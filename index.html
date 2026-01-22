@@ -176,10 +176,8 @@
             font-size: 14px;
         }
 
-        .btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-secondary { background: #1e293b; border: 1px solid #334155; }
-        .btn-magic { background: linear-gradient(135deg, #6366f1, #a855f7); }
 
         #dropOverlay {
             position: absolute;
@@ -216,29 +214,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        .photo-grid {
-            display: grid;
-            grid-template-cols: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 12px;
-        }
-        .photo-item {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: border-color 0.2s;
-        }
-        .photo-item:hover {
-            border-color: #3b82f6;
-        }
-        .photo-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
     </style>
 </head>
 <body>
@@ -253,7 +228,7 @@
         <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Image</div>
         <div class="canvas-area" id="cardCanvas">
             <div class="header-meta-row">
-                <div class="date-pill" id="displayDate" contenteditable="true">01.22.2026</div>
+                <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
                 <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
                 <div class="icon-bar-inline">
                     <i class="fa-brands fa-youtube" style="color:#ff0000"></i>
@@ -292,29 +267,12 @@
                     <span>Show Entire Image</span>
                 </label>
             </div>
-            <div class="flex gap-2 mb-2">
+            <div class="flex gap-2">
                 <button class="btn btn-secondary flex-1 flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
-                    <i class="fa-solid fa-upload text-xs"></i> Local Upload
-                </button>
-                <button class="btn bg-blue-600/20 text-blue-400 border border-blue-600/30 flex-1 flex items-center justify-center gap-2" onclick="openPhotoHelper()">
-                    <i class="fa-brands fa-google text-xs"></i> Google Photos
+                    <i class="fa-solid fa-upload text-xs"></i> Upload Local
                 </button>
                 <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
             </div>
-        </div>
-
-        <div id="photoHelper" class="hidden bg-slate-900 border border-slate-700 rounded-xl p-4 mb-4">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-[10px] font-bold uppercase text-blue-400">Photos Helper</span>
-                <button onclick="closePhotoHelper()" class="text-slate-500 hover:text-white">&times;</button>
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="photoQuery" placeholder="Search for a subject..." class="flex-1 bg-slate-800">
-                <button class="btn w-12 p-0" id="searchPhotosBtn" onclick="searchGooglePhotos()">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-            </div>
-            <div id="photoResults" class="photo-grid"></div>
         </div>
 
         <div class="input-group">
@@ -331,24 +289,13 @@
             </div>
             <div class="input-group">
                 <label class="input-label">Handle</label>
-                <div class="flex gap-1">
-                    <input type="text" id="handleInput" placeholder="@handle" oninput="updateFromInput('handleInput', 'displayHandle', 'innerText')">
-                    <button class="btn w-10 p-0 text-xs btn-secondary" onclick="generateHandle()" title="✨ Generate handle">✨</button>
-                </div>
+                <input type="text" id="handleInput" placeholder="@handle" oninput="updateFromInput('handleInput', 'displayHandle', 'innerText')">
             </div>
         </div>
 
         <div class="input-group">
-            <div class="flex justify-between items-end mb-1">
-                <label class="input-label mb-0">Lower Caption</label>
-                <button class="text-[10px] font-bold text-indigo-400 hover:text-indigo-300" onclick="speakCaption()">
-                    <i class="fa-solid fa-volume-high"></i> Listen ✨
-                </button>
-            </div>
-            <div class="relative">
-                <textarea id="captionInput" rows="2" placeholder="Write your caption..." oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
-                <button class="absolute bottom-2 right-2 btn w-auto px-3 py-1 text-[10px] btn-magic" onclick="rewriteCaption()">✨ Optimize</button>
-            </div>
+            <label class="input-label">Lower Caption</label>
+            <textarea id="captionInput" rows="2" placeholder="Write your caption..." oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
         </div>
 
         <div class="section-title mt-4">AI Magic</div>
@@ -369,8 +316,6 @@
 
     <script>
         const apiKey = "";
-
-        // --- CORE UI FUNCTIONS ---
 
         function toggleFitMode() {
             const isFit = document.getElementById('fitMode').checked;
@@ -397,23 +342,6 @@
             }
         }
 
-        function openPhotoHelper() {
-            document.getElementById('photoHelper').classList.remove('hidden');
-        }
-
-        function closePhotoHelper() {
-            document.getElementById('photoHelper').classList.add('hidden');
-        }
-
-        function selectPhoto(url) {
-            const img = document.getElementById('mainImage');
-            img.src = url;
-            img.classList.add('show-full-image');
-            document.getElementById('fitMode').checked = true;
-            document.getElementById('imgSrcInput').value = url;
-            closePhotoHelper();
-        }
-
         function updateFromInput(inputId, targetId, property) {
             const val = document.getElementById(inputId).value;
             const target = document.getElementById(targetId);
@@ -424,7 +352,42 @@
             }
         }
 
-        // --- GEMINI API INTEGRATIONS ---
+        const dropZone = document.getElementById('captureCard');
+        const dropOverlay = document.getElementById('dropOverlay');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropOverlay.style.display = 'flex';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropOverlay.style.display = 'none';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropOverlay.style.display = 'none';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = document.getElementById('mainImage');
+                    img.src = ev.target.result;
+                    img.classList.add('show-full-image');
+                    document.getElementById('fitMode').checked = true;
+                    document.getElementById('imgSrcInput').value = `[Dropped: ${file.name}]`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.addEventListener('input', () => {
+                if (el.id === 'displayDate') document.getElementById('dateInput').value = el.innerText;
+                if (el.id === 'displayHandle') document.getElementById('handleInput').value = el.innerText;
+                if (el.id === 'displayCaption') document.getElementById('captionInput').value = el.innerText;
+            });
+        });
 
         async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
             for (let i = 0; i < retries; i++) {
@@ -436,54 +399,6 @@
                 }
                 await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
             }
-        }
-
-        async function searchGooglePhotos() {
-            const query = document.getElementById('photoQuery').value;
-            if (!query) return;
-            
-            const btn = document.getElementById('searchPhotosBtn');
-            const resultsDiv = document.getElementById('photoResults');
-            btn.disabled = true;
-            resultsDiv.innerHTML = '<div class="col-span-3 py-4 text-center text-xs opacity-50">Searching...</div>';
-
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        contents: [{ 
-                            parts: [{ text: `Find 6 high quality direct image URLs (from Unsplash or Pexels) for: ${query}. Return ONLY a JSON array of strings.` }] 
-                        }],
-                        tools: [{ "google_search": {} }],
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
-                });
-
-                const urls = JSON.parse(response.candidates?.[0]?.content?.parts?.[0]?.text || "[]");
-                renderPhotos(urls.length ? urls : []);
-            } catch (err) {
-                console.error(err);
-                resultsDiv.innerHTML = '<div class="col-span-3 py-4 text-center text-xs text-red-400">Error connecting.</div>';
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        function renderPhotos(urls) {
-            const resultsDiv = document.getElementById('photoResults');
-            resultsDiv.innerHTML = '';
-            if(!urls.length) {
-                resultsDiv.innerHTML = '<div class="col-span-3 py-4 text-center text-xs opacity-50">No results found.</div>';
-                return;
-            }
-            urls.slice(0, 6).forEach(url => {
-                const div = document.createElement('div');
-                div.className = 'photo-item';
-                div.onclick = () => selectPhoto(url);
-                div.innerHTML = `<img src="${url}" onerror="this.src='https://via.placeholder.com/150?text=No+Preview'">`;
-                resultsDiv.appendChild(div);
-            });
         }
 
         async function generateAIImage() {
@@ -514,7 +429,7 @@
                     img.src = base64;
                     img.classList.add('show-full-image');
                     document.getElementById('fitMode').checked = true;
-                    document.getElementById('imgSrcInput').value = "[AI Generated]";
+                    document.getElementById('imgSrcInput').value = "[AI Generated Image]";
                 }
             } catch (err) {
                 console.error(err);
@@ -523,138 +438,6 @@
                 spinner.style.display = 'none';
                 text.style.display = 'inline';
             }
-        }
-
-        async function rewriteCaption() {
-            const current = document.getElementById('captionInput').value || document.getElementById('displayCaption').innerText;
-            const btn = event.currentTarget;
-            const oldText = btn.innerText;
-            btn.innerText = "✨ Thinking...";
-            btn.disabled = true;
-
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Rewrite this short social media caption to be more engaging, poetic, and trendy: "${current}". Return only the rewritten text, no quotes.` }] }]
-                    })
-                });
-
-                const newText = response.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (newText) {
-                    document.getElementById('captionInput').value = newText;
-                    document.getElementById('displayCaption').innerText = newText;
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                btn.innerText = oldText;
-                btn.disabled = false;
-            }
-        }
-
-        async function generateHandle() {
-            const current = document.getElementById('displayCaption').innerText;
-            const btn = event.currentTarget;
-            btn.innerText = "...";
-            
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Based on this aesthetic: "${current}", suggest 1 short, cool, minimalist social media handle starting with @. Return ONLY the handle.` }] }]
-                    })
-                });
-
-                const newHandle = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-                if (newHandle) {
-                    document.getElementById('handleInput').value = newHandle;
-                    document.getElementById('displayHandle').innerText = newHandle;
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                btn.innerText = "✨";
-            }
-        }
-
-        async function speakCaption() {
-            const text = document.getElementById('displayCaption').innerText;
-            const btn = event.currentTarget;
-            const oldHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading ✨';
-
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Say smoothly and sophisticatedly: ${text}` }] }],
-                        generationConfig: { 
-                            responseModalities: ["AUDIO"],
-                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
-                        }
-                    })
-                });
-
-                const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-                if (base64Audio) {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const audioBuffer = base64ToUint8Array(base64Audio);
-                    const wavBuffer = pcmToWav(audioBuffer, 24000); // 24kHz is default for this model
-                    const blob = new Blob([wavBuffer], { type: 'audio/wav' });
-                    const audioUrl = URL.createObjectURL(blob);
-                    const audio = new Audio(audioUrl);
-                    audio.play();
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                btn.innerHTML = oldHtml;
-            }
-        }
-
-        function base64ToUint8Array(base64) {
-            const binaryString = window.atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes;
-        }
-
-        function pcmToWav(pcmData, sampleRate) {
-            const header = new ArrayBuffer(44);
-            const view = new DataView(header);
-            const mono = true;
-
-            const writeString = (view, offset, string) => {
-                for (let i = 0; i < string.length; i++) {
-                    view.setUint8(offset + i, string.charCodeAt(i));
-                }
-            };
-
-            writeString(view, 0, 'RIFF');
-            view.setUint32(4, 32 + pcmData.length, true);
-            writeString(view, 8, 'WAVE');
-            writeString(view, 12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, mono ? 1 : 2, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * (mono ? 1 : 2) * 2, true);
-            view.setUint16(32, (mono ? 1 : 2) * 2, true);
-            view.setUint16(34, 16, true);
-            writeString(view, 36, 'data');
-            view.setUint32(40, pcmData.length, true);
-
-            const combined = new Uint8Array(header.byteLength + pcmData.byteLength);
-            combined.set(new Uint8Array(header), 0);
-            combined.set(new Uint8Array(pcmData), header.byteLength);
-            return combined;
         }
 
         function downloadInfo() {

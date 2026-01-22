@@ -28,6 +28,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             border: 6px solid #1e293b;
             background: #000;
+            cursor: pointer;
         }
 
         .canvas-area {
@@ -37,7 +38,7 @@
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Reverted to center-aligned */
+            justify-content: center;
             transition: all 0.5s ease;
         }
 
@@ -177,6 +178,8 @@
         }
 
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary { background: #1e293b; border: 1px solid #334155; }
+        .btn-secondary:hover { background: #334155; }
 
         .loading-spinner {
             display: none;
@@ -196,6 +199,18 @@
             background: rgba(59, 130, 246, 0.2);
             border-radius: 4px;
         }
+
+        #dropOverlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(59, 130, 246, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -207,6 +222,7 @@
 
     <!-- The Card -->
     <div class="card-container" id="captureCard">
+        <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Image</div>
         <div class="canvas-area" id="cardCanvas">
             <div class="header-meta-row">
                 <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
@@ -221,7 +237,7 @@
                 </div>
             </div>
             
-            <div class="main-image-container">
+            <div class="main-image-container" id="imageContainer">
                 <img 
                     src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
                     id="mainImage" 
@@ -239,12 +255,24 @@
     <!-- Controls -->
     <div class="controls-panel">
         
-        <div class="section-title">Direct Replacement</div>
+        <div class="section-title">Visual Assets</div>
         
         <div class="input-group">
-            <label class="input-label">Image Source URL</label>
+            <label class="input-label">Image Upload</label>
+            <div class="flex gap-2">
+                <button class="btn btn-secondary flex-1 flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
+                    <i class="fa-solid fa-upload text-xs"></i> Upload Local
+                </button>
+                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Or Image Source URL</label>
             <input type="text" id="imgSrcInput" placeholder="Paste image link here..." oninput="updateFromInput('imgSrcInput', 'mainImage', 'src')">
         </div>
+
+        <div class="section-title mt-4">Meta Information</div>
 
         <div class="grid grid-cols-2 gap-4">
             <div class="input-group">
@@ -281,6 +309,7 @@
     <script>
         const apiKey = "";
 
+        // Function to update display from text inputs
         function updateFromInput(inputId, targetId, property) {
             const val = document.getElementById(inputId).value;
             const target = document.getElementById(targetId);
@@ -291,6 +320,47 @@
             }
         }
 
+        // Handle File Upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('mainImage').src = e.target.result;
+                    document.getElementById('imgSrcInput').value = `[Uploaded: ${file.name}]`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Drag and Drop Logic
+        const dropZone = document.getElementById('captureCard');
+        const dropOverlay = document.getElementById('dropOverlay');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropOverlay.style.display = 'flex';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropOverlay.style.display = 'none';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropOverlay.style.display = 'none';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    document.getElementById('mainImage').src = ev.target.result;
+                    document.getElementById('imgSrcInput').value = `[Dropped: ${file.name}]`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Content Editable Sync
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
             el.addEventListener('input', () => {
                 if (el.id === 'displayDate') document.getElementById('dateInput').value = el.innerText;
@@ -352,7 +422,7 @@
                 handle: document.getElementById('displayHandle').innerText,
                 date: document.getElementById('displayDate').innerText,
                 caption: document.getElementById('displayCaption').innerText,
-                image: document.getElementById('mainImage').src
+                image: document.getElementById('mainImage').src.substring(0, 100) + "..." // Truncated for alert
             };
             console.log("Card Config:", config);
             alert("Card configuration sent to console log.");

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Card Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #020617;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card-container {
+            width: 320px; 
+            height: 540px; 
+            position: relative;
+            overflow: hidden;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            border: 6px solid #1e293b;
+            background: #000;
+        }
+
+        .canvas-area {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .header-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .main-image-container {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            min-height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .image-caption-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 16px 16px 16px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            font-size: 12px;
+            font-weight: 300;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+        }
+
+        .icon-bar-inline {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .brand-pill, .date-pill {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 100px;
+            padding: 4px 8px;
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .controls-panel {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 420px;
+            background: #0f172a;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid #1e293b;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #3b82f6;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::after {
+            content: "";
+            flex-grow: 1;
+            height: 1px;
+            background: #1e293b;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: white;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            display: block;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .loading-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        [contenteditable="true"]:focus {
+            outline: none;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-black italic tracking-tighter">pxltr Studio</h1>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">Universal Asset Replacer</p>
+    </div>
+
+    <!-- The Card -->
+    <div class="card-container" id="captureCard">
+        <div class="canvas-area" id="cardCanvas">
+            <div class="header-meta-row">
+                <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
+                <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
+                <div class="icon-bar-inline">
+                    <i class="fa-brands fa-youtube" style="color:#ff0000"></i>
+                    <i class="fa-brands fa-instagram" style="color:#ff4d4d"></i>
+                    <i class="fa-brands fa-threads" style="color:#fff"></i>
+                    <i class="fa-brands fa-facebook-f" style="color:#1877F2"></i>
+                    <i class="fa-brands fa-tumblr" style="color:#35465c"></i>
+                    <i class="fa-brands fa-reddit" style="color:#ff4500"></i>
+                </div>
+            </div>
+            
+            <div class="main-image-container">
+                <img 
+                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
+                    id="mainImage" 
+                    class="main-image"
+                >
+                <div class="image-caption-overlay" id="displayCaption" contenteditable="true">
+                    Visions of a digital dreamscape.
+                </div>
+            </div>
+            <div class="h-1 w-10 bg-white/20 rounded-full mt-4 ml-auto"></div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-panel">
+        
+        <div class="section-title">Direct Replacement</div>
+        
+        <div class="input-group">
+            <label class="input-label">Image Source URL</label>
+            <input type="text" id="imgSrcInput" placeholder="Paste image link here..." oninput="updateFromInput('imgSrcInput', 'mainImage', 'src')">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="input-group">
+                <label class="input-label">Date</label>
+                <input type="text" id="dateInput" placeholder="MM.DD.YYYY" oninput="updateFromInput('dateInput', 'displayDate', 'innerText')">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Handle</label>
+                <input type="text" id="handleInput" placeholder="@handle" oninput="updateFromInput('handleInput', 'displayHandle', 'innerText')">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Overlay Caption</label>
+            <textarea id="captionInput" rows="2" placeholder="Write your caption..." oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
+        </div>
+
+        <div class="section-title mt-4">AI Magic</div>
+        
+        <div class="input-group">
+            <label class="input-label">AI Image Prompt</label>
+            <div class="flex gap-2">
+                <input type="text" id="aiPrompt" placeholder="Surreal mountain peak...">
+                <button class="btn w-24" id="genImageBtn" onclick="generateAIImage()">
+                    <div class="loading-spinner" id="genSpinner"></div>
+                    <span id="genText">Create</span>
+                </button>
+            </div>
+        </div>
+
+        <button class="btn bg-slate-800 hover:bg-slate-700 mt-4" onclick="downloadInfo()">Print Card Config</button>
+    </div>
+
+    <script>
+        const apiKey = "";
+
+        // Sync inputs with card display
+        function updateFromInput(inputId, targetId, property) {
+            const val = document.getElementById(inputId).value;
+            const target = document.getElementById(targetId);
+            if (property === 'src') {
+                target.src = val || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600";
+            } else {
+                target.innerText = val;
+            }
+        }
+
+        // Keep inputs in sync if someone clicks and types on the card directly
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.addEventListener('input', () => {
+                if (el.id === 'displayDate') document.getElementById('dateInput').value = el.innerText;
+                if (el.id === 'displayHandle') document.getElementById('handleInput').value = el.innerText;
+                if (el.id === 'displayCaption') document.getElementById('captionInput').value = el.innerText;
+            });
+        });
+
+        async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return await response.json();
+                } catch (e) {
+                    if (i === retries - 1) throw e;
+                }
+                await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+            }
+        }
+
+        async function generateAIImage() {
+            const prompt = document.getElementById('aiPrompt').value;
+            if (!prompt) return;
+
+            const btn = document.getElementById('genImageBtn');
+            const spinner = document.getElementById('genSpinner');
+            const text = document.getElementById('genText');
+
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            text.style.display = 'none';
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+                const data = await fetchWithRetry(url, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        instances: [{ prompt: prompt }],
+                        parameters: { sampleCount: 1 }
+                    })
+                });
+
+                if (data.predictions?.[0]?.bytesBase64Encoded) {
+                    const base64 = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                    document.getElementById('mainImage').src = base64;
+                    document.getElementById('imgSrcInput').value = "[AI Generated Image]";
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                text.style.display = 'inline';
+            }
+        }
+
+        function downloadInfo() {
+            const config = {
+                handle: document.getElementById('displayHandle').innerText,
+                date: document.getElementById('displayDate').innerText,
+                caption: document.getElementById('displayCaption').innerText,
+                image: document.getElementById('mainImage').src
+            };
+            console.log("Card Config:", config);
+            alert("Card configuration sent to console log.");
+        }
+
+        window.onload = () => {
+            const now = new Date();
+            const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.${now.getFullYear()}`;
+            document.getElementById('displayDate').innerText = dateStr;
+            document.getElementById('dateInput').value = dateStr;
+            document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText;
+            document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText;
+        };
+    </script>
+</body>
+</html>
+

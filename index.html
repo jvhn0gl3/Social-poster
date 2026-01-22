@@ -28,7 +28,6 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             border: 6px solid #1e293b;
             background: #000;
-            cursor: pointer;
         }
 
         .canvas-area {
@@ -54,7 +53,7 @@
             width: 100%;
             border-radius: 20px;
             overflow: hidden;
-            background: rgba(255, 255, 255, 0.05);
+            background: #000; /* Pure black background for letterboxing */
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             min-height: 220px; 
@@ -68,7 +67,13 @@
             width: 100%;
             height: 100%;
             display: block;
-            object-fit: cover;
+            object-fit: cover; /* Default for demo images */
+            transition: object-fit 0.3s ease;
+        }
+
+        /* Class to show full image without cropping */
+        .show-full-image {
+            object-fit: contain !important;
         }
 
         .image-caption-overlay {
@@ -76,8 +81,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 20px 16px 12px 16px;
-            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+            padding: 24px 16px 12px 16px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%);
             font-size: 11px;
             font-weight: 300;
             line-height: 1.4;
@@ -155,12 +160,6 @@
             padding: 10px 12px;
             color: white;
             font-size: 13px;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #3b82f6;
         }
 
         .btn {
@@ -179,7 +178,6 @@
 
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-secondary { background: #1e293b; border: 1px solid #334155; }
-        .btn-secondary:hover { background: #334155; }
 
         .loading-spinner {
             display: none;
@@ -194,12 +192,6 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        [contenteditable="true"]:focus {
-            outline: none;
-            background: rgba(59, 130, 246, 0.2);
-            border-radius: 4px;
-        }
-
         #dropOverlay {
             position: absolute;
             inset: 0;
@@ -210,6 +202,15 @@
             z-index: 50;
             backdrop-filter: blur(4px);
             pointer-events: none;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #94a3b8;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -237,7 +238,7 @@
                 </div>
             </div>
             
-            <div class="main-image-container" id="imageContainer">
+            <div class="main-image-container">
                 <img 
                     src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
                     id="mainImage" 
@@ -258,7 +259,13 @@
         <div class="section-title">Visual Assets</div>
         
         <div class="input-group">
-            <label class="input-label">Image Upload</label>
+            <div class="flex justify-between items-end mb-2">
+                <label class="input-label mb-0">Image Upload</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="fitMode" onchange="toggleFitMode()" checked> 
+                    <span>Show Entire Image</span>
+                </label>
+            </div>
             <div class="flex gap-2">
                 <button class="btn btn-secondary flex-1 flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
                     <i class="fa-solid fa-upload text-xs"></i> Upload Local
@@ -268,7 +275,7 @@
         </div>
 
         <div class="input-group">
-            <label class="input-label">Or Image Source URL</label>
+            <label class="input-label">Image Source URL</label>
             <input type="text" id="imgSrcInput" placeholder="Paste image link here..." oninput="updateFromInput('imgSrcInput', 'mainImage', 'src')">
         </div>
 
@@ -309,7 +316,31 @@
     <script>
         const apiKey = "";
 
-        // Function to update display from text inputs
+        function toggleFitMode() {
+            const isFit = document.getElementById('fitMode').checked;
+            const img = document.getElementById('mainImage');
+            if (isFit) {
+                img.classList.add('show-full-image');
+            } else {
+                img.classList.remove('show-full-image');
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById('mainImage');
+                    img.src = e.target.result;
+                    img.classList.add('show-full-image');
+                    document.getElementById('fitMode').checked = true;
+                    document.getElementById('imgSrcInput').value = `[Uploaded: ${file.name}]`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function updateFromInput(inputId, targetId, property) {
             const val = document.getElementById(inputId).value;
             const target = document.getElementById(targetId);
@@ -320,20 +351,6 @@
             }
         }
 
-        // Handle File Upload
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('mainImage').src = e.target.result;
-                    document.getElementById('imgSrcInput').value = `[Uploaded: ${file.name}]`;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Drag and Drop Logic
         const dropZone = document.getElementById('captureCard');
         const dropOverlay = document.getElementById('dropOverlay');
 
@@ -353,14 +370,16 @@
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                    document.getElementById('mainImage').src = ev.target.result;
+                    const img = document.getElementById('mainImage');
+                    img.src = ev.target.result;
+                    img.classList.add('show-full-image');
+                    document.getElementById('fitMode').checked = true;
                     document.getElementById('imgSrcInput').value = `[Dropped: ${file.name}]`;
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // Content Editable Sync
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
             el.addEventListener('input', () => {
                 if (el.id === 'displayDate') document.getElementById('dateInput').value = el.innerText;
@@ -405,7 +424,10 @@
 
                 if (data.predictions?.[0]?.bytesBase64Encoded) {
                     const base64 = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-                    document.getElementById('mainImage').src = base64;
+                    const img = document.getElementById('mainImage');
+                    img.src = base64;
+                    img.classList.add('show-full-image');
+                    document.getElementById('fitMode').checked = true;
                     document.getElementById('imgSrcInput').value = "[AI Generated Image]";
                 }
             } catch (err) {
@@ -422,7 +444,7 @@
                 handle: document.getElementById('displayHandle').innerText,
                 date: document.getElementById('displayDate').innerText,
                 caption: document.getElementById('displayCaption').innerText,
-                image: document.getElementById('mainImage').src.substring(0, 100) + "..." // Truncated for alert
+                image: document.getElementById('mainImage').src.substring(0, 50) + "..."
             };
             console.log("Card Config:", config);
             alert("Card configuration sent to console log.");
@@ -435,6 +457,7 @@
             document.getElementById('dateInput').value = dateStr;
             document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText;
             document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText;
+            toggleFitMode();
         };
     </script>
 </body>

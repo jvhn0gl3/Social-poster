@@ -16,7 +16,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Center vertically */
+            justify-content: center;
             padding: 40px 20px;
         }
 
@@ -38,17 +38,17 @@
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center horizontal children */
-            justify-content: center; /* Center vertical children */
+            align-items: center;
+            justify-content: center;
             transition: all 0.5s ease;
         }
 
         .header-meta-row {
             display: flex;
             align-items: center;
-            justify-content: center; /* Center the pills */
+            justify-content: center;
             gap: 6px;
-            margin-bottom: 20px;
+            margin-bottom: 1px; /* Set to exactly one pixel away from the image below */
             width: 100%;
         }
 
@@ -79,14 +79,14 @@
         }
 
         .caption-area {
-            margin-top: 20px;
+            margin-top: 1px; /* Set to exactly one pixel away from the image above */
             padding: 0 12px;
             font-size: 12px;
             font-weight: 300;
             line-height: 1.5;
             color: rgba(255, 255, 255, 0.9);
             min-height: 60px; 
-            text-align: center; /* Center text */
+            text-align: center;
         }
 
         .icon-bar-inline {
@@ -198,6 +198,21 @@
             font-size: 11px;
             color: #94a3b8;
             cursor: pointer;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -405,7 +420,7 @@
                 const data = await fetchWithRetry(url, {
                     method: 'POST',
                     body: JSON.stringify({
-                        instances: [{ prompt: prompt }],
+                        instances: { prompt: prompt },
                         parameters: { sampleCount: 1 }
                     })
                 });
@@ -435,7 +450,6 @@
                 image: document.getElementById('mainImage').src.substring(0, 50) + "..."
             };
             console.log("Card Config:", config);
-            alert("Card configuration sent to console log.");
         }
 
         window.onload = () => {

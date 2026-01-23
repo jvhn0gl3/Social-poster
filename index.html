@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Social Card Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2canvas for screenshot functionality -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -22,7 +21,6 @@
             padding: 40px 20px;
         }
 
-        /* Container for the card to ensure screenshots are accurate */
         .card-wrapper {
             padding: 20px;
             background: transparent;
@@ -48,7 +46,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: all 0.5s ease;
         }
 
         .header-meta-row {
@@ -56,11 +53,12 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            margin-bottom: 8px; 
+            margin-bottom: 12px; 
             width: 100%;
+            z-index: 10;
         }
 
-        .main-image-container {
+        .media-container {
             width: 100%;
             border-radius: 20px;
             overflow: hidden;
@@ -74,7 +72,8 @@
             justify-content: center;
         }
 
-        .main-image {
+        /* Unified Media Styling */
+        .media-asset {
             width: 100%;
             height: 100%;
             display: block;
@@ -82,12 +81,12 @@
             transition: object-fit 0.3s ease;
         }
 
-        .show-full-image {
+        .show-full-media {
             object-fit: contain !important;
         }
 
         .caption-area {
-            margin-top: 12px; 
+            margin-top: 16px; 
             padding: 0 12px;
             font-size: 13px;
             font-weight: 300;
@@ -96,6 +95,7 @@
             min-height: 80px; 
             text-align: center;
             outline: none;
+            z-index: 10;
         }
 
         .icon-bar-inline {
@@ -150,18 +150,8 @@
             background: #1e293b;
         }
 
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #94a3b8;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
 
         input, textarea {
             width: 100%;
@@ -172,10 +162,6 @@
             color: white;
             font-size: 13px;
             outline: none;
-        }
-        
-        input:focus, textarea:focus {
-            border-color: #3b82f6;
         }
 
         .btn {
@@ -198,7 +184,14 @@
 
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-secondary { background: #1e293b; border: 1px solid #334155; }
-        .btn-success { background: #10b981; }
+        .btn-record { background: #ef4444; }
+        .recording-active { animation: pulse-red 2s infinite; }
+
+        @keyframes pulse-red {
+            0% { background: #ef4444; }
+            50% { background: #991b1b; }
+            100% { background: #ef4444; }
+        }
 
         #dropOverlay {
             position: absolute;
@@ -211,42 +204,18 @@
             backdrop-filter: blur(4px);
             pointer-events: none;
         }
-
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            color: #94a3b8;
-            cursor: pointer;
-        }
-
-        .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
 
     <div class="mb-8 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter">pxltr Studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">Universal Asset Replacer</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">Video & Image Social Assets</p>
     </div>
 
-    <!-- The Card Wrapper (helps html2canvas capture edges correctly) -->
     <div class="card-wrapper" id="captureTarget">
         <div class="card-container" id="captureCard">
-            <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Image</div>
+            <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Media</div>
             <div class="canvas-area" id="cardCanvas">
                 <div class="header-meta-row">
                     <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
@@ -255,18 +224,13 @@
                         <i class="fa-brands fa-youtube" style="color:#ff0000"></i>
                         <i class="fa-brands fa-instagram" style="color:#ff4d4d"></i>
                         <i class="fa-brands fa-threads" style="color:#fff"></i>
-                        <i class="fa-brands fa-facebook-f" style="color:#1877F2"></i>
                     </div>
                 </div>
                 
-                <div class="main-image-container">
-                    <!-- Crossorigin attribute added to help with screenshotting external URLs -->
-                    <img 
-                        src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
-                        id="mainImage" 
-                        class="main-image"
-                        crossorigin="anonymous"
-                    >
+                <div class="media-container">
+                    <!-- Same class applied to both to ensure identical layout -->
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
+                    <video id="mainVideo" class="media-asset hidden show-full-media" loop muted playsinline></video>
                 </div>
 
                 <div class="caption-area" id="displayCaption" contenteditable="true">
@@ -278,245 +242,157 @@
         </div>
     </div>
 
-    <!-- Controls -->
     <div class="controls-panel">
-        
-        <div class="section-title">Visual Assets</div>
+        <div class="section-title">Media Assets</div>
         
         <div class="input-group">
             <div class="flex justify-between items-end mb-2">
-                <label class="input-label mb-0">Image Upload</label>
-                <label class="toggle-switch">
+                <label class="input-label mb-0">Upload (Image/Video)</label>
+                <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                     <input type="checkbox" id="fitMode" onchange="toggleFitMode()" checked> 
-                    <span>Show Entire Image</span>
+                    <span>Show Entire</span>
                 </label>
             </div>
-            <div class="flex gap-2">
-                <button class="btn btn-secondary flex-1" onclick="document.getElementById('fileInput').click()">
-                    <i class="fa-solid fa-upload text-xs"></i> Upload Local
-                </button>
-                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label class="input-label">Image Source URL</label>
-            <input type="text" id="imgSrcInput" placeholder="Paste image link here..." oninput="updateFromInput('imgSrcInput', 'mainImage', 'src')">
+            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-clapperboard text-xs"></i> Select Media
+            </button>
+            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
         </div>
 
         <div class="section-title mt-4">Meta Information</div>
-
         <div class="grid grid-cols-2 gap-4">
             <div class="input-group">
                 <label class="input-label">Date</label>
-                <input type="text" id="dateInput" placeholder="MM.DD.YYYY" oninput="updateFromInput('dateInput', 'displayDate', 'innerText')">
+                <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate', 'innerText')">
             </div>
             <div class="input-group">
                 <label class="input-label">Handle</label>
-                <input type="text" id="handleInput" placeholder="@handle" oninput="updateFromInput('handleInput', 'displayHandle', 'innerText')">
+                <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle', 'innerText')">
             </div>
         </div>
 
         <div class="input-group">
-            <label class="input-label">Lower Caption</label>
-            <textarea id="captionInput" rows="2" placeholder="Write your caption..." oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
+            <label class="input-label">Caption</label>
+            <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
         </div>
 
-        <div class="section-title mt-4">AI Magic</div>
-        
-        <div class="input-group">
-            <label class="input-label">AI Image Prompt</label>
-            <div class="flex gap-2">
-                <input type="text" id="aiPrompt" placeholder="Surreal mountain peak...">
-                <button class="btn w-24" id="genImageBtn" onclick="generateAIImage()">
-                    <div class="loading-spinner" id="genSpinner"></div>
-                    <span id="genText">Create</span>
-                </button>
-            </div>
+        <div class="section-title mt-6">Export Studio</div>
+        <div class="flex flex-col gap-2">
+            <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
+                <i class="fa-solid fa-camera"></i> Snapshot (PNG)
+            </button>
+            <button class="btn btn-record" id="recordBtn" onclick="toggleRecording()">
+                <i class="fa-solid fa-circle"></i> <span id="recordBtnText">Record Card Clip</span>
+            </button>
+            <p class="text-[9px] text-slate-500 text-center uppercase tracking-widest mt-1">Recording captures card audio if present</p>
         </div>
-
-        <div class="section-title mt-6">Export</div>
-        <button class="btn btn-success" id="downloadBtn" onclick="downloadScreenshot()">
-            <i class="fa-solid fa-download"></i> 
-            <span id="downloadBtnText">Export Card as PNG</span>
-            <div class="loading-spinner" id="downloadSpinner"></div>
-        </button>
     </div>
 
     <script>
-        const apiKey = "";
+        let mediaRecorder;
+        let recordedChunks = [];
+        let isRecording = false;
 
-        // Toggle image fit mode
         function toggleFitMode() {
             const isFit = document.getElementById('fitMode').checked;
-            const img = document.getElementById('mainImage');
-            if (isFit) {
-                img.classList.add('show-full-image');
-            } else {
-                img.classList.remove('show-full-image');
-            }
+            const elements = [document.getElementById('mainImage'), document.getElementById('mainVideo')];
+            elements.forEach(el => {
+                if (isFit) el.classList.add('show-full-media');
+                else el.classList.remove('show-full-media');
+            });
         }
 
-        // Handle local file uploads
         function handleFileUpload(event) {
             const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.getElementById('mainImage');
-                    img.src = e.target.result;
-                    img.classList.add('show-full-image');
-                    document.getElementById('fitMode').checked = true;
-                    document.getElementById('imgSrcInput').value = `[Uploaded: ${file.name}]`;
-                };
+            if (!file) return;
+
+            const img = document.getElementById('mainImage');
+            const video = document.getElementById('mainVideo');
+            const reader = new FileReader();
+
+            if (file.type.startsWith('image/')) {
+                video.classList.add('hidden');
+                video.pause();
+                img.classList.remove('hidden');
+                reader.onload = (e) => img.src = e.target.result;
                 reader.readAsDataURL(file);
+            } else if (file.type.startsWith('video/')) {
+                img.classList.add('hidden');
+                video.classList.remove('hidden');
+                video.src = URL.createObjectURL(file);
+                video.muted = false; 
+                video.play();
             }
+            toggleFitMode(); // Maintain fit mode consistency on new upload
         }
 
-        // Generic input updater
         function updateFromInput(inputId, targetId, property) {
             const val = document.getElementById(inputId).value;
             const target = document.getElementById(targetId);
-            if (property === 'src') {
-                target.src = val || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600";
-            } else {
-                target.innerText = val;
-            }
+            target[property] = val;
         }
 
-        // Drag and Drop functionality
-        const dropZone = document.getElementById('captureCard');
-        const dropOverlay = document.getElementById('dropOverlay');
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropOverlay.style.display = 'flex';
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropOverlay.style.display = 'none';
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropOverlay.style.display = 'none';
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const img = document.getElementById('mainImage');
-                    img.src = ev.target.result;
-                    img.classList.add('show-full-image');
-                    document.getElementById('fitMode').checked = true;
-                    document.getElementById('imgSrcInput').value = `[Dropped: ${file.name}]`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Sync contenteditable changes back to inputs
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-            el.addEventListener('input', () => {
-                if (el.id === 'displayDate') document.getElementById('dateInput').value = el.innerText;
-                if (el.id === 'displayHandle') document.getElementById('handleInput').value = el.innerText;
-                if (el.id === 'displayCaption') document.getElementById('captionInput').value = el.innerText;
-            });
-        });
-
-        // Screenshot Download Function
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
-            const btn = document.getElementById('downloadBtn');
-            const text = document.getElementById('downloadBtnText');
-            const spinner = document.getElementById('downloadSpinner');
-
-            btn.disabled = true;
-            text.innerText = "Processing...";
-            spinner.style.display = "block";
-
-            try {
-                // Use html2canvas to capture the element
-                // useCORS is important for external images
-                const canvas = await html2canvas(element, {
-                    useCORS: true,
-                    backgroundColor: null,
-                    scale: 2, // Higher quality
-                    logging: false,
-                    borderRadius: 32
-                });
-
-                // Convert canvas to image data
-                const imageData = canvas.toDataURL("image/png");
-                
-                // Create a temporary link to trigger download
-                const link = document.createElement('a');
-                const handle = document.getElementById('displayHandle').innerText.replace('@', '');
-                link.download = `card-${handle || 'design'}-${Date.now()}.png`;
-                link.href = imageData;
-                link.click();
-            } catch (err) {
-                console.error("Screenshot Error:", err);
-                alert("Could not capture image. This is often due to cross-origin security on the external image URL. Try uploading a local image.");
-            } finally {
-                btn.disabled = false;
-                text.innerText = "Export Card as PNG";
-                spinner.style.display = "none";
-            }
+            const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
+            const link = document.createElement('a');
+            link.download = `card-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
         }
 
-        // AI Generation logic
-        async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            const text = document.getElementById('recordBtnText');
+            
+            if (!isRecording) {
                 try {
-                    const response = await fetch(url, options);
-                    if (response.ok) return await response.json();
-                } catch (e) {
-                    if (i === retries - 1) throw e;
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { cursor: "never" },
+                        audio: true
+                    });
+
+                    recordedChunks = [];
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) recordedChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `card-recording-${Date.now()}.webm`;
+                        a.click();
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.classList.add('recording-active');
+                    text.innerText = "Stop Recording";
+                } catch (err) {
+                    console.error("Recording error:", err);
                 }
-                await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btn.classList.remove('recording-active');
+                text.innerText = "Record Card Clip";
             }
         }
 
-        async function generateAIImage() {
-            const prompt = document.getElementById('aiPrompt').value;
-            if (!prompt) return;
+        const dropZone = document.getElementById('captureCard');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dropOverlay').style.display = 'flex'; });
+        dropZone.addEventListener('dragleave', () => { document.getElementById('dropOverlay').style.display = 'none'; });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.getElementById('dropOverlay').style.display = 'none';
+            handleFileUpload({ target: { files: e.dataTransfer.files } });
+        });
 
-            const btn = document.getElementById('genImageBtn');
-            const spinner = document.getElementById('genSpinner');
-            const text = document.getElementById('genText');
-
-            btn.disabled = true;
-            spinner.style.display = 'block';
-            text.style.display = 'none';
-
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-                const data = await fetchWithRetry(url, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        instances: { prompt: prompt },
-                        parameters: { sampleCount: 1 }
-                    })
-                });
-
-                if (data.predictions?.[0]?.bytesBase64Encoded) {
-                    const base64 = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-                    const img = document.getElementById('mainImage');
-                    img.src = base64;
-                    img.classList.add('show-full-image');
-                    document.getElementById('fitMode').checked = true;
-                    document.getElementById('imgSrcInput').value = "[AI Generated Image]";
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                btn.disabled = false;
-                spinner.style.display = 'none';
-                text.style.display = 'inline';
-            }
-        }
-
-        // Initialize
         window.onload = () => {
             const now = new Date();
             const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.${now.getFullYear()}`;
@@ -524,7 +400,6 @@
             document.getElementById('dateInput').value = dateStr;
             document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText;
             document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText;
-            toggleFitMode();
         };
     </script>
 </body>

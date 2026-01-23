@@ -71,57 +71,50 @@
 
         .caption-row {
             display: flex;
-            align-items: flex-start; /* Changed to flex-start to allow sidebar to height-fit */
+            align-items: flex-start;
             gap: 12px;
             margin-bottom: 16px;
             width: 100%;
         }
 
         .accent-sidebar {
-            width: 34px;
+            width: 48px; /* Slightly wider for horizontal text */
             background: #3b82f6;
-            border-radius: 10px;
+            border-radius: 12px;
             flex-shrink: 0;
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 0;
-            /* Remove absolute heights or rotations that break canvas rendering */
+            padding: 12px 4px;
         }
 
         .social-icons-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 5px;
-            margin-bottom: 10px;
+            gap: 4px;
+            margin-bottom: 8px;
             color: white;
             width: 100%;
-            padding: 0 4px;
         }
 
         .social-icons-grid i {
-            font-size: 8px;
+            font-size: 9px;
             text-align: center;
         }
 
-        /* Fixed Vertical Text Logic for HTML2Canvas Stability */
-        .vertical-handle-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .vertical-handle {
-            writing-mode: vertical-rl;
-            /* Removed rotation as it often shifts origin during high-scale export */
-            font-size: 8px;
+        .horizontal-handle {
+            font-size: 6.5px; /* Scaled for the sidebar width */
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.05em;
             color: white;
             white-space: nowrap;
             display: block;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 6px;
+            width: 80%;
+            text-align: center;
         }
 
         .caption-area {
@@ -229,7 +222,7 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Fixed Grid Export • Safe 4:5</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Stable Layout • Safe 4:5</p>
     </div>
 
     <div id="capture-wrapper">
@@ -246,13 +239,11 @@
                                 <i class="fa-brands fa-tiktok"></i>
                                 <i class="fa-solid fa-bolt text-[7px] opacity-40"></i>
                             </div>
-                            <div class="vertical-handle-container">
-                                <div class="vertical-handle" id="displayHandle">pxltr30</div>
-                            </div>
+                            <div class="horizontal-handle" id="displayHandle">pxltr30</div>
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Testing the export stability. The handle and icons are now managed by a strict flexbox container to prevent overlapping on high-resolution PNG exports.
+                            Refined layout for maximum export stability. The handle is now placed horizontally below the icons, removing the need for complex CSS rotations that can cause overlap on certain devices.
                         </div>
                     </div>
                     

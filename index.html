@@ -26,7 +26,7 @@
             background: transparent;
         }
 
-        /* Fixed 9:16 Container */
+        /* Fixed 9:16 Base */
         .card-container {
             width: 337.5px; 
             height: 600px; 
@@ -36,51 +36,47 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             border: 8px solid #1e293b;
             background: #000;
-            /* Ensure no transform during capture unless explicitly set */
-            transform: translateZ(0); 
         }
 
         .canvas-area {
             width: 100%;
             height: 100%;
             background: #0f172a;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center;
-            transition: all 0.5s ease;
             position: relative;
+            transition: all 0.5s ease;
         }
 
         .canvas-area.glow-mode {
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
         }
 
-        /* 4:5 Safe Area Container */
+        /* 4:5 Safe Area - Using Absolute Centering for Snapshot Stability */
         .safe-area-content {
-            width: 100%;
-            height: 422px; 
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 337.5px;
+            height: 421.8px; /* Precise 4:5 ratio height for 337.5 width */
             padding: 24px;
             display: flex;
             flex-direction: column;
-            position: relative;
-            z-index: 10;
             box-sizing: border-box;
+            z-index: 10;
         }
 
         .guides-active .safe-area-content {
-            border-top: 1px dashed rgba(255,255,255,0.2);
-            border-bottom: 1px dashed rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px dashed rgba(255,255,255,0.3);
+            border-bottom: 1px dashed rgba(255,255,255,0.3);
         }
 
-        /* Meta Row */
         .top-section {
             display: flex;
             align-items: flex-start;
             gap: 12px;
             margin-bottom: 16px;
             width: 100%;
-            text-align: left;
         }
 
         .meta-column {
@@ -88,7 +84,6 @@
             flex-direction: column;
             gap: 6px;
             flex-shrink: 0;
-            align-items: flex-start; /* Ensure left alignment */
         }
 
         .caption-area {
@@ -105,7 +100,7 @@
             -webkit-box-orient: vertical;
         }
 
-        /* Capture Specific Overrides */
+        /* Capture Overrides */
         .is-capturing .caption-area {
             display: block !important;
             overflow: visible !important;
@@ -131,22 +126,10 @@
             height: 100%;
             display: block;
             object-fit: cover;
-            transition: object-fit 0.3s ease;
         }
 
         .show-full-media {
             object-fit: contain !important;
-        }
-
-        .icon-bar-inline {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 100px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            width: fit-content;
         }
 
         .brand-pill, .date-pill {
@@ -159,7 +142,16 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             white-space: nowrap;
             outline: none;
-            text-align: center;
+            display: inline-block;
+        }
+
+        .icon-bar-inline {
+            display: flex;
+            gap: 8px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
+            width: fit-content;
         }
 
         .controls-panel {
@@ -192,42 +184,32 @@
             background: #1e293b;
         }
 
-        .input-group { margin-bottom: 15px; }
-        .input-label { display: block; font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
 
         input, textarea {
             width: 100%;
             background: #1e293b;
             border: 1px solid #334155;
             border-radius: 10px;
-            padding: 10px 12px;
+            padding: 10px;
             color: white;
             font-size: 13px;
             outline: none;
         }
-
-        .btn {
-            background: #3b82f6;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            font-size: 14px;
-            border: none;
-        }
-
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-secondary { background: #1e293b; border: 1px solid #334155; }
-        .btn-record { background: #ef4444; }
-        .recording-active { animation: pulse-red 2s infinite; }
 
         #dropOverlay {
             position: absolute;
@@ -238,15 +220,14 @@
             justify-content: center;
             z-index: 50;
             backdrop-filter: blur(4px);
-            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="mb-6 text-center">
-        <h1 class="text-3xl font-black italic tracking-tighter">pxltr Studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">9:16 Story (4:5 Safe Area)</p>
+    <div class="mb-4 text-center">
+        <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr v2</h1>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Story Canvas / Feed Safe</p>
     </div>
 
     <div class="card-wrapper">
@@ -254,8 +235,9 @@
             <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Media</div>
             <div class="canvas-area glow-mode" id="cardCanvas">
                 
+                <!-- Safe Area centered via absolute top:50% -->
                 <div class="safe-area-content" id="safeArea">
-                    <div class="top-section" id="metaRow">
+                    <div class="top-section">
                         <div class="meta-column">
                             <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
                             <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
@@ -266,12 +248,12 @@
                             </div>
                         </div>
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Visions of a digital dreamscape. Exploring the boundaries between reality and the artificial neon glare of the future.
+                            Perfectly centered for both Instagram Story and Feed layouts.
                         </div>
                     </div>
                     
                     <div class="media-container">
-                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
+                        <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
                         <video id="mainVideo" class="media-asset hidden show-full-media" muted playsinline></video>
                     </div>
                 </div>
@@ -284,91 +266,64 @@
     </div>
 
     <div class="controls-panel">
-        <div class="section-title">Display Settings</div>
-        <div class="flex flex-wrap gap-4 mb-3">
+        <div class="section-title">Visuals</div>
+        <div class="flex flex-wrap gap-4 mb-4">
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="fitMode" onchange="toggleFitMode()" checked> 
-                <span>Letterbox</span>
+                <span>Fit Image</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="glowToggle" onchange="toggleGlow()" checked> 
-                <span>Glow Mode</span>
+                <span>Glow</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="guideToggle" onchange="toggleGuides()"> 
-                <span>Show 4:5 Guides</span>
+                <span>Show 4:5 Safe Zone</span>
             </label>
         </div>
 
-        <div class="section-title mt-4">Media</div>
-        <div class="input-group">
-            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-clapperboard text-xs"></i> Select Media
-            </button>
-            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
-        </div>
+        <button class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-upload"></i> Upload Media
+        </button>
+        <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
 
-        <div class="section-title mt-4">Meta</div>
-        <div class="grid grid-cols-2 gap-4">
-            <div class="input-group">
-                <label class="input-label">Date</label>
-                <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate', 'innerText')">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date</label>
+                <input type="text" id="dateInput" placeholder="Date" oninput="update('dateInput', 'displayDate')">
             </div>
-            <div class="input-group">
-                <label class="input-label">Handle</label>
-                <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle', 'innerText')">
+            <div>
+                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
+                <input type="text" id="handleInput" placeholder="Handle" oninput="update('handleInput', 'displayHandle')">
             </div>
         </div>
 
-        <div class="input-group">
-            <label class="input-label">Caption</label>
-            <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
-        </div>
+        <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
+        <textarea id="captionInput" rows="2" class="mb-6" oninput="update('captionInput', 'displayCaption')"></textarea>
 
-        <div class="section-title mt-6">Export</div>
-        <div class="flex flex-col gap-2">
-            <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
-                <i class="fa-solid fa-camera"></i> Save 9:16 Story PNG
-            </button>
-            <button class="btn btn-record" id="recordBtn" onclick="toggleRecording()">
-                <i class="fa-solid fa-circle"></i> <span id="recordBtnText">Record Clip</span>
-            </button>
-        </div>
+        <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
+            <i class="fa-solid fa-download"></i> Export High-Res PNG
+        </button>
     </div>
 
     <script>
-        let mediaRecorder;
-        let recordedChunks = [];
-        let isRecording = false;
-        let activeStream = null;
-
         function toggleGuides() {
-            const isGuides = document.getElementById('guideToggle').checked;
-            const canvas = document.getElementById('cardCanvas');
-            if (isGuides) canvas.classList.add('guides-active');
-            else canvas.classList.remove('guides-active');
+            document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
         }
 
         function toggleFitMode() {
             const isFit = document.getElementById('fitMode').checked;
-            const elements = [document.getElementById('mainImage'), document.getElementById('mainVideo')];
-            elements.forEach(el => {
-                if (isFit) el.classList.add('show-full-media');
-                else el.classList.remove('show-full-media');
-            });
+            document.getElementById('mainImage').classList.toggle('show-full-media', isFit);
+            document.getElementById('mainVideo').classList.toggle('show-full-media', isFit);
         }
 
         function toggleGlow() {
-            const isGlow = document.getElementById('glowToggle').checked;
-            const canvas = document.getElementById('cardCanvas');
-            if (isGlow) canvas.classList.add('glow-mode');
-            else canvas.classList.remove('glow-mode');
+            document.getElementById('cardCanvas').classList.toggle('glow-mode', document.getElementById('glowToggle').checked);
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const img = document.getElementById('mainImage');
             const video = document.getElementById('mainVideo');
             const reader = new FileReader();
@@ -383,27 +338,19 @@
                 img.classList.add('hidden');
                 video.classList.remove('hidden');
                 video.src = URL.createObjectURL(file);
-                video.muted = false; 
-                video.loop = false;
-                video.currentTime = 0;
                 video.play();
             }
-            toggleFitMode();
         }
 
-        function updateFromInput(inputId, targetId, property) {
-            const val = document.getElementById(inputId).value;
-            const target = document.getElementById(targetId);
-            target[property] = val;
+        function update(id, target) {
+            document.getElementById(target).innerText = document.getElementById(id).value;
         }
 
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
-            
-            // Set capture state
             document.body.classList.add('is-capturing');
             
-            // Hide guides
+            // Temporary Guide removal
             const guidesCheckbox = document.getElementById('guideToggle');
             const wasGuides = guidesCheckbox.checked;
             if (wasGuides) {
@@ -412,32 +359,19 @@
             }
 
             try {
-                // We use a specific configuration to ensure alignment is preserved
                 const canvas = await html2canvas(element, { 
                     useCORS: true, 
                     scale: 3, 
                     backgroundColor: "#000000",
-                    logging: false,
+                    width: 337.5,
+                    height: 600,
                     onclone: (clonedDoc) => {
-                        const clonedCard = clonedDoc.getElementById('captureCard');
-                        const clonedMeta = clonedDoc.getElementById('metaRow');
-                        const clonedSafe = clonedDoc.getElementById('safeArea');
-                        
-                        // Force layout resets on clone to prevent offset shift
-                        clonedCard.style.transform = "none";
-                        clonedCard.style.display = "block";
-                        clonedCard.style.position = "relative";
-                        
-                        // Fix Flexbox alignment specifically for meta row in the clone
-                        if (clonedMeta) {
-                            clonedMeta.style.display = "flex";
-                            clonedMeta.style.flexDirection = "row";
-                            clonedMeta.style.alignItems = "flex-start";
-                            clonedMeta.style.justifyContent = "flex-start";
-                            clonedMeta.style.width = "100%";
-                            clonedMeta.style.padding = "0";
-                            clonedMeta.style.margin = "0 0 16px 0";
-                        }
+                        // Ensure the cloned container is explicitly positioned at top-left
+                        const el = clonedDoc.getElementById('captureCard');
+                        el.style.margin = "0";
+                        el.style.position = "relative";
+                        el.style.left = "0";
+                        el.style.top = "0";
                     }
                 });
 
@@ -445,8 +379,6 @@
                 link.download = `pxltr-story-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
-            } catch (e) {
-                console.error("Screenshot failed", e);
             } finally {
                 document.body.classList.remove('is-capturing');
                 if (wasGuides) {
@@ -455,71 +387,6 @@
                 }
             }
         }
-
-        async function toggleRecording() {
-            const btn = document.getElementById('recordBtn');
-            const text = document.getElementById('recordBtnText');
-            const video = document.getElementById('mainVideo');
-            
-            if (!isRecording) {
-                try {
-                    activeStream = await navigator.mediaDevices.getDisplayMedia({
-                        video: { cursor: "never" },
-                        audio: true
-                    });
-
-                    recordedChunks = [];
-                    mediaRecorder = new MediaRecorder(activeStream, { mimeType: 'video/webm;codecs=vp9' });
-
-                    mediaRecorder.ondataavailable = (e) => {
-                        if (e.data.size > 0) recordedChunks.push(e.data);
-                    };
-
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        const handle = document.getElementById('displayHandle').innerText.replace('@', '');
-                        a.download = `pxtr-story-${handle || 'design'}-${Date.now()}.webm`;
-                        a.click();
-                        
-                        if (activeStream) {
-                            activeStream.getTracks().forEach(track => track.stop());
-                        }
-                        
-                        isRecording = false;
-                        btn.classList.remove('recording-active');
-                        text.innerText = "Record Clip";
-                    };
-
-                    if (!video.classList.contains('hidden')) {
-                        video.currentTime = 0;
-                        video.play();
-                        video.onended = () => { if (isRecording) mediaRecorder.stop(); };
-                    }
-
-                    mediaRecorder.start();
-                    isRecording = true;
-                    btn.classList.add('recording-active');
-                    text.innerText = "Stop Recording";
-
-                } catch (err) {
-                    console.error("Recording error:", err);
-                }
-            } else {
-                mediaRecorder.stop();
-            }
-        }
-
-        const dropZone = document.getElementById('captureCard');
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dropOverlay').style.display = 'flex'; });
-        dropZone.addEventListener('dragleave', () => { document.getElementById('dropOverlay').style.display = 'none'; });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            document.getElementById('dropOverlay').style.display = 'none';
-            handleFileUpload({ target: { files: e.dataTransfer.files } });
-        });
 
         window.onload = () => {
             const now = new Date();

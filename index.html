@@ -131,6 +131,12 @@
             -webkit-box-orient: vertical;
         }
 
+        /* Class used during capture to ensure full text is visible */
+        .is-capturing .caption-area {
+            -webkit-line-clamp: unset !important;
+            display: block !important;
+        }
+
         .date-display {
             font-size: 9px;
             font-weight: 600;
@@ -268,7 +274,7 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file. it shouldn't stretch 
+                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file.
                         </div>
                     </div>
                     
@@ -388,18 +394,19 @@
 
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
+            // Remove guides for clean PNG
+            const guidesActive = element.querySelector('#cardCanvas').classList.contains('guides-active');
+            if(guidesActive) element.querySelector('#cardCanvas').classList.remove('guides-active');
+            
             const canvas = await html2canvas(element, { 
                 useCORS: true, 
-                scale: 3, 
+                scale: 4, 
                 width: 337.5, 
-                height: 600,
-                onclone: (clonedDoc) => {
-                    const el = clonedDoc.getElementById('captureCard');
-                    el.style.margin = "0"; 
-                    el.style.border = "none"; 
-                    el.style.borderRadius = "0";
-                }
+                height: 600
             });
+
+            if(guidesActive) element.querySelector('#cardCanvas').classList.add('guides-active');
+
             const link = document.createElement('a');
             link.download = `pxltr-story-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
@@ -412,26 +419,35 @@
             const recordBtn = document.getElementById('recordBtn');
             const mediaBox = document.getElementById('mediaBox');
             
-            // Fixed dimensions for 9:16 vertical video
             const W = 337.5;
             const H = 600;
-            const SCALE = 2; // High-quality export
+            const SCALE = 2.5; // High resolution
             
             const recCanvas = document.createElement('canvas');
             recCanvas.width = W * SCALE;
             recCanvas.height = H * SCALE;
             const ctx = recCanvas.getContext('2d');
             
-            // Step 1: Hide video temporarily to capture just the static UI overlay
+            // Clean UI capture
+            const guidesActive = document.getElementById('cardCanvas').classList.contains('guides-active');
+            if(guidesActive) document.getElementById('cardCanvas').classList.remove('guides-active');
+            
+            // Explicitly force caption expansion for capture
+            card.classList.add('is-capturing');
             video.style.opacity = '0';
+            
             const uiCanvas = await html2canvas(card, {
                 scale: SCALE,
                 width: W,
                 height: H,
                 useCORS: true,
-                backgroundColor: '#000000'
+                backgroundColor: '#000000',
+                logging: false
             });
+            
             video.style.opacity = '1';
+            card.classList.remove('is-capturing');
+            if(guidesActive) document.getElementById('cardCanvas').classList.add('guides-active');
 
             // Prepare recorder
             const stream = recCanvas.captureStream(30);
@@ -442,7 +458,7 @@
 
             recorder = new MediaRecorder(stream, { 
                 mimeType: 'video/webm;codecs=vp9,opus',
-                videoBitsPerSecond: 8000000 // High bitrate 
+                videoBitsPerSecond: 10000000 // 10Mbps
             });
 
             chunks = [];
@@ -467,11 +483,8 @@
             recorder.start();
             video.play();
 
-            // Calculate video draw dimensions based on object-fit: contain/cover
             const rect = mediaBox.getBoundingClientRect();
             const cardRect = card.getBoundingClientRect();
-            
-            // Offsets within the card
             const offsetX = (rect.left - cardRect.left) * SCALE;
             const offsetY = (rect.top - cardRect.top) * SCALE;
             const boxW = rect.width * SCALE;
@@ -483,17 +496,15 @@
                     return;
                 }
 
-                // 1. Draw the static UI overlay (background + caption + handles)
+                // 1. Draw Static Layer
                 ctx.drawImage(uiCanvas, 0, 0);
 
-                // 2. Draw the live video frame directly into the media box area
-                // This bypasses html2canvas for the video, fixing stretching
+                // 2. Draw Video Layer
                 const vW = video.videoWidth;
                 const vH = video.videoHeight;
                 const isFit = document.getElementById('fitMode').checked;
 
                 if (isFit) {
-                    // Object-fit: contain logic
                     const ratio = Math.min(boxW / vW, boxH / vH);
                     const newW = vW * ratio;
                     const newH = vH * ratio;
@@ -503,7 +514,6 @@
                     ctx.fillRect(offsetX, offsetY, boxW, boxH);
                     ctx.drawImage(video, x, y, newW, newH);
                 } else {
-                    // Object-fit: cover logic
                     const ratio = Math.max(boxW / vW, boxH / vH);
                     const newW = vW * ratio;
                     const newH = vH * ratio;

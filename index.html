@@ -204,6 +204,11 @@
             transition: all 0.2s;
         }
 
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         input, textarea {
             width: 100%;
             background: #1e293b;
@@ -223,7 +228,7 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Centered Layout • Motion Ready</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Centered Layout • Stability Update</p>
     </div>
 
     <div id="capture-wrapper">
@@ -388,7 +393,7 @@
 
         async function startRecording() {
             const canvasArea = document.getElementById('cardCanvas');
-            const SCALE = 2.5; 
+            const SCALE = 2.0; // Slightly lower scale for better long-video performance
             const W = 337.5;
             const H = 600;
             
@@ -400,7 +405,7 @@
             const guidesActive = canvasArea.classList.contains('guides-active');
             if(guidesActive) canvasArea.classList.remove('guides-active');
             
-            // Temporary styles for cleaner recording
+            // Temporary hide video from html2canvas pass
             const originalVideoOpacity = video.style.opacity;
             video.style.opacity = '0';
             
@@ -411,7 +416,7 @@
             const boxW = rect.width * SCALE;
             const boxH = rect.height * SCALE;
 
-            // Render the static UI components
+            // Render background/UI once
             const uiCanvas = await html2canvas(canvasArea, {
                 scale: SCALE, width: W, height: H, useCORS: true, backgroundColor: '#000000'
             });
@@ -420,24 +425,36 @@
             if(guidesActive) canvasArea.classList.add('guides-active');
 
             const stream = recCanvas.captureStream(30);
-            // Capture audio if available
             if (video.captureStream || video.mozCaptureStream) {
                 const vidStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
                 const audioTracks = vidStream.getAudioTracks();
                 if(audioTracks.length > 0) audioTracks.forEach(t => stream.addTrack(t));
             }
 
-            recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+            // Fallback for mimeTypes
+            const types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+            let chosenType = types.find(t => MediaRecorder.isTypeSupported(t));
+
+            recorder = new MediaRecorder(stream, { mimeType: chosenType });
             chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.ondataavailable = e => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
+                const blob = new Blob(chunks, { type: chosenType.split(';')[0] });
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
+                a.href = url;
                 a.download = `pxltr-motion-${Date.now()}.webm`;
                 a.click();
+                
+                // Cleanup
                 recordBtn.disabled = false;
                 recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record 9:16';
+                video.muted = true;
+                video.pause();
+                video.currentTime = 0;
             };
 
             video.currentTime = 0;
@@ -445,10 +462,20 @@
             recordBtn.disabled = true;
             recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
 
+            // Explicitly stop when video ends
+            const handleVideoEnd = () => {
+                if (recorder && recorder.state === "recording") {
+                    recorder.stop();
+                }
+                video.removeEventListener('ended', handleVideoEnd);
+            };
+            video.addEventListener('ended', handleVideoEnd);
+
             recorder.start();
             video.play();
 
             function drawLoop() {
+                // If video finishes or stops, stop the loop and recorder
                 if (video.paused || video.ended || recorder.state === "inactive") {
                     if (recorder.state === "recording") recorder.stop();
                     return;

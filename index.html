@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Social Card Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas for screenshot functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
@@ -18,6 +20,12 @@
             align-items: center;
             justify-content: center;
             padding: 40px 20px;
+        }
+
+        /* Container for the card to ensure screenshots are accurate */
+        .card-wrapper {
+            padding: 20px;
+            background: transparent;
         }
 
         .card-container {
@@ -48,7 +56,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            margin-bottom: 1px; 
+            margin-bottom: 8px; 
             width: 100%;
         }
 
@@ -79,14 +87,15 @@
         }
 
         .caption-area {
-            margin-top: 1px; 
+            margin-top: 12px; 
             padding: 0 12px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 300;
             line-height: 1.5;
             color: rgba(255, 255, 255, 0.9);
-            min-height: 60px; 
+            min-height: 80px; 
             text-align: center;
+            outline: none;
         }
 
         .icon-bar-inline {
@@ -108,6 +117,7 @@
             letter-spacing: 0.1em;
             border: 1px solid rgba(255, 255, 255, 0.05);
             white-space: nowrap;
+            outline: none;
         }
 
         .controls-panel {
@@ -118,6 +128,7 @@
             border-radius: 24px;
             padding: 24px;
             border: 1px solid #1e293b;
+            margin-bottom: 40px;
         }
 
         .section-title {
@@ -160,6 +171,11 @@
             padding: 10px 12px;
             color: white;
             font-size: 13px;
+            outline: none;
+        }
+        
+        input:focus, textarea:focus {
+            border-color: #3b82f6;
         }
 
         .btn {
@@ -171,13 +187,18 @@
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             width: 100%;
             font-size: 14px;
+            border: none;
         }
 
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-secondary { background: #1e293b; border: 1px solid #334155; }
+        .btn-success { background: #10b981; }
 
         #dropOverlay {
             position: absolute;
@@ -208,7 +229,6 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             display: none;
-            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -223,34 +243,38 @@
         <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">Universal Asset Replacer</p>
     </div>
 
-    <!-- The Card -->
-    <div class="card-container" id="captureCard">
-        <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Image</div>
-        <div class="canvas-area" id="cardCanvas">
-            <div class="header-meta-row">
-                <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
-                <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
-                <div class="icon-bar-inline">
-                    <i class="fa-brands fa-youtube" style="color:#ff0000"></i>
-                    <i class="fa-brands fa-instagram" style="color:#ff4d4d"></i>
-                    <i class="fa-brands fa-threads" style="color:#fff"></i>
-                    <i class="fa-brands fa-facebook-f" style="color:#1877F2"></i>
+    <!-- The Card Wrapper (helps html2canvas capture edges correctly) -->
+    <div class="card-wrapper" id="captureTarget">
+        <div class="card-container" id="captureCard">
+            <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Image</div>
+            <div class="canvas-area" id="cardCanvas">
+                <div class="header-meta-row">
+                    <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
+                    <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
+                    <div class="icon-bar-inline">
+                        <i class="fa-brands fa-youtube" style="color:#ff0000"></i>
+                        <i class="fa-brands fa-instagram" style="color:#ff4d4d"></i>
+                        <i class="fa-brands fa-threads" style="color:#fff"></i>
+                        <i class="fa-brands fa-facebook-f" style="color:#1877F2"></i>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="main-image-container">
-                <img 
-                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
-                    id="mainImage" 
-                    class="main-image"
-                >
-            </div>
+                
+                <div class="main-image-container">
+                    <!-- Crossorigin attribute added to help with screenshotting external URLs -->
+                    <img 
+                        src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
+                        id="mainImage" 
+                        class="main-image"
+                        crossorigin="anonymous"
+                    >
+                </div>
 
-            <div class="caption-area" id="displayCaption" contenteditable="true">
-                Visions of a digital dreamscape. Exploring the boundaries between reality and the artificial neon glare of the future.
-            </div>
+                <div class="caption-area" id="displayCaption" contenteditable="true">
+                    Visions of a digital dreamscape. Exploring the boundaries between reality and the artificial neon glare of the future.
+                </div>
 
-            <div class="h-1 w-10 bg-white/20 rounded-full mt-6"></div>
+                <div class="h-1 w-10 bg-white/20 rounded-full mt-6"></div>
+            </div>
         </div>
     </div>
 
@@ -268,7 +292,7 @@
                 </label>
             </div>
             <div class="flex gap-2">
-                <button class="btn btn-secondary flex-1 flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
+                <button class="btn btn-secondary flex-1" onclick="document.getElementById('fileInput').click()">
                     <i class="fa-solid fa-upload text-xs"></i> Upload Local
                 </button>
                 <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
@@ -311,12 +335,18 @@
             </div>
         </div>
 
-        <button class="btn bg-slate-800 hover:bg-slate-700 mt-4" onclick="downloadInfo()">Print Card Config</button>
+        <div class="section-title mt-6">Export</div>
+        <button class="btn btn-success" id="downloadBtn" onclick="downloadScreenshot()">
+            <i class="fa-solid fa-download"></i> 
+            <span id="downloadBtnText">Export Card as PNG</span>
+            <div class="loading-spinner" id="downloadSpinner"></div>
+        </button>
     </div>
 
     <script>
         const apiKey = "";
 
+        // Toggle image fit mode
         function toggleFitMode() {
             const isFit = document.getElementById('fitMode').checked;
             const img = document.getElementById('mainImage');
@@ -327,6 +357,7 @@
             }
         }
 
+        // Handle local file uploads
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (file && file.type.startsWith('image/')) {
@@ -342,6 +373,7 @@
             }
         }
 
+        // Generic input updater
         function updateFromInput(inputId, targetId, property) {
             const val = document.getElementById(inputId).value;
             const target = document.getElementById(targetId);
@@ -352,6 +384,7 @@
             }
         }
 
+        // Drag and Drop functionality
         const dropZone = document.getElementById('captureCard');
         const dropOverlay = document.getElementById('dropOverlay');
 
@@ -381,6 +414,7 @@
             }
         });
 
+        // Sync contenteditable changes back to inputs
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
             el.addEventListener('input', () => {
                 if (el.id === 'displayDate') document.getElementById('dateInput').value = el.innerText;
@@ -389,6 +423,48 @@
             });
         });
 
+        // Screenshot Download Function
+        async function downloadScreenshot() {
+            const element = document.getElementById('captureCard');
+            const btn = document.getElementById('downloadBtn');
+            const text = document.getElementById('downloadBtnText');
+            const spinner = document.getElementById('downloadSpinner');
+
+            btn.disabled = true;
+            text.innerText = "Processing...";
+            spinner.style.display = "block";
+
+            try {
+                // Use html2canvas to capture the element
+                // useCORS is important for external images
+                const canvas = await html2canvas(element, {
+                    useCORS: true,
+                    backgroundColor: null,
+                    scale: 2, // Higher quality
+                    logging: false,
+                    borderRadius: 32
+                });
+
+                // Convert canvas to image data
+                const imageData = canvas.toDataURL("image/png");
+                
+                // Create a temporary link to trigger download
+                const link = document.createElement('a');
+                const handle = document.getElementById('displayHandle').innerText.replace('@', '');
+                link.download = `card-${handle || 'design'}-${Date.now()}.png`;
+                link.href = imageData;
+                link.click();
+            } catch (err) {
+                console.error("Screenshot Error:", err);
+                alert("Could not capture image. This is often due to cross-origin security on the external image URL. Try uploading a local image.");
+            } finally {
+                btn.disabled = false;
+                text.innerText = "Export Card as PNG";
+                spinner.style.display = "none";
+            }
+        }
+
+        // AI Generation logic
         async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -440,16 +516,7 @@
             }
         }
 
-        function downloadInfo() {
-            const config = {
-                handle: document.getElementById('displayHandle').innerText,
-                date: document.getElementById('displayDate').innerText,
-                caption: document.getElementById('displayCaption').innerText,
-                image: document.getElementById('mainImage').src.substring(0, 50) + "..."
-            };
-            console.log("Card Config:", config);
-        }
-
+        // Initialize
         window.onload = () => {
             const now = new Date();
             const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.${now.getFullYear()}`;

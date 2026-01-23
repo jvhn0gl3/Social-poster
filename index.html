@@ -21,12 +21,12 @@
             padding: 20px;
         }
 
-        .card-wrapper {
-            padding: 20px;
-            background: transparent;
+        #capture-wrapper {
+            padding: 0;
+            margin: 0;
+            display: inline-block;
         }
 
-        /* Fixed 9:16 Base */
         .card-container {
             width: 337.5px; 
             height: 600px; 
@@ -42,6 +42,10 @@
             width: 100%;
             height: 100%;
             background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             position: relative;
             transition: all 0.5s ease;
         }
@@ -50,19 +54,15 @@
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
         }
 
-        /* 4:5 Safe Area - Using Absolute Centering for Snapshot Stability */
         .safe-area-content {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
             width: 337.5px;
-            height: 421.8px; /* Precise 4:5 ratio height for 337.5 width */
+            height: 421.8px; 
             padding: 24px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
             z-index: 10;
+            position: relative;
         }
 
         .guides-active .safe-area-content {
@@ -71,36 +71,65 @@
             border-bottom: 1px dashed rgba(255,255,255,0.3);
         }
 
-        .top-section {
+        .caption-row {
             display: flex;
-            align-items: flex-start;
+            align-items: stretch;
             gap: 12px;
             margin-bottom: 16px;
             width: 100%;
         }
 
-        .meta-column {
+        .accent-sidebar {
+            width: 36px; /* Widened for the grid */
+            background: #3b82f6;
+            border-radius: 10px;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        .social-icons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2x3 grid is cleaner for 5 icons */
             gap: 6px;
-            flex-shrink: 0;
+            padding: 0 6px;
+            font-size: 9px;
+            color: white;
+            justify-items: center;
+        }
+
+        .vertical-handle {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            font-size: 7px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: white;
+            white-space: nowrap;
+            margin-top: 10px;
         }
 
         .caption-area {
             flex-grow: 1;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 400;
-            line-height: 1.4;
-            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
             text-align: left;
             outline: none;
             overflow: hidden;
             display: -webkit-box;
-            -webkit-line-clamp: 4;
+            -webkit-line-clamp: 6;
             -webkit-box-orient: vertical;
         }
 
-        /* Capture Overrides */
         .is-capturing .caption-area {
             display: block !important;
             overflow: visible !important;
@@ -130,28 +159,6 @@
 
         .show-full-media {
             object-fit: contain !important;
-        }
-
-        .brand-pill, .date-pill {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 100px;
-            padding: 4px 10px;
-            font-size: 7px;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            white-space: nowrap;
-            outline: none;
-            display: inline-block;
-        }
-
-        .icon-bar-inline {
-            display: flex;
-            gap: 8px;
-            padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 100px;
-            width: fit-content;
         }
 
         .controls-panel {
@@ -187,8 +194,8 @@
         .btn {
             background: #3b82f6;
             color: white;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
@@ -198,7 +205,10 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: background 0.2s;
         }
+
+        .btn:hover { background: #2563eb; }
 
         input, textarea {
             width: 100%;
@@ -226,29 +236,31 @@
 <body>
 
     <div class="mb-4 text-center">
-        <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr v2</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Story Canvas / Feed Safe</p>
+        <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr studio</h1>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Grid Branding • Safe 4:5</p>
     </div>
 
-    <div class="card-wrapper">
+    <div id="capture-wrapper">
         <div class="card-container" id="captureCard">
             <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Media</div>
             <div class="canvas-area glow-mode" id="cardCanvas">
                 
-                <!-- Safe Area centered via absolute top:50% -->
                 <div class="safe-area-content" id="safeArea">
-                    <div class="top-section">
-                        <div class="meta-column">
-                            <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
-                            <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
-                            <div class="icon-bar-inline">
-                                <i class="fa-brands fa-youtube text-[8px]" style="color:#ff0000"></i>
-                                <i class="fa-brands fa-instagram text-[8px]" style="color:#ff4d4d"></i>
-                                <i class="fa-brands fa-threads text-[8px]" style="color:#fff"></i>
+                    <div class="caption-row">
+                        <div class="accent-sidebar">
+                            <div class="social-icons-grid">
+                                <i class="fa-brands fa-facebook-f"></i>
+                                <i class="fa-brands fa-threads"></i>
+                                <i class="fa-brands fa-youtube"></i>
+                                <i class="fa-brands fa-instagram"></i>
+                                <i class="fa-brands fa-tiktok"></i>
+                                <i class="fa-solid fa-bolt-lightning opacity-40"></i> <!-- Spacer icon for grid symmetry -->
                             </div>
+                            <div class="vertical-handle" id="displayHandle">pxltr30</div>
                         </div>
+
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Perfectly centered for both Instagram Story and Feed layouts.
+                            Branding integrated into a compact grid layout. Your social icons and handle now occupy a more substantial vertical sidebar, creating a premium professional feel.
                         </div>
                     </div>
                     
@@ -258,8 +270,9 @@
                     </div>
                 </div>
 
+                <!-- Footer Indicator -->
                 <div class="absolute bottom-10 flex justify-center w-full">
-                    <div class="h-1.5 w-12 bg-white/30 rounded-full"></div>
+                    <div class="h-1 w-10 bg-white/20 rounded-full"></div>
                 </div>
             </div>
         </div>
@@ -278,7 +291,7 @@
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="guideToggle" onchange="toggleGuides()"> 
-                <span>Show 4:5 Safe Zone</span>
+                <span>Show Safe Zone</span>
             </label>
         </div>
 
@@ -287,22 +300,19 @@
         </button>
         <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
 
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date</label>
-                <input type="text" id="dateInput" placeholder="Date" oninput="update('dateInput', 'displayDate')">
-            </div>
+        <div class="grid grid-cols-1 gap-4 mb-4">
             <div>
                 <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
-                <input type="text" id="handleInput" placeholder="Handle" oninput="update('handleInput', 'displayHandle')">
+                <input type="text" id="handleInput" oninput="update('handleInput', 'displayHandle')">
+            </div>
+            <div>
+                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
+                <textarea id="captionInput" rows="3" oninput="update('captionInput', 'displayCaption')"></textarea>
             </div>
         </div>
 
-        <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
-        <textarea id="captionInput" rows="2" class="mb-6" oninput="update('captionInput', 'displayCaption')"></textarea>
-
         <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
-            <i class="fa-solid fa-download"></i> Export High-Res PNG
+            <i class="fa-solid fa-download"></i> Export PNG
         </button>
     </div>
 
@@ -350,7 +360,6 @@
             const element = document.getElementById('captureCard');
             document.body.classList.add('is-capturing');
             
-            // Temporary Guide removal
             const guidesCheckbox = document.getElementById('guideToggle');
             const wasGuides = guidesCheckbox.checked;
             if (wasGuides) {
@@ -365,13 +374,12 @@
                     backgroundColor: "#000000",
                     width: 337.5,
                     height: 600,
+                    logging: false,
                     onclone: (clonedDoc) => {
-                        // Ensure the cloned container is explicitly positioned at top-left
                         const el = clonedDoc.getElementById('captureCard');
                         el.style.margin = "0";
-                        el.style.position = "relative";
-                        el.style.left = "0";
-                        el.style.top = "0";
+                        el.style.border = "none";
+                        el.style.borderRadius = "0";
                     }
                 });
 
@@ -379,6 +387,8 @@
                 link.download = `pxltr-story-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
+            } catch (err) {
+                console.error("Export failed:", err);
             } finally {
                 document.body.classList.remove('is-capturing');
                 if (wasGuides) {
@@ -389,12 +399,8 @@
         }
 
         window.onload = () => {
-            const now = new Date();
-            const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.${now.getFullYear()}`;
-            document.getElementById('displayDate').innerText = dateStr;
-            document.getElementById('dateInput').value = dateStr;
-            document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText;
-            document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText;
+            document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText.trim();
+            document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText.trim();
         };
     </script>
 </body>

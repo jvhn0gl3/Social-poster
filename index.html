@@ -238,7 +238,7 @@
             outline: none;
         }
 
-        canvas#recorder-canvas {
+        #recorder-canvas {
             display: none;
         }
     </style>
@@ -268,13 +268,13 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file.
+                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file. it shouldn't stretch 
                         </div>
                     </div>
                     
                     <div class="date-display" id="displayDate">January 23, 2026</div>
                     
-                    <div class="media-container">
+                    <div class="media-container" id="mediaBox">
                         <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
                         <video id="mainVideo" class="media-asset hidden show-full-media" crossorigin="anonymous" playsinline></video>
                     </div>
@@ -358,10 +358,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Revoke old URL to save memory
-            if (currentObjectUrl) {
-                URL.revokeObjectURL(currentObjectUrl);
-            }
+            if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
 
             const img = document.getElementById('mainImage');
             const video = document.getElementById('mainVideo');
@@ -382,7 +379,6 @@
                 video.src = currentObjectUrl;
                 video.muted = false; 
                 video.volume = 1;
-                // No .load() call needed as assigning src to video already triggers loading
             }
         }
 
@@ -414,34 +410,41 @@
             const video = document.getElementById('mainVideo');
             const card = document.getElementById('captureCard');
             const recordBtn = document.getElementById('recordBtn');
+            const mediaBox = document.getElementById('mediaBox');
             
-            const REC_WIDTH = 337.5;
-            const REC_HEIGHT = 600;
-            const SCALE = 2;
+            // Fixed dimensions for 9:16 vertical video
+            const W = 337.5;
+            const H = 600;
+            const SCALE = 2; // High-quality export
             
-            const captureCanvas = document.createElement('canvas');
-            captureCanvas.id = "recorder-canvas";
-            captureCanvas.width = REC_WIDTH * SCALE;
-            captureCanvas.height = REC_HEIGHT * SCALE;
-            const ctx = captureCanvas.getContext('2d');
+            const recCanvas = document.createElement('canvas');
+            recCanvas.width = W * SCALE;
+            recCanvas.height = H * SCALE;
+            const ctx = recCanvas.getContext('2d');
             
-            video.currentTime = 0;
-            recordBtn.disabled = true;
-            recordBtn.classList.add('recording');
-            recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
+            // Step 1: Hide video temporarily to capture just the static UI overlay
+            video.style.opacity = '0';
+            const uiCanvas = await html2canvas(card, {
+                scale: SCALE,
+                width: W,
+                height: H,
+                useCORS: true,
+                backgroundColor: '#000000'
+            });
+            video.style.opacity = '1';
 
-            const stream = captureCanvas.captureStream(30);
-            
+            // Prepare recorder
+            const stream = recCanvas.captureStream(30);
             if (video.captureStream || video.mozCaptureStream) {
-                const videoStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
-                videoStream.getAudioTracks().forEach(track => stream.addTrack(track));
+                const vidStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
+                vidStream.getAudioTracks().forEach(t => stream.addTrack(t));
             }
 
             recorder = new MediaRecorder(stream, { 
                 mimeType: 'video/webm;codecs=vp9,opus',
-                videoBitsPerSecond: 5000000 
+                videoBitsPerSecond: 8000000 // High bitrate 
             });
-            
+
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
@@ -449,47 +452,76 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `pxltr-video-${Date.now()}.webm`;
+                a.download = `pxltr-motion-${Date.now()}.webm`;
                 a.click();
-                
                 recordBtn.disabled = false;
                 recordBtn.classList.remove('recording');
                 recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record Video';
             };
 
+            video.currentTime = 0;
+            recordBtn.disabled = true;
+            recordBtn.classList.add('recording');
+            recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
             recorder.start();
             video.play();
 
-            async function renderFrame() {
+            // Calculate video draw dimensions based on object-fit: contain/cover
+            const rect = mediaBox.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+            
+            // Offsets within the card
+            const offsetX = (rect.left - cardRect.left) * SCALE;
+            const offsetY = (rect.top - cardRect.top) * SCALE;
+            const boxW = rect.width * SCALE;
+            const boxH = rect.height * SCALE;
+
+            function drawLoop() {
                 if (video.paused || video.ended || recorder.state === "inactive") {
                     if (recorder.state === "recording") recorder.stop();
                     return;
                 }
 
-                try {
-                    const canvas = await html2canvas(card, {
-                        scale: SCALE,
-                        width: REC_WIDTH,
-                        height: REC_HEIGHT,
-                        logging: false,
-                        useCORS: true,
-                        backgroundColor: '#000000'
-                    });
-                    
-                    ctx.clearRect(0, 0, captureCanvas.width, captureCanvas.height);
-                    ctx.drawImage(canvas, 0, 0, captureCanvas.width, captureCanvas.height);
-                } catch (e) {
-                    console.error("Frame capture failed", e);
+                // 1. Draw the static UI overlay (background + caption + handles)
+                ctx.drawImage(uiCanvas, 0, 0);
+
+                // 2. Draw the live video frame directly into the media box area
+                // This bypasses html2canvas for the video, fixing stretching
+                const vW = video.videoWidth;
+                const vH = video.videoHeight;
+                const isFit = document.getElementById('fitMode').checked;
+
+                if (isFit) {
+                    // Object-fit: contain logic
+                    const ratio = Math.min(boxW / vW, boxH / vH);
+                    const newW = vW * ratio;
+                    const newH = vH * ratio;
+                    const x = offsetX + (boxW - newW) / 2;
+                    const y = offsetY + (boxH - newH) / 2;
+                    ctx.fillStyle = "#000";
+                    ctx.fillRect(offsetX, offsetY, boxW, boxH);
+                    ctx.drawImage(video, x, y, newW, newH);
+                } else {
+                    // Object-fit: cover logic
+                    const ratio = Math.max(boxW / vW, boxH / vH);
+                    const newW = vW * ratio;
+                    const newH = vH * ratio;
+                    const x = offsetX + (boxW - newW) / 2;
+                    const y = offsetY + (boxH - newH) / 2;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(offsetX, offsetY, boxW, boxH);
+                    ctx.clip();
+                    ctx.drawImage(video, x, y, newW, newH);
+                    ctx.restore();
                 }
-                
-                requestAnimationFrame(renderFrame);
+
+                requestAnimationFrame(drawLoop);
             }
 
-            setTimeout(renderFrame, 100);
-            
-            video.onended = () => {
-                if(recorder.state === "recording") recorder.stop();
-            };
+            drawLoop();
+            video.onended = () => { if(recorder.state === "recording") recorder.stop(); };
         }
 
         function setCurrentDate() {
@@ -500,7 +532,6 @@
         }
 
         window.onload = () => {
-            document.getElementById('guideToggle').checked = true;
             document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText.trim();
             document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText.trim();
             setCurrentDate();

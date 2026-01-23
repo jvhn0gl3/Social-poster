@@ -63,6 +63,7 @@
             z-index: 10;
         }
 
+        /* Safe zone styles */
         .guides-active .safe-area-content {
             background: rgba(255, 255, 255, 0.03);
             border-top: 1px dashed rgba(255,255,255,0.3);
@@ -78,7 +79,7 @@
         }
 
         .accent-sidebar {
-            width: 48px; /* Slightly wider for horizontal text */
+            width: 48px;
             background: #3b82f6;
             border-radius: 12px;
             flex-shrink: 0;
@@ -104,7 +105,7 @@
         }
 
         .horizontal-handle {
-            font-size: 6.5px; /* Scaled for the sidebar width */
+            font-size: 6.5px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -227,7 +228,7 @@
 
     <div id="capture-wrapper">
         <div class="card-container" id="captureCard">
-            <div class="canvas-area glow-mode" id="cardCanvas">
+            <div class="canvas-area glow-mode guides-active" id="cardCanvas">
                 <div class="safe-area-content" id="safeArea">
                     <div class="caption-row">
                         <div class="accent-sidebar">
@@ -243,7 +244,7 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Refined layout for maximum export stability. The handle is now placed horizontally below the icons, removing the need for complex CSS rotations that can cause overlap on certain devices.
+                            The safe zone guides are now visible by default and will be included in your exported PNG.
                         </div>
                     </div>
                     
@@ -272,7 +273,7 @@
                 <span>Glow</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
-                <input type="checkbox" id="guideToggle" onchange="toggleGuides()"> 
+                <input type="checkbox" id="guideToggle" onchange="toggleGuides()" checked> 
                 <span>Show Safe Zone</span>
             </label>
         </div>
@@ -341,11 +342,7 @@
             const element = document.getElementById('captureCard');
             document.body.classList.add('is-capturing');
             
-            const wasGuides = document.getElementById('guideToggle').checked;
-            if (wasGuides) {
-                document.getElementById('guideToggle').checked = false;
-                toggleGuides();
-            }
+            // Note: We no longer remove guides-active here so they stay visible in export.
 
             try {
                 const canvas = await html2canvas(element, { 
@@ -368,14 +365,12 @@
                 link.click();
             } finally {
                 document.body.classList.remove('is-capturing');
-                if (wasGuides) {
-                    document.getElementById('guideToggle').checked = true;
-                    toggleGuides();
-                }
             }
         }
 
         window.onload = () => {
+            // Set guide checkbox to true by default to match the starting canvas state
+            document.getElementById('guideToggle').checked = true;
             document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText.trim();
             document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText.trim();
         };

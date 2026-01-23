@@ -131,7 +131,13 @@
             -webkit-box-orient: vertical;
         }
 
-        /* Essential for capture: ensures height is calculated based on content, not container */
+        /* Expanded caption for Text Only mode */
+        .text-only-mode .caption-area {
+            -webkit-line-clamp: 18;
+            font-size: 13px;
+        }
+
+        /* Ensure full capture */
         .is-capturing .caption-area {
             -webkit-line-clamp: unset !important;
             display: block !important;
@@ -277,7 +283,7 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file.
+                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file. Turn on "Text Only" to create simple text posts.
                         </div>
                     </div>
                     
@@ -297,8 +303,12 @@
     </div>
 
     <div class="controls-panel">
-        <div class="section-title">Visuals</div>
+        <div class="section-title">Mode & Visuals</div>
         <div class="flex flex-wrap gap-4 mb-4">
+            <label class="flex items-center gap-2 cursor-pointer text-[11px] font-bold text-blue-400 bg-blue-400/10 px-3 py-1.5 rounded-full">
+                <input type="checkbox" id="textOnlyMode" onchange="toggleTextOnly()"> 
+                <span>Text Only Mode</span>
+            </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="fitMode" onchange="toggleFitMode()" checked> 
                 <span>Fit Image</span>
@@ -309,14 +319,16 @@
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="guideToggle" onchange="toggleGuides()" checked> 
-                <span>Show Safe Zone</span>
+                <span>Guides</span>
             </label>
         </div>
 
-        <button type="button" class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
-            <i class="fa-solid fa-upload"></i> Upload Media (Img/Vid)
-        </button>
-        <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
+        <div id="mediaUploadContainer">
+            <button type="button" class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-upload"></i> Upload Media (Img/Vid)
+            </button>
+            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
+        </div>
 
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
@@ -348,6 +360,31 @@
         let recorder = null;
         let chunks = [];
         let currentObjectUrl = null;
+
+        function toggleTextOnly() {
+            const isTextOnly = document.getElementById('textOnlyMode').checked;
+            const card = document.getElementById('captureCard');
+            const mediaBox = document.getElementById('mediaBox');
+            const uploadBtn = document.getElementById('mediaUploadContainer');
+            const recordBtn = document.getElementById('recordBtn');
+            const video = document.getElementById('mainVideo');
+
+            if (isTextOnly) {
+                card.classList.add('text-only-mode');
+                mediaBox.classList.add('hidden');
+                uploadBtn.classList.add('hidden');
+                recordBtn.classList.add('hidden');
+                video.pause();
+            } else {
+                card.classList.remove('text-only-mode');
+                mediaBox.classList.remove('hidden');
+                uploadBtn.classList.remove('hidden');
+                // Re-show record button only if a video is active
+                if (video.src && !video.classList.contains('hidden')) {
+                    recordBtn.classList.remove('hidden');
+                }
+            }
+        }
 
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
@@ -399,13 +436,10 @@
             const card = document.getElementById('captureCard');
             const canvasArea = document.getElementById('cardCanvas');
             
-            // UI Cleanup
             const guidesActive = canvasArea.classList.contains('guides-active');
             if(guidesActive) canvasArea.classList.remove('guides-active');
             card.classList.add('is-capturing');
             
-            // html2canvas is more reliable if we don't scale the source element ourselves,
-            // but let the library handle the internal scaling.
             const canvas = await html2canvas(canvasArea, { 
                 useCORS: true, 
                 scale: 4, 
@@ -440,15 +474,12 @@
             recCanvas.height = H * SCALE;
             const ctx = recCanvas.getContext('2d');
             
-            // Clean UI capture
             const guidesActive = canvasArea.classList.contains('guides-active');
             if(guidesActive) canvasArea.classList.remove('guides-active');
             
-            // Snapshot calculation
             card.classList.add('is-capturing');
             video.style.opacity = '0';
             
-            // Get accurate coordinates for video box BEFORE the snapshot might shift things
             const rect = mediaBox.getBoundingClientRect();
             const canvasRect = canvasArea.getBoundingClientRect();
             const offsetX = (rect.left - canvasRect.left) * SCALE;
@@ -469,7 +500,6 @@
             card.classList.remove('is-capturing');
             if(guidesActive) canvasArea.classList.add('guides-active');
 
-            // Prepare recorder
             const stream = recCanvas.captureStream(30);
             if (video.captureStream || video.mozCaptureStream) {
                 const vidStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();

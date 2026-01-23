@@ -238,8 +238,7 @@
             outline: none;
         }
 
-        /* Video element for recording needs to be visible to capture but can be managed */
-        canvas {
+        canvas#recorder-canvas {
             display: none;
         }
     </style>
@@ -337,7 +336,6 @@
     </div>
 
     <script>
-        let mediaType = 'image';
         let recorder = null;
         let chunks = [];
 
@@ -364,7 +362,6 @@
             const reader = new FileReader();
 
             if (file.type.startsWith('image/')) {
-                mediaType = 'image';
                 video.classList.add('hidden');
                 video.pause();
                 img.classList.remove('hidden');
@@ -372,13 +369,11 @@
                 reader.onload = (e) => img.src = e.target.result;
                 reader.readAsDataURL(file);
             } else if (file.type.startsWith('video/')) {
-                mediaType = 'video';
                 img.classList.add('hidden');
                 video.classList.remove('hidden');
                 recordBtn.classList.remove('hidden');
                 video.src = URL.createObjectURL(file);
                 video.load();
-                // Ensure audio is enabled for recording if file has it
                 video.muted = false; 
                 video.volume = 1;
             }
@@ -391,10 +386,15 @@
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
             const canvas = await html2canvas(element, { 
-                useCORS: true, scale: 3, width: 337.5, height: 600,
+                useCORS: true, 
+                scale: 3, 
+                width: 337.5, 
+                height: 600,
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.getElementById('captureCard');
-                    el.style.margin = "0"; el.style.border = "none"; el.style.borderRadius = "0";
+                    el.style.margin = "0"; 
+                    el.style.border = "none"; 
+                    el.style.borderRadius = "0";
                 }
             });
             const link = document.createElement('a');
@@ -408,35 +408,36 @@
             const card = document.getElementById('captureCard');
             const recordBtn = document.getElementById('recordBtn');
             
-            // Reset video to start
-            video.currentTime = 0;
-            
-            // Generate canvas from HTML for recording
-            // We use html2canvas for the static parts and draw video on top, 
-            // but for real-time we'll capture the card element using a temporary canvas stream.
-            // Note: Full HTML element recording in real-time is best done via captureStream on a canvas
-            // that is updated every frame.
+            // Set dimensions explicitly for 2x scaling to match aspect ratio perfectly
+            const REC_WIDTH = 337.5;
+            const REC_HEIGHT = 600;
+            const SCALE = 2;
             
             const captureCanvas = document.createElement('canvas');
-            captureCanvas.width = 337.5 * 2; // High res
-            captureCanvas.height = 600 * 2;
+            captureCanvas.id = "recorder-canvas";
+            captureCanvas.width = REC_WIDTH * SCALE;
+            captureCanvas.height = REC_HEIGHT * SCALE;
             const ctx = captureCanvas.getContext('2d');
             
+            video.currentTime = 0;
             recordBtn.disabled = true;
             recordBtn.classList.add('recording');
             recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
 
             const stream = captureCanvas.captureStream(30);
             
-            // Add audio if video has it
-            if (video.captureStream) {
-                const videoStream = video.captureStream();
+            // Handle audio capture
+            if (video.captureStream || video.mozCaptureStream) {
+                const videoStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
                 videoStream.getAudioTracks().forEach(track => stream.addTrack(track));
             }
 
-            recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+            recorder = new MediaRecorder(stream, { 
+                mimeType: 'video/webm;codecs=vp9,opus',
+                videoBitsPerSecond: 5000000 // 5Mbps for quality
+            });
+            
             chunks = [];
-
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
@@ -451,34 +452,38 @@
                 recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record Video';
             };
 
-            // Start recording and video playback
             recorder.start();
             video.play();
 
-            // Render loop to draw card to canvas
             async function renderFrame() {
-                if (video.paused || video.ended) {
-                    recorder.stop();
+                if (video.paused || video.ended || recorder.state === "inactive") {
+                    if (recorder.state === "recording") recorder.stop();
                     return;
                 }
 
-                const canvas = await html2canvas(card, {
-                    scale: 2,
-                    width: 337.5,
-                    height: 600,
-                    logging: false,
-                    useCORS: true
-                });
-                
-                ctx.clearRect(0, 0, captureCanvas.width, captureCanvas.height);
-                ctx.drawImage(canvas, 0, 0);
+                try {
+                    const canvas = await html2canvas(card, {
+                        scale: SCALE,
+                        width: REC_WIDTH,
+                        height: REC_HEIGHT,
+                        logging: false,
+                        useCORS: true,
+                        backgroundColor: '#000000'
+                    });
+                    
+                    ctx.clearRect(0, 0, captureCanvas.width, captureCanvas.height);
+                    // Draw captured frame at full canvas size to avoid stretching
+                    ctx.drawImage(canvas, 0, 0, captureCanvas.width, captureCanvas.height);
+                } catch (e) {
+                    console.error("Frame capture failed", e);
+                }
                 
                 requestAnimationFrame(renderFrame);
             }
 
-            renderFrame();
+            // Small delay to ensure video buffer is active
+            setTimeout(renderFrame, 100);
             
-            // Safety stop when video ends
             video.onended = () => {
                 if(recorder.state === "recording") recorder.stop();
             };

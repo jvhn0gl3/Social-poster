@@ -131,13 +131,11 @@
             -webkit-box-orient: vertical;
         }
 
-        /* Expanded caption for Text Only mode */
         .text-only-mode .caption-area {
             -webkit-line-clamp: 18;
             font-size: 13px;
         }
 
-        /* Ensure full capture */
         .is-capturing .caption-area {
             -webkit-line-clamp: unset !important;
             display: block !important;
@@ -158,7 +156,7 @@
 
         .media-container {
             width: 100%;
-            flex-grow: 1;
+            /* Removed fixed aspect ratio - now dynamic based on media */
             border-radius: 20px;
             overflow: hidden;
             background: #000;
@@ -167,17 +165,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: auto;
+            max-height: 250px; /* Sanity check for extremely tall media */
         }
 
         .media-asset {
             width: 100%;
-            height: 100%;
+            height: auto;
             display: block;
             object-fit: cover;
-        }
-
-        .show-full-media {
-            object-fit: contain !important;
         }
 
         .controls-panel {
@@ -252,10 +248,6 @@
             font-size: 13px;
             outline: none;
         }
-
-        #recorder-canvas {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -283,15 +275,15 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file. Turn on "Text Only" to create simple text posts.
+                            Upload media to see the box adjust to its aspect ratio. Perfect for high-fidelity social storytelling.
                         </div>
                     </div>
                     
                     <div class="date-display" id="displayDate">January 23, 2026</div>
                     
                     <div class="media-container" id="mediaBox">
-                        <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
-                        <video id="mainVideo" class="media-asset hidden show-full-media" crossorigin="anonymous" playsinline></video>
+                        <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset" crossorigin="anonymous">
+                        <video id="mainVideo" class="media-asset hidden" crossorigin="anonymous" playsinline></video>
                     </div>
                 </div>
 
@@ -310,10 +302,6 @@
                 <span>Text Only Mode</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
-                <input type="checkbox" id="fitMode" onchange="toggleFitMode()" checked> 
-                <span>Fit Image</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="glowToggle" onchange="toggleGlow()" checked> 
                 <span>Glow</span>
             </label>
@@ -323,13 +311,15 @@
             </label>
         </div>
 
-        <div id="mediaUploadContainer">
+        <div id="mediaControls">
+            <div class="section-title">Media</div>
             <button type="button" class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-upload"></i> Upload Media (Img/Vid)
+                <i class="fa-solid fa-upload"></i> Upload Image / Video
             </button>
             <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
         </div>
 
+        <div class="section-title">Content</div>
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
                 <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
@@ -365,21 +355,20 @@
             const isTextOnly = document.getElementById('textOnlyMode').checked;
             const card = document.getElementById('captureCard');
             const mediaBox = document.getElementById('mediaBox');
-            const uploadBtn = document.getElementById('mediaUploadContainer');
+            const mediaControls = document.getElementById('mediaControls');
             const recordBtn = document.getElementById('recordBtn');
             const video = document.getElementById('mainVideo');
 
             if (isTextOnly) {
                 card.classList.add('text-only-mode');
                 mediaBox.classList.add('hidden');
-                uploadBtn.classList.add('hidden');
+                mediaControls.classList.add('hidden');
                 recordBtn.classList.add('hidden');
                 video.pause();
             } else {
                 card.classList.remove('text-only-mode');
                 mediaBox.classList.remove('hidden');
-                uploadBtn.classList.remove('hidden');
-                // Re-show record button only if a video is active
+                mediaControls.classList.remove('hidden');
                 if (video.src && !video.classList.contains('hidden')) {
                     recordBtn.classList.remove('hidden');
                 }
@@ -388,12 +377,6 @@
 
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
-        }
-
-        function toggleFitMode() {
-            const isFit = document.getElementById('fitMode').checked;
-            document.getElementById('mainImage').classList.toggle('show-full-media', isFit);
-            document.getElementById('mainVideo').classList.toggle('show-full-media', isFit);
         }
 
         function toggleGlow() {
@@ -409,6 +392,7 @@
             const img = document.getElementById('mainImage');
             const video = document.getElementById('mainVideo');
             const recordBtn = document.getElementById('recordBtn');
+            const mediaBox = document.getElementById('mediaBox');
 
             currentObjectUrl = URL.createObjectURL(file);
 
@@ -418,6 +402,10 @@
                 img.classList.remove('hidden');
                 recordBtn.classList.add('hidden');
                 img.src = currentObjectUrl;
+                img.onload = () => {
+                   const ratio = img.naturalHeight / img.naturalWidth;
+                   mediaBox.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
+                };
             } else if (file.type.startsWith('video/')) {
                 img.classList.add('hidden');
                 video.classList.remove('hidden');
@@ -425,6 +413,9 @@
                 video.src = currentObjectUrl;
                 video.muted = false; 
                 video.volume = 1;
+                video.onloadedmetadata = () => {
+                    mediaBox.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
+                };
             }
         }
 
@@ -435,8 +426,8 @@
         async function downloadScreenshot() {
             const card = document.getElementById('captureCard');
             const canvasArea = document.getElementById('cardCanvas');
-            
             const guidesActive = canvasArea.classList.contains('guides-active');
+            
             if(guidesActive) canvasArea.classList.remove('guides-active');
             card.classList.add('is-capturing');
             
@@ -540,33 +531,9 @@
                 }
 
                 ctx.drawImage(uiCanvas, 0, 0);
-
-                const vW = video.videoWidth;
-                const vH = video.videoHeight;
-                const isFit = document.getElementById('fitMode').checked;
-
-                if (isFit) {
-                    const ratio = Math.min(boxW / vW, boxH / vH);
-                    const newW = vW * ratio;
-                    const newH = vH * ratio;
-                    const x = offsetX + (boxW - newW) / 2;
-                    const y = offsetY + (boxH - newH) / 2;
-                    ctx.fillStyle = "#000";
-                    ctx.fillRect(offsetX, offsetY, boxW, boxH);
-                    ctx.drawImage(video, x, y, newW, newH);
-                } else {
-                    const ratio = Math.max(boxW / vW, boxH / vH);
-                    const newW = vW * ratio;
-                    const newH = vH * ratio;
-                    const x = offsetX + (boxW - newW) / 2;
-                    const y = offsetY + (boxH - newH) / 2;
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(offsetX, offsetY, boxW, boxH);
-                    ctx.clip();
-                    ctx.drawImage(video, x, y, newW, newH);
-                    ctx.restore();
-                }
+                
+                // Draw dynamic sized video
+                ctx.drawImage(video, offsetX, offsetY, boxW, boxH);
 
                 requestAnimationFrame(drawLoop);
             }

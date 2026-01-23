@@ -304,7 +304,7 @@
             </label>
         </div>
 
-        <button class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
+        <button type="button" class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
             <i class="fa-solid fa-upload"></i> Upload Media (Img/Vid)
         </button>
         <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
@@ -326,10 +326,10 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2">
-            <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
+            <button type="button" class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
                 <i class="fa-solid fa-image"></i> PNG
             </button>
-            <button id="recordBtn" class="btn btn-record bg-blue-600 hover:bg-blue-500 hidden" onclick="startRecording()">
+            <button id="recordBtn" type="button" class="btn btn-record bg-blue-600 hover:bg-blue-500 hidden" onclick="startRecording()">
                 <i class="fa-solid fa-circle"></i> Record Video
             </button>
         </div>
@@ -338,6 +338,7 @@
     <script>
         let recorder = null;
         let chunks = [];
+        let currentObjectUrl = null;
 
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
@@ -356,26 +357,32 @@
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            // Revoke old URL to save memory
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+            }
+
             const img = document.getElementById('mainImage');
             const video = document.getElementById('mainVideo');
             const recordBtn = document.getElementById('recordBtn');
-            const reader = new FileReader();
+
+            currentObjectUrl = URL.createObjectURL(file);
 
             if (file.type.startsWith('image/')) {
                 video.classList.add('hidden');
                 video.pause();
                 img.classList.remove('hidden');
                 recordBtn.classList.add('hidden');
-                reader.onload = (e) => img.src = e.target.result;
-                reader.readAsDataURL(file);
+                img.src = currentObjectUrl;
             } else if (file.type.startsWith('video/')) {
                 img.classList.add('hidden');
                 video.classList.remove('hidden');
                 recordBtn.classList.remove('hidden');
-                video.src = URL.createObjectURL(file);
-                video.load();
+                video.src = currentObjectUrl;
                 video.muted = false; 
                 video.volume = 1;
+                // No .load() call needed as assigning src to video already triggers loading
             }
         }
 
@@ -408,7 +415,6 @@
             const card = document.getElementById('captureCard');
             const recordBtn = document.getElementById('recordBtn');
             
-            // Set dimensions explicitly for 2x scaling to match aspect ratio perfectly
             const REC_WIDTH = 337.5;
             const REC_HEIGHT = 600;
             const SCALE = 2;
@@ -426,7 +432,6 @@
 
             const stream = captureCanvas.captureStream(30);
             
-            // Handle audio capture
             if (video.captureStream || video.mozCaptureStream) {
                 const videoStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
                 videoStream.getAudioTracks().forEach(track => stream.addTrack(track));
@@ -434,7 +439,7 @@
 
             recorder = new MediaRecorder(stream, { 
                 mimeType: 'video/webm;codecs=vp9,opus',
-                videoBitsPerSecond: 5000000 // 5Mbps for quality
+                videoBitsPerSecond: 5000000 
             });
             
             chunks = [];
@@ -472,7 +477,6 @@
                     });
                     
                     ctx.clearRect(0, 0, captureCanvas.width, captureCanvas.height);
-                    // Draw captured frame at full canvas size to avoid stretching
                     ctx.drawImage(canvas, 0, 0, captureCanvas.width, captureCanvas.height);
                 } catch (e) {
                     console.error("Frame capture failed", e);
@@ -481,7 +485,6 @@
                 requestAnimationFrame(renderFrame);
             }
 
-            // Small delay to ensure video buffer is active
             setTimeout(renderFrame, 100);
             
             video.onended = () => {

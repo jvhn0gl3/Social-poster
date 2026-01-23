@@ -131,10 +131,13 @@
             -webkit-box-orient: vertical;
         }
 
-        /* Class used during capture to ensure full text is visible */
+        /* Essential for capture: ensures height is calculated based on content, not container */
         .is-capturing .caption-area {
             -webkit-line-clamp: unset !important;
             display: block !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
         }
 
         .date-display {
@@ -393,19 +396,27 @@
         }
 
         async function downloadScreenshot() {
-            const element = document.getElementById('captureCard');
-            // Remove guides for clean PNG
-            const guidesActive = element.querySelector('#cardCanvas').classList.contains('guides-active');
-            if(guidesActive) element.querySelector('#cardCanvas').classList.remove('guides-active');
+            const card = document.getElementById('captureCard');
+            const canvasArea = document.getElementById('cardCanvas');
             
-            const canvas = await html2canvas(element, { 
+            // UI Cleanup
+            const guidesActive = canvasArea.classList.contains('guides-active');
+            if(guidesActive) canvasArea.classList.remove('guides-active');
+            card.classList.add('is-capturing');
+            
+            // html2canvas is more reliable if we don't scale the source element ourselves,
+            // but let the library handle the internal scaling.
+            const canvas = await html2canvas(canvasArea, { 
                 useCORS: true, 
                 scale: 4, 
                 width: 337.5, 
-                height: 600
+                height: 600,
+                backgroundColor: null,
+                logging: false
             });
 
-            if(guidesActive) element.querySelector('#cardCanvas').classList.add('guides-active');
+            card.classList.remove('is-capturing');
+            if(guidesActive) canvasArea.classList.add('guides-active');
 
             const link = document.createElement('a');
             link.download = `pxltr-story-${Date.now()}.png`;
@@ -416,12 +427,13 @@
         async function startRecording() {
             const video = document.getElementById('mainVideo');
             const card = document.getElementById('captureCard');
+            const canvasArea = document.getElementById('cardCanvas');
             const recordBtn = document.getElementById('recordBtn');
             const mediaBox = document.getElementById('mediaBox');
             
             const W = 337.5;
             const H = 600;
-            const SCALE = 2.5; // High resolution
+            const SCALE = 2.5; 
             
             const recCanvas = document.createElement('canvas');
             recCanvas.width = W * SCALE;
@@ -429,14 +441,22 @@
             const ctx = recCanvas.getContext('2d');
             
             // Clean UI capture
-            const guidesActive = document.getElementById('cardCanvas').classList.contains('guides-active');
-            if(guidesActive) document.getElementById('cardCanvas').classList.remove('guides-active');
+            const guidesActive = canvasArea.classList.contains('guides-active');
+            if(guidesActive) canvasArea.classList.remove('guides-active');
             
-            // Explicitly force caption expansion for capture
+            // Snapshot calculation
             card.classList.add('is-capturing');
             video.style.opacity = '0';
             
-            const uiCanvas = await html2canvas(card, {
+            // Get accurate coordinates for video box BEFORE the snapshot might shift things
+            const rect = mediaBox.getBoundingClientRect();
+            const canvasRect = canvasArea.getBoundingClientRect();
+            const offsetX = (rect.left - canvasRect.left) * SCALE;
+            const offsetY = (rect.top - canvasRect.top) * SCALE;
+            const boxW = rect.width * SCALE;
+            const boxH = rect.height * SCALE;
+
+            const uiCanvas = await html2canvas(canvasArea, {
                 scale: SCALE,
                 width: W,
                 height: H,
@@ -447,7 +467,7 @@
             
             video.style.opacity = '1';
             card.classList.remove('is-capturing');
-            if(guidesActive) document.getElementById('cardCanvas').classList.add('guides-active');
+            if(guidesActive) canvasArea.classList.add('guides-active');
 
             // Prepare recorder
             const stream = recCanvas.captureStream(30);
@@ -458,7 +478,7 @@
 
             recorder = new MediaRecorder(stream, { 
                 mimeType: 'video/webm;codecs=vp9,opus',
-                videoBitsPerSecond: 10000000 // 10Mbps
+                videoBitsPerSecond: 10000000 
             });
 
             chunks = [];
@@ -483,23 +503,14 @@
             recorder.start();
             video.play();
 
-            const rect = mediaBox.getBoundingClientRect();
-            const cardRect = card.getBoundingClientRect();
-            const offsetX = (rect.left - cardRect.left) * SCALE;
-            const offsetY = (rect.top - cardRect.top) * SCALE;
-            const boxW = rect.width * SCALE;
-            const boxH = rect.height * SCALE;
-
             function drawLoop() {
                 if (video.paused || video.ended || recorder.state === "inactive") {
                     if (recorder.state === "recording") recorder.stop();
                     return;
                 }
 
-                // 1. Draw Static Layer
                 ctx.drawImage(uiCanvas, 0, 0);
 
-                // 2. Draw Video Layer
                 const vW = video.videoWidth;
                 const vH = video.videoHeight;
                 const isFit = document.getElementById('fitMode').checked;

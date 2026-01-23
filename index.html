@@ -47,7 +47,6 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            transition: all 0.5s ease;
         }
 
         .canvas-area.glow-mode {
@@ -62,7 +61,6 @@
             flex-direction: column;
             box-sizing: border-box;
             z-index: 10;
-            position: relative;
         }
 
         .guides-active .safe-area-content {
@@ -73,47 +71,57 @@
 
         .caption-row {
             display: flex;
-            align-items: stretch;
+            align-items: flex-start; /* Changed to flex-start to allow sidebar to height-fit */
             gap: 12px;
             margin-bottom: 16px;
             width: 100%;
         }
 
         .accent-sidebar {
-            width: 36px; /* Widened for the grid */
+            width: 34px;
             background: #3b82f6;
             border-radius: 10px;
             flex-shrink: 0;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
             padding: 10px 0;
-            position: relative;
+            /* Remove absolute heights or rotations that break canvas rendering */
         }
 
         .social-icons-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2x3 grid is cleaner for 5 icons */
-            gap: 6px;
-            padding: 0 6px;
-            font-size: 9px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
             color: white;
-            justify-items: center;
+            width: 100%;
+            padding: 0 4px;
+        }
+
+        .social-icons-grid i {
+            font-size: 8px;
+            text-align: center;
+        }
+
+        /* Fixed Vertical Text Logic for HTML2Canvas Stability */
+        .vertical-handle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .vertical-handle {
             writing-mode: vertical-rl;
-            text-orientation: mixed;
-            transform: rotate(180deg);
-            font-size: 7px;
+            /* Removed rotation as it often shifts origin during high-scale export */
+            font-size: 8px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.15em;
             color: white;
             white-space: nowrap;
-            margin-top: 10px;
+            display: block;
         }
 
         .caption-area {
@@ -147,7 +155,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .media-asset {
@@ -169,7 +176,6 @@
             border-radius: 24px;
             padding: 24px;
             border: 1px solid #1e293b;
-            margin-bottom: 40px;
         }
 
         .section-title {
@@ -205,10 +211,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: background 0.2s;
         }
-
-        .btn:hover { background: #2563eb; }
 
         input, textarea {
             width: 100%;
@@ -220,31 +223,18 @@
             font-size: 13px;
             outline: none;
         }
-
-        #dropOverlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(59, 130, 246, 0.4);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-            backdrop-filter: blur(4px);
-        }
     </style>
 </head>
 <body>
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Grid Branding • Safe 4:5</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Fixed Grid Export • Safe 4:5</p>
     </div>
 
     <div id="capture-wrapper">
         <div class="card-container" id="captureCard">
-            <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Media</div>
             <div class="canvas-area glow-mode" id="cardCanvas">
-                
                 <div class="safe-area-content" id="safeArea">
                     <div class="caption-row">
                         <div class="accent-sidebar">
@@ -254,13 +244,15 @@
                                 <i class="fa-brands fa-youtube"></i>
                                 <i class="fa-brands fa-instagram"></i>
                                 <i class="fa-brands fa-tiktok"></i>
-                                <i class="fa-solid fa-bolt-lightning opacity-40"></i> <!-- Spacer icon for grid symmetry -->
+                                <i class="fa-solid fa-bolt text-[7px] opacity-40"></i>
                             </div>
-                            <div class="vertical-handle" id="displayHandle">pxltr30</div>
+                            <div class="vertical-handle-container">
+                                <div class="vertical-handle" id="displayHandle">pxltr30</div>
+                            </div>
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Branding integrated into a compact grid layout. Your social icons and handle now occupy a more substantial vertical sidebar, creating a premium professional feel.
+                            Testing the export stability. The handle and icons are now managed by a strict flexbox container to prevent overlapping on high-resolution PNG exports.
                         </div>
                     </div>
                     
@@ -270,7 +262,6 @@
                     </div>
                 </div>
 
-                <!-- Footer Indicator -->
                 <div class="absolute bottom-10 flex justify-center w-full">
                     <div class="h-1 w-10 bg-white/20 rounded-full"></div>
                 </div>
@@ -300,15 +291,14 @@
         </button>
         <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
 
-        <div class="grid grid-cols-1 gap-4 mb-4">
-            <div>
-                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
-                <input type="text" id="handleInput" oninput="update('handleInput', 'displayHandle')">
-            </div>
-            <div>
-                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
-                <textarea id="captionInput" rows="3" oninput="update('captionInput', 'displayCaption')"></textarea>
-            </div>
+        <div class="mb-4">
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
+            <input type="text" id="handleInput" oninput="update('handleInput', 'displayHandle')">
+        </div>
+        
+        <div class="mb-4">
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
+            <textarea id="captionInput" rows="3" oninput="update('captionInput', 'displayCaption')"></textarea>
         </div>
 
         <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
@@ -360,10 +350,9 @@
             const element = document.getElementById('captureCard');
             document.body.classList.add('is-capturing');
             
-            const guidesCheckbox = document.getElementById('guideToggle');
-            const wasGuides = guidesCheckbox.checked;
+            const wasGuides = document.getElementById('guideToggle').checked;
             if (wasGuides) {
-                guidesCheckbox.checked = false;
+                document.getElementById('guideToggle').checked = false;
                 toggleGuides();
             }
 
@@ -371,10 +360,9 @@
                 const canvas = await html2canvas(element, { 
                     useCORS: true, 
                     scale: 3, 
-                    backgroundColor: "#000000",
+                    backgroundColor: null,
                     width: 337.5,
                     height: 600,
-                    logging: false,
                     onclone: (clonedDoc) => {
                         const el = clonedDoc.getElementById('captureCard');
                         el.style.margin = "0";
@@ -387,12 +375,10 @@
                 link.download = `pxltr-story-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
-            } catch (err) {
-                console.error("Export failed:", err);
             } finally {
                 document.body.classList.remove('is-capturing');
                 if (wasGuides) {
-                    guidesCheckbox.checked = true;
+                    document.getElementById('guideToggle').checked = true;
                     toggleGuides();
                 }
             }

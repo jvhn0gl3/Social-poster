@@ -63,7 +63,6 @@
             z-index: 10;
         }
 
-        /* Safe zone styles */
         .guides-active .safe-area-content {
             background: rgba(255, 255, 255, 0.03);
             border-top: 1px dashed rgba(255,255,255,0.3);
@@ -74,7 +73,7 @@
             display: flex;
             align-items: flex-start;
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
             width: 100%;
         }
 
@@ -128,8 +127,18 @@
             outline: none;
             overflow: hidden;
             display: -webkit-box;
-            -webkit-line-clamp: 6;
+            -webkit-line-clamp: 5;
             -webkit-box-orient: vertical;
+        }
+
+        .date-display {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.4);
+            margin-left: 60px; /* Aligns with the caption area offset */
+            margin-bottom: 12px;
         }
 
         .is-capturing .caption-area {
@@ -223,7 +232,7 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Stable Layout • Safe 4:5</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Dated Layout • Safe 4:5</p>
     </div>
 
     <div id="capture-wrapper">
@@ -244,9 +253,11 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            The safe zone guides are now visible by default and will be included in your exported PNG.
+                            The layout has been updated to restore the date display. It sits elegantly below the caption, providing context to your post while maintaining high export quality.
                         </div>
                     </div>
+                    
+                    <div class="date-display" id="displayDate">January 23, 2026</div>
                     
                     <div class="media-container">
                         <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
@@ -283,9 +294,15 @@
         </button>
         <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
 
-        <div class="mb-4">
-            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
-            <input type="text" id="handleInput" oninput="update('handleInput', 'displayHandle')">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
+                <input type="text" id="handleInput" oninput="update('handleInput', 'displayHandle')">
+            </div>
+            <div>
+                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date</label>
+                <input type="text" id="dateInput" oninput="update('dateInput', 'displayDate')">
+            </div>
         </div>
         
         <div class="mb-4">
@@ -342,8 +359,6 @@
             const element = document.getElementById('captureCard');
             document.body.classList.add('is-capturing');
             
-            // Note: We no longer remove guides-active here so they stay visible in export.
-
             try {
                 const canvas = await html2canvas(element, { 
                     useCORS: true, 
@@ -368,11 +383,18 @@
             }
         }
 
+        function setCurrentDate() {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('en-US', options);
+            document.getElementById('displayDate').innerText = today;
+            document.getElementById('dateInput').value = today;
+        }
+
         window.onload = () => {
-            // Set guide checkbox to true by default to match the starting canvas state
             document.getElementById('guideToggle').checked = true;
             document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText.trim();
             document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText.trim();
+            setCurrentDate();
         };
     </script>
 </body>

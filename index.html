@@ -26,6 +26,7 @@
             background: transparent;
         }
 
+        /* Fixed 9:16 Container */
         .card-container {
             width: 337.5px; 
             height: 600px; 
@@ -35,6 +36,8 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             border: 8px solid #1e293b;
             background: #000;
+            /* Ensure no transform during capture unless explicitly set */
+            transform: translateZ(0); 
         }
 
         .canvas-area {
@@ -53,6 +56,7 @@
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
         }
 
+        /* 4:5 Safe Area Container */
         .safe-area-content {
             width: 100%;
             height: 422px; 
@@ -61,6 +65,7 @@
             flex-direction: column;
             position: relative;
             z-index: 10;
+            box-sizing: border-box;
         }
 
         .guides-active .safe-area-content {
@@ -68,11 +73,14 @@
             border-bottom: 1px dashed rgba(255,255,255,0.2);
         }
 
+        /* Meta Row */
         .top-section {
             display: flex;
             align-items: flex-start;
             gap: 12px;
             margin-bottom: 16px;
+            width: 100%;
+            text-align: left;
         }
 
         .meta-column {
@@ -80,9 +88,11 @@
             flex-direction: column;
             gap: 6px;
             flex-shrink: 0;
+            align-items: flex-start; /* Ensure left alignment */
         }
 
         .caption-area {
+            flex-grow: 1;
             font-size: 10px;
             font-weight: 400;
             line-height: 1.4;
@@ -95,7 +105,7 @@
             -webkit-box-orient: vertical;
         }
 
-        /* Prevent clipping during capture */
+        /* Capture Specific Overrides */
         .is-capturing .caption-area {
             display: block !important;
             overflow: visible !important;
@@ -149,6 +159,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             white-space: nowrap;
             outline: none;
+            text-align: center;
         }
 
         .controls-panel {
@@ -238,13 +249,13 @@
         <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">9:16 Story (4:5 Safe Area)</p>
     </div>
 
-    <div class="card-wrapper" id="captureTarget">
+    <div class="card-wrapper">
         <div class="card-container" id="captureCard">
             <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Media</div>
             <div class="canvas-area glow-mode" id="cardCanvas">
                 
-                <div class="safe-area-content">
-                    <div class="top-section">
+                <div class="safe-area-content" id="safeArea">
+                    <div class="top-section" id="metaRow">
                         <div class="meta-column">
                             <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
                             <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
@@ -389,10 +400,10 @@
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
             
-            // Set capture state to prevent CSS clipping
+            // Set capture state
             document.body.classList.add('is-capturing');
             
-            // Temporarily hide guides
+            // Hide guides
             const guidesCheckbox = document.getElementById('guideToggle');
             const wasGuides = guidesCheckbox.checked;
             if (wasGuides) {
@@ -401,29 +412,42 @@
             }
 
             try {
+                // We use a specific configuration to ensure alignment is preserved
                 const canvas = await html2canvas(element, { 
                     useCORS: true, 
-                    scale: 3, // High-quality scale
-                    backgroundColor: null,
+                    scale: 3, 
+                    backgroundColor: "#000000",
                     logging: false,
-                    width: element.offsetWidth,
-                    height: element.offsetHeight,
                     onclone: (clonedDoc) => {
-                        // Ensure cloned element has no scrollbars or offsets
-                        const clonedEl = clonedDoc.getElementById('captureCard');
-                        clonedEl.style.transform = "none";
-                        clonedEl.style.margin = "0";
+                        const clonedCard = clonedDoc.getElementById('captureCard');
+                        const clonedMeta = clonedDoc.getElementById('metaRow');
+                        const clonedSafe = clonedDoc.getElementById('safeArea');
+                        
+                        // Force layout resets on clone to prevent offset shift
+                        clonedCard.style.transform = "none";
+                        clonedCard.style.display = "block";
+                        clonedCard.style.position = "relative";
+                        
+                        // Fix Flexbox alignment specifically for meta row in the clone
+                        if (clonedMeta) {
+                            clonedMeta.style.display = "flex";
+                            clonedMeta.style.flexDirection = "row";
+                            clonedMeta.style.alignItems = "flex-start";
+                            clonedMeta.style.justifyContent = "flex-start";
+                            clonedMeta.style.width = "100%";
+                            clonedMeta.style.padding = "0";
+                            clonedMeta.style.margin = "0 0 16px 0";
+                        }
                     }
                 });
 
                 const link = document.createElement('a');
-                link.download = `pxltr-story-safe-${Date.now()}.png`;
+                link.download = `pxltr-story-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
             } catch (e) {
                 console.error("Screenshot failed", e);
             } finally {
-                // Restore state
                 document.body.classList.remove('is-capturing');
                 if (wasGuides) {
                     guidesCheckbox.checked = true;
@@ -457,7 +481,7 @@
                         const a = document.createElement('a');
                         a.href = url;
                         const handle = document.getElementById('displayHandle').innerText.replace('@', '');
-                        a.download = `pxtr-story-safe-${handle || 'design'}-${Date.now()}.webm`;
+                        a.download = `pxtr-story-${handle || 'design'}-${Date.now()}.webm`;
                         a.click();
                         
                         if (activeStream) {

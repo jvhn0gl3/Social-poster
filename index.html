@@ -198,11 +198,6 @@
             transition: all 0.2s;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         input, textarea {
             width: 100%;
             background: #1e293b;
@@ -222,7 +217,7 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Stability Update • Media Handling</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image Mode • Clean Interface</p>
     </div>
 
     <div id="capture-wrapper">
@@ -246,13 +241,12 @@
 
                     <div class="cell-2">
                         <div class="caption-text" id="displayCaption" contenteditable="true">
-                            Click upload to place media.
+                            Click upload to place an image.
                         </div>
                         
                         <div class="content-box" id="mainBox">
-                            <span id="placeholderText" class="text-[8px] uppercase tracking-widest opacity-30 font-bold">Media Area</span>
+                            <span id="placeholderText" class="text-[8px] uppercase tracking-widest opacity-30 font-bold">Image Area</span>
                             <img src="" id="mainImage" class="media-asset hidden" crossorigin="anonymous">
-                            <video id="mainVideo" class="media-asset hidden" crossorigin="anonymous" playsinline muted loop autoplay></video>
                         </div>
                     </div>
                 </div>
@@ -278,9 +272,9 @@
         </div>
 
         <button type="button" class="btn bg-slate-800 mb-6" onclick="document.getElementById('fileInput').click()">
-            <i class="fa-solid fa-upload"></i> Upload Image or Video
+            <i class="fa-solid fa-upload"></i> Upload Image
         </button>
-        <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
+        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
 
         <div class="section-title">Editor</div>
         <div class="mb-4">
@@ -293,24 +287,15 @@
             <textarea id="captionInput" rows="3" oninput="updateCaption()"></textarea>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-            <button type="button" class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
-                <i class="fa-solid fa-image"></i> Export PNG
-            </button>
-            <button id="recordBtn" type="button" class="btn bg-blue-600 hover:bg-blue-500 hidden" onclick="startRecording()">
-                <i class="fa-solid fa-circle"></i> Record 9:16
-            </button>
-        </div>
+        <button type="button" class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
+            <i class="fa-solid fa-image"></i> Export PNG
+        </button>
     </div>
 
     <script>
-        let recorder = null;
-        let chunks = [];
         let currentObjectUrl = null;
 
         const img = document.getElementById('mainImage');
-        const video = document.getElementById('mainVideo');
-        const recordBtn = document.getElementById('recordBtn');
         const placeholder = document.getElementById('placeholderText');
         const mainBox = document.getElementById('mainBox');
         const displayCaption = document.getElementById('displayCaption');
@@ -325,37 +310,17 @@
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if (!file || !file.type.startsWith('image/')) return;
 
             if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
             currentObjectUrl = URL.createObjectURL(file);
 
-            // Set styles for the box to contain the media
             mainBox.style.border = "none";
             mainBox.style.background = "transparent";
             placeholder.classList.add('hidden');
 
-            if (file.type.startsWith('image/')) {
-                video.classList.add('hidden');
-                video.pause();
-                video.src = "";
-                img.src = currentObjectUrl;
-                img.classList.remove('hidden');
-                recordBtn.classList.add('hidden');
-            } else if (file.type.startsWith('video/')) {
-                img.classList.add('hidden');
-                img.src = "";
-                
-                // Important: Update video attributes
-                video.src = currentObjectUrl;
-                video.classList.remove('hidden');
-                recordBtn.classList.remove('hidden');
-                
-                video.load();
-                video.onloadedmetadata = () => {
-                    video.play().catch(e => console.log("Autoplay policy check", e));
-                };
-            }
+            img.src = currentObjectUrl;
+            img.classList.remove('hidden');
         }
 
         function updateDate() {
@@ -390,85 +355,6 @@
             link.download = `pxltr-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
-        }
-
-        async function startRecording() {
-            const canvasArea = document.getElementById('cardCanvas');
-            const SCALE = 2.0; 
-            const W = 337.5;
-            const H = 600;
-            
-            const recCanvas = document.createElement('canvas');
-            recCanvas.width = W * SCALE;
-            recCanvas.height = H * SCALE;
-            const ctx = recCanvas.getContext('2d');
-            
-            const guidesActive = canvasArea.classList.contains('guides-active');
-            if(guidesActive) canvasArea.classList.remove('guides-active');
-            
-            const originalVideoOpacity = video.style.opacity;
-            video.style.opacity = '0';
-            
-            const rect = video.getBoundingClientRect();
-            const canvasRect = canvasArea.getBoundingClientRect();
-            const offsetX = (rect.left - canvasRect.left) * SCALE;
-            const offsetY = (rect.top - canvasRect.top) * SCALE;
-            const boxW = rect.width * SCALE;
-            const boxH = rect.height * SCALE;
-
-            const uiCanvas = await html2canvas(canvasArea, {
-                scale: SCALE, width: W, height: H, useCORS: true, backgroundColor: '#000000'
-            });
-            
-            video.style.opacity = originalVideoOpacity || '1';
-            if(guidesActive) canvasArea.classList.add('guides-active');
-
-            const stream = recCanvas.captureStream(30);
-            if (video.captureStream || video.mozCaptureStream) {
-                const vidStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
-                vidStream.getAudioTracks().forEach(t => stream.addTrack(t));
-            }
-
-            const types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
-            let chosenType = types.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
-
-            recorder = new MediaRecorder(stream, { mimeType: chosenType });
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: chosenType.split(';')[0] });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `pxltr-motion-${Date.now()}.webm`;
-                a.click();
-                recordBtn.disabled = false;
-                recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record 9:16';
-            };
-
-            video.currentTime = 0;
-            video.muted = false; 
-            recordBtn.disabled = true;
-            recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
-
-            const onEnd = () => {
-                if (recorder && recorder.state === "recording") recorder.stop();
-                video.removeEventListener('ended', onEnd);
-            };
-            video.addEventListener('ended', onEnd);
-
-            recorder.start();
-            video.play();
-
-            function drawLoop() {
-                if (video.paused || video.ended || recorder.state === "inactive") {
-                    if (recorder.state === "recording") recorder.stop();
-                    return;
-                }
-                ctx.drawImage(uiCanvas, 0, 0);
-                ctx.drawImage(video, offsetX, offsetY, boxW, boxH);
-                requestAnimationFrame(drawLoop);
-            }
-            drawLoop();
         }
 
         window.onload = () => {

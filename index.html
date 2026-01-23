@@ -156,24 +156,25 @@
 
         .media-container {
             width: 100%;
-            /* Removed fixed aspect ratio - now dynamic based on media */
             border-radius: 20px;
             overflow: hidden;
-            background: #000;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-top: auto;
-            max-height: 250px; /* Sanity check for extremely tall media */
+            /* Flex properties ensure it takes only the height it needs */
+            flex-shrink: 0; 
         }
 
         .media-asset {
             width: 100%;
             height: auto;
             display: block;
-            object-fit: cover;
+            object-fit: contain; /* Changed from cover to prevent cropping */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
         }
 
         .controls-panel {
@@ -275,7 +276,7 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Upload media to see the box adjust to its aspect ratio. Perfect for high-fidelity social storytelling.
+                            Upload your media. The container will now strictly follow the image's aspect ratio without cropping any edges.
                         </div>
                     </div>
                     
@@ -403,7 +404,6 @@
                 recordBtn.classList.add('hidden');
                 img.src = currentObjectUrl;
                 img.onload = () => {
-                   const ratio = img.naturalHeight / img.naturalWidth;
                    mediaBox.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
                 };
             } else if (file.type.startsWith('video/')) {
@@ -531,8 +531,6 @@
                 }
 
                 ctx.drawImage(uiCanvas, 0, 0);
-                
-                // Draw dynamic sized video
                 ctx.drawImage(video, offsetX, offsetY, boxW, boxH);
 
                 requestAnimationFrame(drawLoop);

@@ -18,7 +18,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
+            padding: 20px;
         }
 
         .card-wrapper {
@@ -26,50 +26,94 @@
             background: transparent;
         }
 
+        /* Instagram Story Ratio (9:16)
+           The Container is always 9:16 
+        */
         .card-container {
-            width: 320px; 
-            height: 540px; 
+            width: 337.5px; 
+            height: 600px; 
             position: relative;
             overflow: hidden;
-            border-radius: 32px;
+            border-radius: 40px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-            border: 6px solid #1e293b;
+            border: 8px solid #1e293b;
             background: #000;
         }
 
         .canvas-area {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-            padding: 24px 16px;
+            background: #0f172a;
             display: flex;
             flex-direction: column;
+            justify-content: center; /* Center content for 4:5 safe area */
             align-items: center;
-            justify-content: center;
+            transition: all 0.5s ease;
+            position: relative;
         }
 
-        .header-meta-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 12px; 
+        .canvas-area.glow-mode {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        }
+
+        /* The Safe Area (4:5 Ratio) 
+           This is where the actual content lives so it fits both Story and Feed
+        */
+        .safe-area-content {
             width: 100%;
+            height: 422px; /* 4:5 relative to 337.5 width */
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
             z-index: 10;
+        }
+
+        /* Guide lines toggleable via UI */
+        .guides-active .safe-area-content {
+            border-top: 1px dashed rgba(255,255,255,0.2);
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+        }
+
+        .top-section {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .meta-column {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .caption-area {
+            font-size: 10px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: left;
+            outline: none;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
 
         .media-container {
             width: 100%;
+            flex-grow: 1;
             border-radius: 20px;
             overflow: hidden;
             background: #000;
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
-            min-height: 220px; 
-            max-height: 220px; 
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .media-asset {
@@ -84,43 +128,31 @@
             object-fit: contain !important;
         }
 
-        .caption-area {
-            margin-top: 16px; 
-            padding: 0 12px;
-            font-size: 13px;
-            font-weight: 300;
-            line-height: 1.5;
-            color: rgba(255, 255, 255, 0.9);
-            min-height: 80px; 
-            text-align: center;
-            outline: none;
-            z-index: 10;
-        }
-
         .icon-bar-inline {
             display: flex;
             gap: 8px;
             align-items: center;
-            padding: 4px 10px;
+            padding: 4px 8px;
             background: rgba(255, 255, 255, 0.08);
             border-radius: 100px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            width: fit-content;
         }
 
         .brand-pill, .date-pill {
             background: rgba(255, 255, 255, 0.15);
             border-radius: 100px;
-            padding: 4px 8px;
-            font-size: 8px;
+            padding: 4px 10px;
+            font-size: 7px;
             font-weight: 800;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             border: 1px solid rgba(255, 255, 255, 0.05);
             white-space: nowrap;
             outline: none;
         }
 
         .controls-panel {
-            margin-top: 40px;
+            margin-top: 20px;
             width: 100%;
             max-width: 420px;
             background: #0f172a;
@@ -142,7 +174,7 @@
             gap: 8px;
         }
 
-        .section-title::after, .section-title::before {
+        .section-title::after {
             content: "";
             flex-grow: 1;
             height: 1px;
@@ -186,12 +218,6 @@
         .btn-record { background: #ef4444; }
         .recording-active { animation: pulse-red 2s infinite; }
 
-        @keyframes pulse-red {
-            0% { background: #ef4444; }
-            50% { background: #991b1b; }
-            100% { background: #ef4444; }
-        }
-
         #dropOverlay {
             position: absolute;
             inset: 0;
@@ -207,57 +233,73 @@
 </head>
 <body>
 
-    <div class="mb-8 text-center">
+    <div class="mb-6 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter">pxltr Studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">Video & Image Social Assets</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">9:16 Story (4:5 Safe Area)</p>
     </div>
 
     <div class="card-wrapper" id="captureTarget">
         <div class="card-container" id="captureCard">
             <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Media</div>
-            <div class="canvas-area" id="cardCanvas">
-                <div class="header-meta-row">
-                    <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
-                    <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
-                    <div class="icon-bar-inline">
-                        <i class="fa-brands fa-youtube" style="color:#ff0000"></i>
-                        <i class="fa-brands fa-instagram" style="color:#ff4d4d"></i>
-                        <i class="fa-brands fa-threads" style="color:#fff"></i>
+            <div class="canvas-area glow-mode" id="cardCanvas">
+                
+                <!-- Safe Area Box -->
+                <div class="safe-area-content">
+                    <div class="top-section">
+                        <div class="meta-column">
+                            <div class="date-pill" id="displayDate" contenteditable="true">01.21.2026</div>
+                            <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
+                            <div class="icon-bar-inline">
+                                <i class="fa-brands fa-youtube text-[8px]" style="color:#ff0000"></i>
+                                <i class="fa-brands fa-instagram text-[8px]" style="color:#ff4d4d"></i>
+                                <i class="fa-brands fa-threads text-[8px]" style="color:#fff"></i>
+                            </div>
+                        </div>
+                        <div class="caption-area" id="displayCaption" contenteditable="true">
+                            Visions of a digital dreamscape. Exploring the boundaries between reality and the artificial neon glare of the future.
+                        </div>
+                    </div>
+                    
+                    <div class="media-container">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
+                        <video id="mainVideo" class="media-asset hidden show-full-media" muted playsinline></video>
                     </div>
                 </div>
-                
-                <div class="media-container">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
-                    <video id="mainVideo" class="media-asset hidden show-full-media" muted playsinline></video>
-                </div>
 
-                <div class="caption-area" id="displayCaption" contenteditable="true">
-                    Visions of a digital dreamscape. Exploring the boundaries between reality and the artificial neon glare of the future.
+                <!-- Story-only Bottom Ornament -->
+                <div class="absolute bottom-10 flex justify-center w-full">
+                    <div class="h-1.5 w-12 bg-white/30 rounded-full"></div>
                 </div>
-
-                <div class="h-1 w-10 bg-white/20 rounded-full mt-6"></div>
             </div>
         </div>
     </div>
 
     <div class="controls-panel">
-        <div class="section-title">Media Assets</div>
-        
+        <div class="section-title">Display Settings</div>
+        <div class="flex flex-wrap gap-4 mb-3">
+            <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
+                <input type="checkbox" id="fitMode" onchange="toggleFitMode()" checked> 
+                <span>Letterbox</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
+                <input type="checkbox" id="glowToggle" onchange="toggleGlow()" checked> 
+                <span>Glow Mode</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
+                <input type="checkbox" id="guideToggle" onchange="toggleGuides()"> 
+                <span>Show 4:5 Guides</span>
+            </label>
+        </div>
+
+        <div class="section-title mt-4">Media</div>
         <div class="input-group">
-            <div class="flex justify-between items-end mb-2">
-                <label class="input-label mb-0">Upload (Image/Video)</label>
-                <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
-                    <input type="checkbox" id="fitMode" onchange="toggleFitMode()" checked> 
-                    <span>Show Entire</span>
-                </label>
-            </div>
             <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
                 <i class="fa-solid fa-clapperboard text-xs"></i> Select Media
             </button>
             <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
         </div>
 
-        <div class="section-title mt-4">Meta Information</div>
+        <div class="section-title mt-4">Meta</div>
         <div class="grid grid-cols-2 gap-4">
             <div class="input-group">
                 <label class="input-label">Date</label>
@@ -274,15 +316,14 @@
             <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
         </div>
 
-        <div class="section-title mt-6">Export Studio</div>
+        <div class="section-title mt-6">Export</div>
         <div class="flex flex-col gap-2">
             <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
-                <i class="fa-solid fa-camera"></i> Snapshot (PNG)
+                <i class="fa-solid fa-camera"></i> Save 9:16 Story PNG
             </button>
             <button class="btn btn-record" id="recordBtn" onclick="toggleRecording()">
-                <i class="fa-solid fa-circle"></i> <span id="recordBtnText">Record Card Clip</span>
+                <i class="fa-solid fa-circle"></i> <span id="recordBtnText">Record Clip</span>
             </button>
-            <p class="text-[9px] text-slate-500 text-center uppercase tracking-widest mt-1">Recording stops automatically when video ends</p>
         </div>
     </div>
 
@@ -291,6 +332,13 @@
         let recordedChunks = [];
         let isRecording = false;
         let activeStream = null;
+
+        function toggleGuides() {
+            const isGuides = document.getElementById('guideToggle').checked;
+            const canvas = document.getElementById('cardCanvas');
+            if (isGuides) canvas.classList.add('guides-active');
+            else canvas.classList.remove('guides-active');
+        }
 
         function toggleFitMode() {
             const isFit = document.getElementById('fitMode').checked;
@@ -301,6 +349,13 @@
             });
         }
 
+        function toggleGlow() {
+            const isGlow = document.getElementById('glowToggle').checked;
+            const canvas = document.getElementById('cardCanvas');
+            if (isGlow) canvas.classList.add('glow-mode');
+            else canvas.classList.remove('glow-mode');
+        }
+
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -309,7 +364,6 @@
             const video = document.getElementById('mainVideo');
             const reader = new FileReader();
 
-            // Clear previous video listeners
             video.onended = null;
 
             if (file.type.startsWith('image/')) {
@@ -323,7 +377,7 @@
                 video.classList.remove('hidden');
                 video.src = URL.createObjectURL(file);
                 video.muted = false; 
-                video.loop = false; // Disable loop to allow auto-stop
+                video.loop = false;
                 video.currentTime = 0;
                 video.play();
             }
@@ -338,11 +392,24 @@
 
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
+            // Ensure guides are off for screenshot
+            const guidesCheckbox = document.getElementById('guideToggle');
+            const wasGuides = guidesCheckbox.checked;
+            if (wasGuides) {
+                guidesCheckbox.checked = false;
+                toggleGuides();
+            }
+
             const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
             const link = document.createElement('a');
-            link.download = `card-${Date.now()}.png`;
+            link.download = `pxltr-story-safe-${Date.now()}.png`;
             link.href = canvas.toDataURL();
             link.click();
+
+            if (wasGuides) {
+                guidesCheckbox.checked = true;
+                toggleGuides();
+            }
         }
 
         async function toggleRecording() {
@@ -370,7 +437,7 @@
                         const a = document.createElement('a');
                         a.href = url;
                         const handle = document.getElementById('displayHandle').innerText.replace('@', '');
-                        a.download = `card-clip-${handle || 'design'}-${Date.now()}.webm`;
+                        a.download = `pxtr-story-safe-${handle || 'design'}-${Date.now()}.webm`;
                         a.click();
                         
                         if (activeStream) {
@@ -379,15 +446,13 @@
                         
                         isRecording = false;
                         btn.classList.remove('recording-active');
-                        text.innerText = "Record Card Clip";
+                        text.innerText = "Record Clip";
                         video.onended = null;
                     };
 
-                    // Start video from beginning when recording starts
                     if (!video.classList.contains('hidden')) {
                         video.currentTime = 0;
                         video.play();
-                        // Auto-stop recording when video ends
                         video.onended = () => {
                             if (isRecording) mediaRecorder.stop();
                         };

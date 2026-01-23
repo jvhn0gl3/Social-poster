@@ -27,7 +27,6 @@
             display: inline-block;
         }
 
-        /* STRICT 9:16 Outer Frame */
         .card-container {
             width: 337.5px; 
             height: 600px; 
@@ -54,7 +53,6 @@
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
         }
 
-        /* 4:5 Inner Content Zone */
         .safe-area-4-5 {
             width: 337.5px;
             height: 421.875px; 
@@ -72,7 +70,6 @@
             border: 1px dashed rgba(255,255,255,0.1);
         }
 
-        /* Branding Column */
         .cell-1 {
             width: 44px;
             display: flex;
@@ -116,7 +113,6 @@
             line-height: 1.2;
         }
 
-        /* Content Column */
         .cell-2 {
             flex-grow: 1;
             display: flex;
@@ -135,7 +131,6 @@
             margin-bottom: 2px;
         }
 
-        /* The Content Box / Media Container */
         .content-box {
             width: 100%;
             min-height: 100px;
@@ -157,7 +152,6 @@
             display: block;
         }
 
-        /* Controls Panel */
         .controls-panel {
             margin-top: 24px;
             width: 100%;
@@ -228,7 +222,7 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Centered Layout • Stability Update</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Stability Update • Media Handling</p>
     </div>
 
     <div id="capture-wrapper">
@@ -252,7 +246,7 @@
 
                     <div class="cell-2">
                         <div class="caption-text" id="displayCaption" contenteditable="true">
-                            Click the upload button below to place media inside this box.
+                            Click upload to place media.
                         </div>
                         
                         <div class="content-box" id="mainBox">
@@ -290,12 +284,12 @@
 
         <div class="section-title">Editor</div>
         <div class="mb-4">
-            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date Display</label>
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date</label>
             <input type="text" id="dateInput" oninput="updateDate()">
         </div>
         
         <div class="mb-4">
-            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption (Delete to Hide)</label>
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
             <textarea id="captionInput" rows="3" oninput="updateCaption()"></textarea>
         </div>
 
@@ -336,23 +330,31 @@
             if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
             currentObjectUrl = URL.createObjectURL(file);
 
-            placeholder.classList.add('hidden');
+            // Set styles for the box to contain the media
             mainBox.style.border = "none";
             mainBox.style.background = "transparent";
+            placeholder.classList.add('hidden');
 
             if (file.type.startsWith('image/')) {
                 video.classList.add('hidden');
                 video.pause();
+                video.src = "";
+                img.src = currentObjectUrl;
                 img.classList.remove('hidden');
                 recordBtn.classList.add('hidden');
-                img.src = currentObjectUrl;
             } else if (file.type.startsWith('video/')) {
                 img.classList.add('hidden');
+                img.src = "";
+                
+                // Important: Update video attributes
+                video.src = currentObjectUrl;
                 video.classList.remove('hidden');
                 recordBtn.classList.remove('hidden');
-                video.src = currentObjectUrl;
+                
                 video.load();
-                video.play().catch(e => console.log("Auto-play prevented", e));
+                video.onloadedmetadata = () => {
+                    video.play().catch(e => console.log("Autoplay policy check", e));
+                };
             }
         }
 
@@ -363,7 +365,6 @@
         function updateCaption() {
             const val = document.getElementById('captionInput').value;
             displayCaption.innerText = val;
-            
             if (!val.trim()) {
                 displayCaption.classList.add('hidden');
             } else {
@@ -393,7 +394,7 @@
 
         async function startRecording() {
             const canvasArea = document.getElementById('cardCanvas');
-            const SCALE = 2.0; // Slightly lower scale for better long-video performance
+            const SCALE = 2.0; 
             const W = 337.5;
             const H = 600;
             
@@ -405,7 +406,6 @@
             const guidesActive = canvasArea.classList.contains('guides-active');
             if(guidesActive) canvasArea.classList.remove('guides-active');
             
-            // Temporary hide video from html2canvas pass
             const originalVideoOpacity = video.style.opacity;
             video.style.opacity = '0';
             
@@ -416,7 +416,6 @@
             const boxW = rect.width * SCALE;
             const boxH = rect.height * SCALE;
 
-            // Render background/UI once
             const uiCanvas = await html2canvas(canvasArea, {
                 scale: SCALE, width: W, height: H, useCORS: true, backgroundColor: '#000000'
             });
@@ -427,34 +426,23 @@
             const stream = recCanvas.captureStream(30);
             if (video.captureStream || video.mozCaptureStream) {
                 const vidStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
-                const audioTracks = vidStream.getAudioTracks();
-                if(audioTracks.length > 0) audioTracks.forEach(t => stream.addTrack(t));
+                vidStream.getAudioTracks().forEach(t => stream.addTrack(t));
             }
 
-            // Fallback for mimeTypes
-            const types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
-            let chosenType = types.find(t => MediaRecorder.isTypeSupported(t));
+            const types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+            let chosenType = types.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
 
             recorder = new MediaRecorder(stream, { mimeType: chosenType });
             chunks = [];
-            recorder.ondataavailable = e => {
-                if (e.data.size > 0) chunks.push(e.data);
-            };
-
+            recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: chosenType.split(';')[0] });
-                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = URL.createObjectURL(blob);
                 a.download = `pxltr-motion-${Date.now()}.webm`;
                 a.click();
-                
-                // Cleanup
                 recordBtn.disabled = false;
                 recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record 9:16';
-                video.muted = true;
-                video.pause();
-                video.currentTime = 0;
             };
 
             video.currentTime = 0;
@@ -462,20 +450,16 @@
             recordBtn.disabled = true;
             recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
 
-            // Explicitly stop when video ends
-            const handleVideoEnd = () => {
-                if (recorder && recorder.state === "recording") {
-                    recorder.stop();
-                }
-                video.removeEventListener('ended', handleVideoEnd);
+            const onEnd = () => {
+                if (recorder && recorder.state === "recording") recorder.stop();
+                video.removeEventListener('ended', onEnd);
             };
-            video.addEventListener('ended', handleVideoEnd);
+            video.addEventListener('ended', onEnd);
 
             recorder.start();
             video.play();
 
             function drawLoop() {
-                // If video finishes or stops, stop the loop and recorder
                 if (video.paused || video.ended || recorder.state === "inactive") {
                     if (recorder.state === "recording") recorder.stop();
                     return;
@@ -492,14 +476,7 @@
             const today = new Date().toLocaleDateString('en-US', options).toUpperCase();
             document.getElementById('displayDate').innerText = today;
             document.getElementById('dateInput').value = today;
-            
-            const initialCaption = displayCaption.innerText.trim();
-            document.getElementById('captionInput').value = initialCaption;
-            
-            displayCaption.addEventListener('input', () => {
-                document.getElementById('captionInput').value = displayCaption.innerText;
-                if (!displayCaption.innerText.trim()) displayCaption.classList.add('hidden');
-            });
+            document.getElementById('captionInput').value = displayCaption.innerText.trim();
         };
     </script>
 </body>

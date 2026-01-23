@@ -27,6 +27,7 @@
             display: inline-block;
         }
 
+        /* STRICT 9:16 Outer Frame */
         .card-container {
             width: 337.5px; 
             height: 600px; 
@@ -53,132 +54,112 @@
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
         }
 
-        .safe-area-content {
+        /* 4:5 Inner Content Zone */
+        .safe-area-4-5 {
             width: 337.5px;
-            height: 421.8px; 
+            height: 421.875px; 
             padding: 24px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 16px; 
             box-sizing: border-box;
             z-index: 10;
+            position: relative;
         }
 
-        .guides-active .safe-area-content {
+        .guides-active .safe-area-4-5 {
             background: rgba(255, 255, 255, 0.03);
-            border-top: 1px dashed rgba(255,255,255,0.3);
-            border-bottom: 1px dashed rgba(255,255,255,0.3);
+            border: 1px dashed rgba(255,255,255,0.1);
         }
 
-        .caption-row {
+        /* Branding Column */
+        .cell-1 {
+            width: 44px;
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 8px;
-            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
         }
 
-        .accent-sidebar {
-            width: 48px;
+        .sidebar-brand {
+            width: 100%;
             background: #3b82f6;
-            border-radius: 12px;
-            flex-shrink: 0;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 12px 4px;
+            margin-bottom: 8px;
         }
 
         .social-icons-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 4px;
-            margin-bottom: 8px;
             color: white;
             width: 100%;
         }
 
         .social-icons-grid i {
-            font-size: 9px;
+            font-size: 8px;
             text-align: center;
         }
 
-        .horizontal-handle {
+        .compact-date {
             font-size: 6.5px;
-            font-weight: 900;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: white;
-            white-space: nowrap;
-            display: block;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            padding-top: 6px;
-            width: 80%;
+            color: rgba(255, 255, 255, 0.4);
             text-align: center;
+            line-height: 1.2;
         }
 
-        .caption-area {
+        /* Content Column */
+        .cell-2 {
             flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .caption-text {
             font-size: 11px;
             font-weight: 400;
-            line-height: 1.5;
-            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.95);
             text-align: left;
             outline: none;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 5;
-            -webkit-box-orient: vertical;
+            margin-bottom: 2px;
         }
 
-        .text-only-mode .caption-area {
-            -webkit-line-clamp: 18;
-            font-size: 13px;
-        }
-
-        .is-capturing .caption-area {
-            -webkit-line-clamp: unset !important;
-            display: block !important;
-            height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
-        }
-
-        .date-display {
-            font-size: 9px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: rgba(255, 255, 255, 0.4);
-            margin-left: 60px;
-            margin-bottom: 12px;
-        }
-
-        .media-container {
+        /* The Content Box / Media Container */
+        .content-box {
             width: 100%;
-            border-radius: 20px;
-            overflow: hidden;
-            background: transparent;
-            position: relative;
+            min-height: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: auto;
-            /* Flex properties ensure it takes only the height it needs */
-            flex-shrink: 0; 
+            overflow: hidden;
+            position: relative;
         }
 
         .media-asset {
             width: 100%;
             height: auto;
+            max-height: 280px;
+            object-fit: contain;
             display: block;
-            object-fit: contain; /* Changed from cover to prevent cropping */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
         }
 
+        /* Controls Panel */
         .controls-panel {
-            margin-top: 20px;
+            margin-top: 24px;
             width: 100%;
             max-width: 420px;
             background: #0f172a;
@@ -223,22 +204,6 @@
             transition: all 0.2s;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-record.recording {
-            background: #ef4444;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.98); opacity: 0.8; }
-            100% { transform: scale(1); }
-        }
-
         input, textarea {
             width: 100%;
             background: #1e293b;
@@ -249,21 +214,25 @@
             font-size: 13px;
             outline: none;
         }
+
+        .hidden { display: none !important; }
+
     </style>
 </head>
 <body>
 
     <div class="mb-4 text-center">
-        <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Motion Layout • Video Support</p>
+        <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Centered Layout • Motion Ready</p>
     </div>
 
     <div id="capture-wrapper">
         <div class="card-container" id="captureCard">
             <div class="canvas-area glow-mode guides-active" id="cardCanvas">
-                <div class="safe-area-content" id="safeArea">
-                    <div class="caption-row">
-                        <div class="accent-sidebar">
+                
+                <div class="safe-area-4-5" id="safeArea">
+                    <div class="cell-1">
+                        <div class="sidebar-brand">
                             <div class="social-icons-grid">
                                 <i class="fa-brands fa-facebook-f"></i>
                                 <i class="fa-brands fa-threads"></i>
@@ -272,77 +241,65 @@
                                 <i class="fa-brands fa-tiktok"></i>
                                 <i class="fa-solid fa-bolt text-[7px] opacity-40"></i>
                             </div>
-                            <div class="horizontal-handle" id="displayHandle">pxltr30</div>
                         </div>
-
-                        <div class="caption-area" id="displayCaption" contenteditable="true">
-                            Upload your media. The container will now strictly follow the image's aspect ratio without cropping any edges.
-                        </div>
+                        <div class="compact-date" id="displayDate">JAN 23, 2026</div>
                     </div>
-                    
-                    <div class="date-display" id="displayDate">January 23, 2026</div>
-                    
-                    <div class="media-container" id="mediaBox">
-                        <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset" crossorigin="anonymous">
-                        <video id="mainVideo" class="media-asset hidden" crossorigin="anonymous" playsinline></video>
+
+                    <div class="cell-2">
+                        <div class="caption-text" id="displayCaption" contenteditable="true">
+                            Click the upload button below to place media inside this box.
+                        </div>
+                        
+                        <div class="content-box" id="mainBox">
+                            <span id="placeholderText" class="text-[8px] uppercase tracking-widest opacity-30 font-bold">Media Area</span>
+                            <img src="" id="mainImage" class="media-asset hidden" crossorigin="anonymous">
+                            <video id="mainVideo" class="media-asset hidden" crossorigin="anonymous" playsinline muted loop autoplay></video>
+                        </div>
                     </div>
                 </div>
 
-                <div class="absolute bottom-10 flex justify-center w-full">
-                    <div class="h-1 w-10 bg-white/20 rounded-full"></div>
+                <div class="absolute bottom-6 flex justify-center w-full">
+                    <div class="h-1 w-12 bg-white/20 rounded-full"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="controls-panel">
-        <div class="section-title">Mode & Visuals</div>
+        <div class="section-title">Visual Settings</div>
         <div class="flex flex-wrap gap-4 mb-4">
-            <label class="flex items-center gap-2 cursor-pointer text-[11px] font-bold text-blue-400 bg-blue-400/10 px-3 py-1.5 rounded-full">
-                <input type="checkbox" id="textOnlyMode" onchange="toggleTextOnly()"> 
-                <span>Text Only Mode</span>
-            </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="glowToggle" onchange="toggleGlow()" checked> 
-                <span>Glow</span>
+                <span>Glow Effect</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
                 <input type="checkbox" id="guideToggle" onchange="toggleGuides()" checked> 
-                <span>Guides</span>
+                <span>Show Safe Zone</span>
             </label>
         </div>
 
-        <div id="mediaControls">
-            <div class="section-title">Media</div>
-            <button type="button" class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-upload"></i> Upload Image / Video
-            </button>
-            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
-        </div>
+        <button type="button" class="btn bg-slate-800 mb-6" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-upload"></i> Upload Image or Video
+        </button>
+        <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
 
-        <div class="section-title">Content</div>
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Handle</label>
-                <input type="text" id="handleInput" oninput="update('handleInput', 'displayHandle')">
-            </div>
-            <div>
-                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date</label>
-                <input type="text" id="dateInput" oninput="update('dateInput', 'displayDate')">
-            </div>
+        <div class="section-title">Editor</div>
+        <div class="mb-4">
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date Display</label>
+            <input type="text" id="dateInput" oninput="updateDate()">
         </div>
         
         <div class="mb-4">
-            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
-            <textarea id="captionInput" rows="3" oninput="update('captionInput', 'displayCaption')"></textarea>
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption (Delete to Hide)</label>
+            <textarea id="captionInput" rows="3" oninput="updateCaption()"></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
             <button type="button" class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
-                <i class="fa-solid fa-image"></i> PNG
+                <i class="fa-solid fa-image"></i> Export PNG
             </button>
-            <button id="recordBtn" type="button" class="btn btn-record bg-blue-600 hover:bg-blue-500 hidden" onclick="startRecording()">
-                <i class="fa-solid fa-circle"></i> Record Video
+            <button id="recordBtn" type="button" class="btn bg-blue-600 hover:bg-blue-500 hidden" onclick="startRecording()">
+                <i class="fa-solid fa-circle"></i> Record 9:16
             </button>
         </div>
     </div>
@@ -352,29 +309,12 @@
         let chunks = [];
         let currentObjectUrl = null;
 
-        function toggleTextOnly() {
-            const isTextOnly = document.getElementById('textOnlyMode').checked;
-            const card = document.getElementById('captureCard');
-            const mediaBox = document.getElementById('mediaBox');
-            const mediaControls = document.getElementById('mediaControls');
-            const recordBtn = document.getElementById('recordBtn');
-            const video = document.getElementById('mainVideo');
-
-            if (isTextOnly) {
-                card.classList.add('text-only-mode');
-                mediaBox.classList.add('hidden');
-                mediaControls.classList.add('hidden');
-                recordBtn.classList.add('hidden');
-                video.pause();
-            } else {
-                card.classList.remove('text-only-mode');
-                mediaBox.classList.remove('hidden');
-                mediaControls.classList.remove('hidden');
-                if (video.src && !video.classList.contains('hidden')) {
-                    recordBtn.classList.remove('hidden');
-                }
-            }
-        }
+        const img = document.getElementById('mainImage');
+        const video = document.getElementById('mainVideo');
+        const recordBtn = document.getElementById('recordBtn');
+        const placeholder = document.getElementById('placeholderText');
+        const mainBox = document.getElementById('mainBox');
+        const displayCaption = document.getElementById('displayCaption');
 
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
@@ -389,13 +329,11 @@
             if (!file) return;
 
             if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
-
-            const img = document.getElementById('mainImage');
-            const video = document.getElementById('mainVideo');
-            const recordBtn = document.getElementById('recordBtn');
-            const mediaBox = document.getElementById('mediaBox');
-
             currentObjectUrl = URL.createObjectURL(file);
+
+            placeholder.classList.add('hidden');
+            mainBox.style.border = "none";
+            mainBox.style.background = "transparent";
 
             if (file.type.startsWith('image/')) {
                 video.classList.add('hidden');
@@ -403,62 +341,56 @@
                 img.classList.remove('hidden');
                 recordBtn.classList.add('hidden');
                 img.src = currentObjectUrl;
-                img.onload = () => {
-                   mediaBox.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
-                };
             } else if (file.type.startsWith('video/')) {
                 img.classList.add('hidden');
                 video.classList.remove('hidden');
                 recordBtn.classList.remove('hidden');
                 video.src = currentObjectUrl;
-                video.muted = false; 
-                video.volume = 1;
-                video.onloadedmetadata = () => {
-                    mediaBox.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
-                };
+                video.load();
+                video.play().catch(e => console.log("Auto-play prevented", e));
             }
         }
 
-        function update(id, target) {
-            document.getElementById(target).innerText = document.getElementById(id).value;
+        function updateDate() {
+            document.getElementById('displayDate').innerText = document.getElementById('dateInput').value;
+        }
+
+        function updateCaption() {
+            const val = document.getElementById('captionInput').value;
+            displayCaption.innerText = val;
+            
+            if (!val.trim()) {
+                displayCaption.classList.add('hidden');
+            } else {
+                displayCaption.classList.remove('hidden');
+            }
         }
 
         async function downloadScreenshot() {
-            const card = document.getElementById('captureCard');
             const canvasArea = document.getElementById('cardCanvas');
             const guidesActive = canvasArea.classList.contains('guides-active');
-            
             if(guidesActive) canvasArea.classList.remove('guides-active');
-            card.classList.add('is-capturing');
             
             const canvas = await html2canvas(canvasArea, { 
                 useCORS: true, 
                 scale: 4, 
                 width: 337.5, 
                 height: 600,
-                backgroundColor: null,
-                logging: false
+                backgroundColor: '#000000'
             });
 
-            card.classList.remove('is-capturing');
             if(guidesActive) canvasArea.classList.add('guides-active');
-
             const link = document.createElement('a');
-            link.download = `pxltr-story-${Date.now()}.png`;
+            link.download = `pxltr-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
         }
 
         async function startRecording() {
-            const video = document.getElementById('mainVideo');
-            const card = document.getElementById('captureCard');
             const canvasArea = document.getElementById('cardCanvas');
-            const recordBtn = document.getElementById('recordBtn');
-            const mediaBox = document.getElementById('mediaBox');
-            
+            const SCALE = 2.5; 
             const W = 337.5;
             const H = 600;
-            const SCALE = 2.5; 
             
             const recCanvas = document.createElement('canvas');
             recCanvas.width = W * SCALE;
@@ -468,58 +400,50 @@
             const guidesActive = canvasArea.classList.contains('guides-active');
             if(guidesActive) canvasArea.classList.remove('guides-active');
             
-            card.classList.add('is-capturing');
+            // Temporary styles for cleaner recording
+            const originalVideoOpacity = video.style.opacity;
             video.style.opacity = '0';
             
-            const rect = mediaBox.getBoundingClientRect();
+            const rect = video.getBoundingClientRect();
             const canvasRect = canvasArea.getBoundingClientRect();
             const offsetX = (rect.left - canvasRect.left) * SCALE;
             const offsetY = (rect.top - canvasRect.top) * SCALE;
             const boxW = rect.width * SCALE;
             const boxH = rect.height * SCALE;
 
+            // Render the static UI components
             const uiCanvas = await html2canvas(canvasArea, {
-                scale: SCALE,
-                width: W,
-                height: H,
-                useCORS: true,
-                backgroundColor: '#000000',
-                logging: false
+                scale: SCALE, width: W, height: H, useCORS: true, backgroundColor: '#000000'
             });
             
-            video.style.opacity = '1';
-            card.classList.remove('is-capturing');
+            video.style.opacity = originalVideoOpacity || '1';
             if(guidesActive) canvasArea.classList.add('guides-active');
 
             const stream = recCanvas.captureStream(30);
+            // Capture audio if available
             if (video.captureStream || video.mozCaptureStream) {
                 const vidStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
-                vidStream.getAudioTracks().forEach(t => stream.addTrack(t));
+                const audioTracks = vidStream.getAudioTracks();
+                if(audioTracks.length > 0) audioTracks.forEach(t => stream.addTrack(t));
             }
 
-            recorder = new MediaRecorder(stream, { 
-                mimeType: 'video/webm;codecs=vp9,opus',
-                videoBitsPerSecond: 10000000 
-            });
-
+            recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = URL.createObjectURL(blob);
                 a.download = `pxltr-motion-${Date.now()}.webm`;
                 a.click();
                 recordBtn.disabled = false;
-                recordBtn.classList.remove('recording');
-                recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record Video';
+                recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record 9:16';
             };
 
             video.currentTime = 0;
+            video.muted = false; 
             recordBtn.disabled = true;
-            recordBtn.classList.add('recording');
-            recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
 
             recorder.start();
             video.play();
@@ -529,28 +453,26 @@
                     if (recorder.state === "recording") recorder.stop();
                     return;
                 }
-
                 ctx.drawImage(uiCanvas, 0, 0);
                 ctx.drawImage(video, offsetX, offsetY, boxW, boxH);
-
                 requestAnimationFrame(drawLoop);
             }
-
             drawLoop();
-            video.onended = () => { if(recorder.state === "recording") recorder.stop(); };
-        }
-
-        function setCurrentDate() {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            const today = new Date().toLocaleDateString('en-US', options);
-            document.getElementById('displayDate').innerText = today;
-            document.getElementById('dateInput').value = today;
         }
 
         window.onload = () => {
-            document.getElementById('handleInput').value = document.getElementById('displayHandle').innerText.trim();
-            document.getElementById('captionInput').value = document.getElementById('displayCaption').innerText.trim();
-            setCurrentDate();
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            const today = new Date().toLocaleDateString('en-US', options).toUpperCase();
+            document.getElementById('displayDate').innerText = today;
+            document.getElementById('dateInput').value = today;
+            
+            const initialCaption = displayCaption.innerText.trim();
+            document.getElementById('captionInput').value = initialCaption;
+            
+            displayCaption.addEventListener('input', () => {
+                document.getElementById('captionInput').value = displayCaption.innerText;
+                if (!displayCaption.innerText.trim()) displayCaption.classList.add('hidden');
+            });
         };
     </script>
 </body>

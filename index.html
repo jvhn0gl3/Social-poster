@@ -137,14 +137,8 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: rgba(255, 255, 255, 0.4);
-            margin-left: 60px; /* Aligns with the caption area offset */
+            margin-left: 60px;
             margin-bottom: 12px;
-        }
-
-        .is-capturing .caption-area {
-            display: block !important;
-            overflow: visible !important;
-            -webkit-line-clamp: none !important;
         }
 
         .media-container {
@@ -214,6 +208,23 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-record.recording {
+            background: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.98); opacity: 0.8; }
+            100% { transform: scale(1); }
         }
 
         input, textarea {
@@ -226,13 +237,18 @@
             font-size: 13px;
             outline: none;
         }
+
+        /* Video element for recording needs to be visible to capture but can be managed */
+        canvas {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Dated Layout • Safe 4:5</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Motion Layout • Video Support</p>
     </div>
 
     <div id="capture-wrapper">
@@ -253,7 +269,7 @@
                         </div>
 
                         <div class="caption-area" id="displayCaption" contenteditable="true">
-                            The layout has been updated to restore the date display. It sits elegantly below the caption, providing context to your post while maintaining high export quality.
+                            Now supporting video motion! Upload a clip, and use the record button to capture the entire card as a video file.
                         </div>
                     </div>
                     
@@ -261,7 +277,7 @@
                     
                     <div class="media-container">
                         <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=600" id="mainImage" class="media-asset show-full-media" crossorigin="anonymous">
-                        <video id="mainVideo" class="media-asset hidden show-full-media" muted playsinline></video>
+                        <video id="mainVideo" class="media-asset hidden show-full-media" crossorigin="anonymous" playsinline></video>
                     </div>
                 </div>
 
@@ -290,7 +306,7 @@
         </div>
 
         <button class="btn bg-slate-800 mb-4" onclick="document.getElementById('fileInput').click()">
-            <i class="fa-solid fa-upload"></i> Upload Media
+            <i class="fa-solid fa-upload"></i> Upload Media (Img/Vid)
         </button>
         <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
 
@@ -310,12 +326,21 @@
             <textarea id="captionInput" rows="3" oninput="update('captionInput', 'displayCaption')"></textarea>
         </div>
 
-        <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
-            <i class="fa-solid fa-download"></i> Export PNG
-        </button>
+        <div class="grid grid-cols-2 gap-2">
+            <button class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
+                <i class="fa-solid fa-image"></i> PNG
+            </button>
+            <button id="recordBtn" class="btn btn-record bg-blue-600 hover:bg-blue-500 hidden" onclick="startRecording()">
+                <i class="fa-solid fa-circle"></i> Record Video
+            </button>
+        </div>
     </div>
 
     <script>
+        let mediaType = 'image';
+        let recorder = null;
+        let chunks = [];
+
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
         }
@@ -335,19 +360,27 @@
             if (!file) return;
             const img = document.getElementById('mainImage');
             const video = document.getElementById('mainVideo');
+            const recordBtn = document.getElementById('recordBtn');
             const reader = new FileReader();
 
             if (file.type.startsWith('image/')) {
+                mediaType = 'image';
                 video.classList.add('hidden');
                 video.pause();
                 img.classList.remove('hidden');
+                recordBtn.classList.add('hidden');
                 reader.onload = (e) => img.src = e.target.result;
                 reader.readAsDataURL(file);
             } else if (file.type.startsWith('video/')) {
+                mediaType = 'video';
                 img.classList.add('hidden');
                 video.classList.remove('hidden');
+                recordBtn.classList.remove('hidden');
                 video.src = URL.createObjectURL(file);
-                video.play();
+                video.load();
+                // Ensure audio is enabled for recording if file has it
+                video.muted = false; 
+                video.volume = 1;
             }
         }
 
@@ -357,30 +390,98 @@
 
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
-            document.body.classList.add('is-capturing');
+            const canvas = await html2canvas(element, { 
+                useCORS: true, scale: 3, width: 337.5, height: 600,
+                onclone: (clonedDoc) => {
+                    const el = clonedDoc.getElementById('captureCard');
+                    el.style.margin = "0"; el.style.border = "none"; el.style.borderRadius = "0";
+                }
+            });
+            const link = document.createElement('a');
+            link.download = `pxltr-story-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+
+        async function startRecording() {
+            const video = document.getElementById('mainVideo');
+            const card = document.getElementById('captureCard');
+            const recordBtn = document.getElementById('recordBtn');
             
-            try {
-                const canvas = await html2canvas(element, { 
-                    useCORS: true, 
-                    scale: 3, 
-                    backgroundColor: null,
+            // Reset video to start
+            video.currentTime = 0;
+            
+            // Generate canvas from HTML for recording
+            // We use html2canvas for the static parts and draw video on top, 
+            // but for real-time we'll capture the card element using a temporary canvas stream.
+            // Note: Full HTML element recording in real-time is best done via captureStream on a canvas
+            // that is updated every frame.
+            
+            const captureCanvas = document.createElement('canvas');
+            captureCanvas.width = 337.5 * 2; // High res
+            captureCanvas.height = 600 * 2;
+            const ctx = captureCanvas.getContext('2d');
+            
+            recordBtn.disabled = true;
+            recordBtn.classList.add('recording');
+            recordBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
+
+            const stream = captureCanvas.captureStream(30);
+            
+            // Add audio if video has it
+            if (video.captureStream) {
+                const videoStream = video.captureStream();
+                videoStream.getAudioTracks().forEach(track => stream.addTrack(track));
+            }
+
+            recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+            chunks = [];
+
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pxltr-video-${Date.now()}.webm`;
+                a.click();
+                
+                recordBtn.disabled = false;
+                recordBtn.classList.remove('recording');
+                recordBtn.innerHTML = '<i class="fa-solid fa-circle"></i> Record Video';
+            };
+
+            // Start recording and video playback
+            recorder.start();
+            video.play();
+
+            // Render loop to draw card to canvas
+            async function renderFrame() {
+                if (video.paused || video.ended) {
+                    recorder.stop();
+                    return;
+                }
+
+                const canvas = await html2canvas(card, {
+                    scale: 2,
                     width: 337.5,
                     height: 600,
-                    onclone: (clonedDoc) => {
-                        const el = clonedDoc.getElementById('captureCard');
-                        el.style.margin = "0";
-                        el.style.border = "none";
-                        el.style.borderRadius = "0";
-                    }
+                    logging: false,
+                    useCORS: true
                 });
-
-                const link = document.createElement('a');
-                link.download = `pxltr-story-${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
-                link.click();
-            } finally {
-                document.body.classList.remove('is-capturing');
+                
+                ctx.clearRect(0, 0, captureCanvas.width, captureCanvas.height);
+                ctx.drawImage(canvas, 0, 0);
+                
+                requestAnimationFrame(renderFrame);
             }
+
+            renderFrame();
+            
+            // Safety stop when video ends
+            video.onended = () => {
+                if(recorder.state === "recording") recorder.stop();
+            };
         }
 
         function setCurrentDate() {

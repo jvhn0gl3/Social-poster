@@ -26,9 +26,6 @@
             background: transparent;
         }
 
-        /* Instagram Story Ratio (9:16)
-           The Container is always 9:16 
-        */
         .card-container {
             width: 337.5px; 
             height: 600px; 
@@ -46,7 +43,7 @@
             background: #0f172a;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center content for 4:5 safe area */
+            justify-content: center; 
             align-items: center;
             transition: all 0.5s ease;
             position: relative;
@@ -56,12 +53,9 @@
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
         }
 
-        /* The Safe Area (4:5 Ratio) 
-           This is where the actual content lives so it fits both Story and Feed
-        */
         .safe-area-content {
             width: 100%;
-            height: 422px; /* 4:5 relative to 337.5 width */
+            height: 422px; 
             padding: 24px;
             display: flex;
             flex-direction: column;
@@ -69,7 +63,6 @@
             z-index: 10;
         }
 
-        /* Guide lines toggleable via UI */
         .guides-active .safe-area-content {
             border-top: 1px dashed rgba(255,255,255,0.2);
             border-bottom: 1px dashed rgba(255,255,255,0.2);
@@ -98,8 +91,15 @@
             outline: none;
             overflow: hidden;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
+        }
+
+        /* Prevent clipping during capture */
+        .is-capturing .caption-area {
+            display: block !important;
+            overflow: visible !important;
+            -webkit-line-clamp: none !important;
         }
 
         .media-container {
@@ -243,7 +243,6 @@
             <div id="dropOverlay" class="text-white font-black text-xl italic uppercase">Drop Media</div>
             <div class="canvas-area glow-mode" id="cardCanvas">
                 
-                <!-- Safe Area Box -->
                 <div class="safe-area-content">
                     <div class="top-section">
                         <div class="meta-column">
@@ -266,7 +265,6 @@
                     </div>
                 </div>
 
-                <!-- Story-only Bottom Ornament -->
                 <div class="absolute bottom-10 flex justify-center w-full">
                     <div class="h-1.5 w-12 bg-white/30 rounded-full"></div>
                 </div>
@@ -364,8 +362,6 @@
             const video = document.getElementById('mainVideo');
             const reader = new FileReader();
 
-            video.onended = null;
-
             if (file.type.startsWith('image/')) {
                 video.classList.add('hidden');
                 video.pause();
@@ -392,7 +388,11 @@
 
         async function downloadScreenshot() {
             const element = document.getElementById('captureCard');
-            // Ensure guides are off for screenshot
+            
+            // Set capture state to prevent CSS clipping
+            document.body.classList.add('is-capturing');
+            
+            // Temporarily hide guides
             const guidesCheckbox = document.getElementById('guideToggle');
             const wasGuides = guidesCheckbox.checked;
             if (wasGuides) {
@@ -400,15 +400,35 @@
                 toggleGuides();
             }
 
-            const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
-            const link = document.createElement('a');
-            link.download = `pxltr-story-safe-${Date.now()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
+            try {
+                const canvas = await html2canvas(element, { 
+                    useCORS: true, 
+                    scale: 3, // High-quality scale
+                    backgroundColor: null,
+                    logging: false,
+                    width: element.offsetWidth,
+                    height: element.offsetHeight,
+                    onclone: (clonedDoc) => {
+                        // Ensure cloned element has no scrollbars or offsets
+                        const clonedEl = clonedDoc.getElementById('captureCard');
+                        clonedEl.style.transform = "none";
+                        clonedEl.style.margin = "0";
+                    }
+                });
 
-            if (wasGuides) {
-                guidesCheckbox.checked = true;
-                toggleGuides();
+                const link = document.createElement('a');
+                link.download = `pxltr-story-safe-${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+            } catch (e) {
+                console.error("Screenshot failed", e);
+            } finally {
+                // Restore state
+                document.body.classList.remove('is-capturing');
+                if (wasGuides) {
+                    guidesCheckbox.checked = true;
+                    toggleGuides();
+                }
             }
         }
 
@@ -447,15 +467,12 @@
                         isRecording = false;
                         btn.classList.remove('recording-active');
                         text.innerText = "Record Clip";
-                        video.onended = null;
                     };
 
                     if (!video.classList.contains('hidden')) {
                         video.currentTime = 0;
                         video.play();
-                        video.onended = () => {
-                            if (isRecording) mediaRecorder.stop();
-                        };
+                        video.onended = () => { if (isRecording) mediaRecorder.stop(); };
                     }
 
                     mediaRecorder.start();

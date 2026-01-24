@@ -25,6 +25,7 @@
             padding: 0;
             margin: 0;
             display: inline-block;
+            line-height: 0; /* Prevents tiny gaps below inline elements */
         }
 
         .card-container {
@@ -35,7 +36,7 @@
             border-radius: 40px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             border: 8px solid #1e293b;
-            background: #000;
+            background: #0f172a; /* Match default canvas background */
         }
 
         .canvas-area {
@@ -47,6 +48,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            box-sizing: border-box;
         }
 
         .canvas-area.glow-mode {
@@ -217,12 +219,12 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image Mode • Clean Interface</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image Mode • Precision Export</p>
     </div>
 
     <div id="capture-wrapper">
         <div class="card-container" id="captureCard">
-            <div class="canvas-area glow-mode guides-active" id="cardCanvas">
+            <div class="canvas-area glow-mode" id="cardCanvas">
                 
                 <div class="safe-area-4-5" id="safeArea">
                     <div class="cell-1">
@@ -266,7 +268,7 @@
                 <span>Glow Effect</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
-                <input type="checkbox" id="guideToggle" onchange="toggleGuides()" checked> 
+                <input type="checkbox" id="guideToggle" onchange="toggleGuides()"> 
                 <span>Show Safe Zone</span>
             </label>
         </div>
@@ -339,18 +341,28 @@
 
         async function downloadScreenshot() {
             const canvasArea = document.getElementById('cardCanvas');
-            const guidesActive = canvasArea.classList.contains('guides-active');
-            if(guidesActive) canvasArea.classList.remove('guides-active');
             
+            // Explicitly disable guides for export
+            const guidesWasActive = canvasArea.classList.contains('guides-active');
+            canvasArea.classList.remove('guides-active');
+            
+            // Use a higher scale and clear background
             const canvas = await html2canvas(canvasArea, { 
                 useCORS: true, 
                 scale: 4, 
                 width: 337.5, 
                 height: 600,
-                backgroundColor: '#000000'
+                backgroundColor: null, // Allow CSS background to be used
+                logging: false,
+                x: 0,
+                y: 0,
+                scrollX: 0,
+                scrollY: 0
             });
 
-            if(guidesActive) canvasArea.classList.add('guides-active');
+            // Restore guides if they were on
+            if(guidesWasActive) canvasArea.classList.add('guides-active');
+
             const link = document.createElement('a');
             link.download = `pxltr-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);

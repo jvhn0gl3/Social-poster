@@ -133,9 +133,10 @@
             margin-bottom: 2px;
         }
 
+        /* Improved content-box for text-only mode */
         .content-box {
             width: 100%;
-            min-height: 100px;
+            min-height: 0px; /* Collapses when empty */
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             border: 1px dashed rgba(255, 255, 255, 0.1);
@@ -144,6 +145,24 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* State when no image is loaded */
+        .content-box.is-empty {
+            border-color: transparent;
+            background: transparent;
+            min-height: 0;
+            height: 0;
+            margin: 0;
+            opacity: 0;
+        }
+
+        .content-box.has-image {
+            min-height: 100px;
+            margin-top: 12px;
+            opacity: 1;
+            border-style: solid;
         }
 
         .media-asset {
@@ -228,7 +247,7 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image Mode • Universal Share</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image & Text Mode • Universal Share</p>
     </div>
 
     <div id="capture-wrapper">
@@ -250,11 +269,10 @@
 
                     <div class="cell-2">
                         <div class="caption-text" id="displayCaption" contenteditable="true">
-                            Click upload to place an image.
+                            Enter your text here. This layout adjusts automatically whether you have an image or not.
                         </div>
                         
-                        <div class="content-box" id="mainBox">
-                            <span id="placeholderText" class="text-[8px] uppercase tracking-widest opacity-30 font-bold">Image Area</span>
+                        <div class="content-box is-empty" id="mainBox">
                             <img src="" id="mainImage" class="media-asset hidden" crossorigin="anonymous">
                         </div>
                     </div>
@@ -268,6 +286,17 @@
     </div>
 
     <div class="controls-panel">
+        <div class="section-title">Media Management</div>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <button type="button" class="btn bg-slate-800" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-camera"></i> Add Image
+            </button>
+            <button type="button" id="removeImgBtn" class="btn bg-red-500/10 text-red-400 border border-red-500/20 hidden" onclick="removeImage()">
+                <i class="fa-solid fa-xmark"></i> Remove Media
+            </button>
+        </div>
+        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+
         <div class="section-title">Visual Settings</div>
         <div class="flex flex-wrap gap-4 mb-4">
             <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-400">
@@ -280,11 +309,6 @@
             </label>
         </div>
 
-        <button type="button" class="btn bg-slate-800 mb-6" onclick="document.getElementById('fileInput').click()">
-            <i class="fa-solid fa-upload"></i> Upload Image
-        </button>
-        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
-
         <div class="section-title">Editor</div>
         <div class="mb-4">
             <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Date</label>
@@ -292,25 +316,25 @@
         </div>
         
         <div class="mb-4">
-            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption</label>
-            <textarea id="captionInput" rows="3" oninput="updateCaption()"></textarea>
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Caption / Text</label>
+            <textarea id="captionInput" rows="4" oninput="updateCaption()"></textarea>
         </div>
 
         <button id="shareBtn" type="button" class="btn bg-emerald-600 hover:bg-emerald-500" onclick="exportAndShare()">
             <i class="fa-solid fa-share-nodes"></i> Export & Share
         </button>
-        <div id="shareStatus" class="hidden">Generating Card...</div>
+        <div id="shareStatus" class="hidden">Generating High-Res Card...</div>
     </div>
 
     <script>
         let currentObjectUrl = null;
 
         const img = document.getElementById('mainImage');
-        const placeholder = document.getElementById('placeholderText');
         const mainBox = document.getElementById('mainBox');
         const displayCaption = document.getElementById('displayCaption');
         const shareBtn = document.getElementById('shareBtn');
         const shareStatus = document.getElementById('shareStatus');
+        const removeImgBtn = document.getElementById('removeImgBtn');
 
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
@@ -327,12 +351,26 @@
             if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
             currentObjectUrl = URL.createObjectURL(file);
 
-            mainBox.style.border = "none";
-            mainBox.style.background = "transparent";
-            placeholder.classList.add('hidden');
-
+            mainBox.classList.remove('is-empty');
+            mainBox.classList.add('has-image');
+            
             img.src = currentObjectUrl;
             img.classList.remove('hidden');
+            removeImgBtn.classList.remove('hidden');
+        }
+
+        function removeImage() {
+            if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+            currentObjectUrl = null;
+            
+            img.src = "";
+            img.classList.add('hidden');
+            
+            mainBox.classList.remove('has-image');
+            mainBox.classList.add('is-empty');
+            
+            removeImgBtn.classList.add('hidden');
+            document.getElementById('fileInput').value = "";
         }
 
         function updateDate() {
@@ -377,7 +415,7 @@
                     await navigator.share({
                         files: [file],
                         title: 'PXLTR Studio Card',
-                        text: 'Created with PXLTR Studio'
+                        text: displayCaption.innerText.substring(0, 50) + '...'
                     });
                 } else {
                     const link = document.createElement('a');

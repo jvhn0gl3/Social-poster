@@ -133,10 +133,9 @@
             margin-bottom: 2px;
         }
 
-        /* Improved content-box for text-only mode */
         .content-box {
             width: 100%;
-            min-height: 0px; /* Collapses when empty */
+            min-height: 0px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             border: 1px dashed rgba(255, 255, 255, 0.1);
@@ -148,7 +147,6 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* State when no image is loaded */
         .content-box.is-empty {
             border-color: transparent;
             background: transparent;
@@ -241,13 +239,28 @@
             text-transform: uppercase;
         }
 
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .input-group input {
+            flex-grow: 1;
+        }
+
+        .input-group button {
+            width: auto;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
     </style>
 </head>
 <body>
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image & Text Mode • Universal Share</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Universal Asset Creator</p>
     </div>
 
     <div id="capture-wrapper">
@@ -287,12 +300,23 @@
 
     <div class="controls-panel">
         <div class="section-title">Media Management</div>
+        
+        <div class="mb-4">
+            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Image URL</label>
+            <div class="input-group">
+                <input type="text" id="urlInput" placeholder="https://image-link.com/photo.jpg">
+                <button type="button" class="btn bg-slate-700" onclick="handleUrlUpload()">
+                    <i class="fa-solid fa-link"></i>
+                </button>
+            </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-3 mb-6">
             <button type="button" class="btn bg-slate-800" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-solid fa-camera"></i> Add Image
+                <i class="fa-solid fa-camera"></i> Upload File
             </button>
             <button type="button" id="removeImgBtn" class="btn bg-red-500/10 text-red-400 border border-red-500/20 hidden" onclick="removeImage()">
-                <i class="fa-solid fa-xmark"></i> Remove Media
+                <i class="fa-solid fa-xmark"></i> Clear
             </button>
         </div>
         <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
@@ -335,6 +359,7 @@
         const shareBtn = document.getElementById('shareBtn');
         const shareStatus = document.getElementById('shareStatus');
         const removeImgBtn = document.getElementById('removeImgBtn');
+        const urlInput = document.getElementById('urlInput');
 
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
@@ -348,19 +373,40 @@
             const file = event.target.files[0];
             if (!file || !file.type.startsWith('image/')) return;
 
-            if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+            if (currentObjectUrl) {
+                if (currentObjectUrl.startsWith('blob:')) URL.revokeObjectURL(currentObjectUrl);
+            }
+            
             currentObjectUrl = URL.createObjectURL(file);
+            applyImage(currentObjectUrl);
+            urlInput.value = "";
+        }
 
+        function handleUrlUpload() {
+            const url = urlInput.value.trim();
+            if (!url) return;
+            
+            if (currentObjectUrl && currentObjectUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(currentObjectUrl);
+            }
+            
+            currentObjectUrl = url;
+            applyImage(url);
+        }
+
+        function applyImage(source) {
             mainBox.classList.remove('is-empty');
             mainBox.classList.add('has-image');
             
-            img.src = currentObjectUrl;
+            img.src = source;
             img.classList.remove('hidden');
             removeImgBtn.classList.remove('hidden');
         }
 
         function removeImage() {
-            if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+            if (currentObjectUrl && currentObjectUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(currentObjectUrl);
+            }
             currentObjectUrl = null;
             
             img.src = "";
@@ -371,6 +417,7 @@
             
             removeImgBtn.classList.add('hidden');
             document.getElementById('fileInput').value = "";
+            urlInput.value = "";
         }
 
         function updateDate() {
@@ -390,12 +437,21 @@
         async function exportAndShare() {
             shareBtn.disabled = true;
             shareStatus.classList.remove('hidden');
+            shareStatus.innerText = "Processing Image...";
             
             const canvasArea = document.getElementById('cardCanvas');
             const guidesWasActive = canvasArea.classList.contains('guides-active');
             canvasArea.classList.remove('guides-active');
             
             try {
+                // Pre-check if image is loaded for URL inputs
+                if (img.src && !img.complete) {
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = () => reject(new Error("Image failed to load"));
+                    });
+                }
+
                 const canvas = await html2canvas(canvasArea, { 
                     useCORS: true, 
                     scale: 4, 
@@ -425,6 +481,7 @@
                 }
             } catch (err) {
                 console.error("Share failed", err);
+                alert("Could not process image. If using a URL, ensure the host allows cross-origin requests.");
             } finally {
                 shareBtn.disabled = false;
                 shareStatus.classList.add('hidden');

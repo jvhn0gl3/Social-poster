@@ -25,7 +25,7 @@
             padding: 0;
             margin: 0;
             display: inline-block;
-            line-height: 0; /* Prevents tiny gaps below inline elements */
+            line-height: 0;
         }
 
         .card-container {
@@ -36,7 +36,7 @@
             border-radius: 40px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             border: 8px solid #1e293b;
-            background: #0f172a; /* Match default canvas background */
+            background: #0f172a;
         }
 
         .canvas-area {
@@ -213,13 +213,22 @@
 
         .hidden { display: none !important; }
 
+        #shareStatus {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 8px;
+            color: #3b82f6;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
     </style>
 </head>
 <body>
 
     <div class="mb-4 text-center">
         <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">pxltr studio</h1>
-        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image Mode • Precision Export</p>
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest">Image Mode • Universal Share</p>
     </div>
 
     <div id="capture-wrapper">
@@ -234,8 +243,6 @@
                                 <i class="fa-brands fa-threads"></i>
                                 <i class="fa-brands fa-youtube"></i>
                                 <i class="fa-brands fa-instagram"></i>
-                                <i class="fa-brands fa-tiktok"></i>
-                                <i class="fa-solid fa-bolt text-[7px] opacity-40"></i>
                             </div>
                         </div>
                         <div class="compact-date" id="displayDate">JAN 23, 2026</div>
@@ -289,9 +296,10 @@
             <textarea id="captionInput" rows="3" oninput="updateCaption()"></textarea>
         </div>
 
-        <button type="button" class="btn bg-emerald-600 hover:bg-emerald-500" onclick="downloadScreenshot()">
-            <i class="fa-solid fa-image"></i> Export PNG
+        <button id="shareBtn" type="button" class="btn bg-emerald-600 hover:bg-emerald-500" onclick="exportAndShare()">
+            <i class="fa-solid fa-share-nodes"></i> Export & Share
         </button>
+        <div id="shareStatus" class="hidden">Generating Card...</div>
     </div>
 
     <script>
@@ -301,6 +309,8 @@
         const placeholder = document.getElementById('placeholderText');
         const mainBox = document.getElementById('mainBox');
         const displayCaption = document.getElementById('displayCaption');
+        const shareBtn = document.getElementById('shareBtn');
+        const shareStatus = document.getElementById('shareStatus');
 
         function toggleGuides() {
             document.getElementById('cardCanvas').classList.toggle('guides-active', document.getElementById('guideToggle').checked);
@@ -339,34 +349,48 @@
             }
         }
 
-        async function downloadScreenshot() {
-            const canvasArea = document.getElementById('cardCanvas');
+        async function exportAndShare() {
+            shareBtn.disabled = true;
+            shareStatus.classList.remove('hidden');
             
-            // Explicitly disable guides for export
+            const canvasArea = document.getElementById('cardCanvas');
             const guidesWasActive = canvasArea.classList.contains('guides-active');
             canvasArea.classList.remove('guides-active');
             
-            // Use a higher scale and clear background
-            const canvas = await html2canvas(canvasArea, { 
-                useCORS: true, 
-                scale: 4, 
-                width: 337.5, 
-                height: 600,
-                backgroundColor: null, // Allow CSS background to be used
-                logging: false,
-                x: 0,
-                y: 0,
-                scrollX: 0,
-                scrollY: 0
-            });
+            try {
+                const canvas = await html2canvas(canvasArea, { 
+                    useCORS: true, 
+                    scale: 4, 
+                    width: 337.5, 
+                    height: 600,
+                    backgroundColor: null,
+                    logging: false,
+                    x: 0, y: 0, scrollX: 0, scrollY: 0
+                });
 
-            // Restore guides if they were on
-            if(guidesWasActive) canvasArea.classList.add('guides-active');
+                if(guidesWasActive) canvasArea.classList.add('guides-active');
 
-            const link = document.createElement('a');
-            link.download = `pxltr-${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                const file = new File([blob], `pxltr-${Date.now()}.png`, { type: 'image/png' });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'PXLTR Studio Card',
+                        text: 'Created with PXLTR Studio'
+                    });
+                } else {
+                    const link = document.createElement('a');
+                    link.download = file.name;
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                }
+            } catch (err) {
+                console.error("Share failed", err);
+            } finally {
+                shareBtn.disabled = false;
+                shareStatus.classList.add('hidden');
+            }
         }
 
         window.onload = () => {

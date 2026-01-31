@@ -39,11 +39,14 @@
             border: 4px solid #1e293b;
             background: #000;
             flex-shrink: 0;
+            /* Explicitly set transform-origin for capture stability */
+            transform-origin: top left;
         }
 
         .canvas-area {
             width: 100%;
             height: 100%;
+            background: #0f172a; /* Solid fallback for capture */
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             display: flex;
             flex-direction: column;
@@ -60,10 +63,10 @@
             flex-direction: column;
             position: relative;
             z-index: 2;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 20px;
             padding: 12px;
-            border: 1px dashed rgba(255, 255, 255, 0.1); 
+            border: 1px dashed rgba(255, 255, 255, 0.15); 
             box-sizing: border-box;
         }
 
@@ -90,11 +93,12 @@
             color: rgba(255, 255, 255, 0.9);
             max-height: 30px;
             overflow: hidden;
+            word-wrap: break-word;
         }
 
         .main-media-container {
             width: 100%;
-            flex: 1; 
+            height: 180px; /* Fixed height inside the safe zone to prevent layout shifts */
             border-radius: 10px;
             overflow: hidden;
             background: #000;
@@ -138,7 +142,7 @@
             font-size: 7px;
             font-weight: 800;
             letter-spacing: 0.05em;
-            width: fit-content;
+            white-space: nowrap;
         }
 
         .controls-panel {
@@ -200,21 +204,13 @@
             width: 100%;
             font-size: 13px;
             transition: all 0.2s;
+            border: none;
         }
 
         .btn-download { background: #10b981; }
         .btn-recording { background: #ef4444; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        .loading-spinner {
-            display: none;
-            width: 14px; height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%; border-top-color: #fff;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         [contenteditable="true"]:focus { outline: none; background: rgba(59, 130, 246, 0.2); border-radius: 4px; }
 
@@ -245,7 +241,6 @@
                     </div>
                     
                     <div class="main-media-container" id="mediaContainer">
-                        <!-- Media elements will toggle here -->
                         <img 
                             src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
                             id="mainImage" 
@@ -309,13 +304,6 @@
                     </button>
                 </div>
             </div>
-            
-            <div id="statusTip" class="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl hidden">
-                <p class="text-[10px] text-blue-400 font-medium">
-                    <i class="fa-solid fa-video mr-1"></i>
-                    Video mode: App will record the canvas and download when video ends.
-                </p>
-            </div>
         </div>
     </div>
 
@@ -336,7 +324,6 @@
             const imageEl = document.getElementById('mainImage');
             const videoEl = document.getElementById('mainVideo');
             const actionText = document.getElementById('actionText');
-            const statusTip = document.getElementById('statusTip');
 
             if (file.type.startsWith('video/')) {
                 isVideoMode = true;
@@ -344,7 +331,6 @@
                 videoEl.classList.remove('hidden');
                 videoEl.src = URL.createObjectURL(file);
                 actionText.innerText = "Record Canvas";
-                statusTip.classList.remove('hidden');
             } else {
                 isVideoMode = false;
                 videoEl.classList.add('hidden');
@@ -353,7 +339,6 @@
                 reader.onload = (e) => { imageEl.src = e.target.result; };
                 reader.readAsDataURL(file);
                 actionText.innerText = "Pull PNG";
-                statusTip.classList.add('hidden');
             }
         }
 
@@ -368,17 +353,37 @@
         async function downloadPNG() {
             const card = document.getElementById('captureCard');
             const safeZone = document.getElementById('safeZone');
+            
+            // Temporary styles to ensure clean capture
             const originalBorder = safeZone.style.border;
             safeZone.style.border = 'none';
+            
+            // Scroll to top to prevent offset issues with html2canvas
+            window.scrollTo(0,0);
 
             try {
-                const canvas = await html2canvas(card, { scale: 3, useCORS: true, backgroundColor: null, borderRadius: 24 });
+                const canvas = await html2canvas(card, {
+                    scale: 3, // High DPI
+                    useCORS: true,
+                    backgroundColor: "#000000",
+                    logging: false,
+                    width: 320,
+                    height: 568,
+                    x: 0,
+                    y: 0,
+                    scrollX: 0,
+                    scrollY: -window.scrollY // Compensate for scroll
+                });
+                
                 const link = document.createElement('a');
                 link.download = `pxltr-${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png');
+                link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
-            } catch (err) { console.error(err); } 
-            finally { safeZone.style.border = originalBorder; }
+            } catch (err) { 
+                console.error("PNG Capture Error:", err); 
+            } finally { 
+                safeZone.style.border = originalBorder; 
+            }
         }
 
         async function recordCanvas() {
@@ -387,29 +392,20 @@
             const btn = document.getElementById('actionBtn');
             const safeZone = document.getElementById('safeZone');
             
-            // UI Feedback
             btn.classList.add('btn-recording');
             btn.innerText = "Recording...";
             const originalBorder = safeZone.style.border;
             safeZone.style.border = 'none';
 
-            // 1. Reset video to start
             video.currentTime = 0;
             
-            // 2. We use html2canvas in a loop or MediaStream from the element
-            // Note: capturing a div with video inside via CaptureStream is tricky for layouts.
-            // We'll use a hidden Canvas to composite the frame if needed, 
-            // but for simplicity/performance in this environment, we'll capture the specific area.
-            
             try {
-                // Prepare recording
-                const stream = card.captureStream ? card.captureStream(30) : null;
-                if (!stream) {
-                    alert("Canvas capture not supported in this browser version.");
-                    return;
-                }
-
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+                // Capture at 60fps for smoothness
+                const stream = card.captureStream(60);
+                mediaRecorder = new MediaRecorder(stream, { 
+                    mimeType: 'video/webm; codecs=vp9',
+                    videoBitsPerSecond: 5000000 // 5Mbps for quality
+                });
                 recordedChunks = [];
 
                 mediaRecorder.ondataavailable = (e) => {
@@ -421,47 +417,27 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `pxltr-recap-${Date.now()}.webm`;
+                    a.download = `pxltr-video-${Date.now()}.webm`;
                     a.click();
                     
-                    // Reset UI
                     btn.classList.remove('btn-recording');
                     btn.innerText = "Record Canvas";
                     safeZone.style.border = originalBorder;
                 };
 
-                // Start
                 mediaRecorder.start();
                 video.play();
 
-                // Stop when video ends
                 video.onended = () => {
                     mediaRecorder.stop();
                     video.onended = null;
                 };
 
             } catch (err) {
-                console.error("Recording error:", err);
+                console.error("Video Recording Error:", err);
                 btn.classList.remove('btn-recording');
                 btn.innerText = "Record Canvas";
                 safeZone.style.border = originalBorder;
-            }
-        }
-
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-            el.addEventListener('input', () => {
-                const inputMap = { 'displayDate': 'dateInput', 'displayHandle': 'handleInput', 'displayCaption': 'captionInput' };
-                if (inputMap[el.id]) document.getElementById(inputMap[el.id]).value = el.innerText;
-            });
-        });
-
-        async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) return await response.json();
-                } catch (e) { if (i === retries - 1) throw e; }
-                await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
             }
         }
 
@@ -473,10 +449,12 @@
 
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-                const data = await fetchWithRetry(url, {
+                const response = await fetch(url, {
                     method: 'POST',
                     body: JSON.stringify({ instances: [{ prompt: prompt }], parameters: { sampleCount: 1 } })
                 });
+                const data = await response.json();
+                
                 if (data.predictions?.[0]?.bytesBase64Encoded) {
                     isVideoMode = false;
                     document.getElementById('mainVideo').classList.add('hidden');
@@ -484,10 +462,12 @@
                     img.classList.remove('hidden');
                     img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
                     document.getElementById('actionText').innerText = "Pull PNG";
-                    document.getElementById('statusTip').classList.add('hidden');
                 }
-            } catch (err) { console.error(err); } 
-            finally { btn.disabled = false; spinner.style.display = 'none'; text.style.display = 'inline'; }
+            } catch (err) { 
+                console.error("AI Generation Error:", err); 
+            } finally { 
+                btn.disabled = false; spinner.style.display = 'none'; text.style.display = 'inline'; 
+            }
         }
 
         window.onload = () => {

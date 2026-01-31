@@ -29,10 +29,9 @@
             margin-top: 10px;
         }
 
-        /* 9:16 Fixed Frame with 1:1 Safe Zone Logic */
         .card-container {
             width: 320px; 
-            height: 568px; /* Strict 9:16 */
+            height: 568px;
             position: relative;
             overflow: hidden;
             border-radius: 24px;
@@ -48,12 +47,11 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center the content vertically for easy 1:1 cropping */
+            justify-content: center;
             padding: 20px;
             position: relative;
         }
 
-        /* The "Safe Zone" - This is what will become the 1:1 post */
         .safe-zone-1to1 {
             width: 280px; 
             height: 280px; 
@@ -94,22 +92,21 @@
             overflow: hidden;
         }
 
-        .main-image-container {
+        .main-media-container {
             width: 100%;
             flex: 1; 
             border-radius: 10px;
             overflow: hidden;
-            background: #000; /* Black background for letterboxing */
+            background: #000;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            display: block;
             position: relative;
         }
 
-        .main-image {
+        .main-media {
             width: 100%;
             height: 100%;
             display: block;
-            object-fit: contain; /* Shows the WHOLE image without cropping */
+            object-fit: contain;
             position: absolute;
             top: 0;
             left: 0;
@@ -202,19 +199,18 @@
             display: block;
             width: 100%;
             font-size: 13px;
+            transition: all 0.2s;
         }
 
-        .btn-download {
-            background: #10b981;
-        }
+        .btn-download { background: #10b981; }
+        .btn-recording { background: #ef4444; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         .loading-spinner {
             display: none;
-            width: 14px;
-            height: 14px;
+            width: 14px; height: 14px;
             border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
+            border-radius: 50%; border-top-color: #fff;
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
@@ -231,7 +227,7 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-2xl font-black italic tracking-tighter">pxltr Studio</h1>
-        <p class="text-slate-400 text-[9px] uppercase tracking-widest">Safe-Zone Composer</p>
+        <p class="text-slate-400 text-[9px] uppercase tracking-widest">Multimedia Safe-Zone</p>
     </div>
 
     <div class="app-wrapper">
@@ -244,17 +240,19 @@
                             <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
                         </div>
                         <div class="caption-text-area" id="displayCaption" contenteditable="true">
-                            Visions of a digital dreamscape where light and form collide.
+                            Capturing the motion of the digital era.
                         </div>
                     </div>
                     
-                    <div class="main-image-container">
+                    <div class="main-media-container" id="mediaContainer">
+                        <!-- Media elements will toggle here -->
                         <img 
                             src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
                             id="mainImage" 
-                            class="main-image"
+                            class="main-media"
                             crossorigin="anonymous"
                         >
+                        <video id="mainVideo" class="main-media hidden" muted playsinline></video>
                     </div>
 
                     <div class="footer-row">
@@ -271,31 +269,34 @@
 
         <div class="controls-panel">
             <div class="section-title">Visuals</div>
-            <div class="flex gap-2 mb-3">
-                <button class="btn bg-slate-800 border border-slate-700 flex-1 flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
-                    <i class="fa-solid fa-upload text-[10px]"></i> Change
-                </button>
-                <button class="btn btn-download flex-1 flex items-center justify-center gap-2" onclick="downloadImage()">
-                    <i class="fa-solid fa-download text-[10px]"></i> Pull PNG
-                </button>
-                <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+            <div class="flex flex-col gap-2 mb-3">
+                <div class="flex gap-2">
+                    <button class="btn bg-slate-800 border border-slate-700 flex-1 flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
+                        <i class="fa-solid fa-file-import text-[10px]"></i> Upload
+                    </button>
+                    <button id="actionBtn" class="btn btn-download flex-1 flex items-center justify-center gap-2" onclick="handleExport()">
+                        <i id="actionIcon" class="fa-solid fa-download text-[10px]"></i> 
+                        <span id="actionText">Pull PNG</span>
+                    </button>
+                </div>
+                <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
             </div>
 
             <div class="section-title mt-4">Content</div>
             <div class="grid grid-cols-2 gap-2 mb-2">
                 <div class="input-group">
                     <label class="input-label">Date</label>
-                    <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate', 'innerText')">
+                    <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate')">
                 </div>
                 <div class="input-group">
                     <label class="input-label">Handle</label>
-                    <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle', 'innerText')">
+                    <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle')">
                 </div>
             </div>
 
             <div class="input-group">
                 <label class="input-label">Caption</label>
-                <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption', 'innerText')"></textarea>
+                <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
             </div>
 
             <div class="section-title mt-4">AI Creator</div>
@@ -308,26 +309,63 @@
                     </button>
                 </div>
             </div>
+            
+            <div id="statusTip" class="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl hidden">
+                <p class="text-[10px] text-blue-400 font-medium">
+                    <i class="fa-solid fa-video mr-1"></i>
+                    Video mode: App will record the canvas and download when video ends.
+                </p>
+            </div>
         </div>
     </div>
 
     <script>
         const apiKey = "";
+        let isVideoMode = false;
+        let mediaRecorder;
+        let recordedChunks = [];
 
-        function updateFromInput(inputId, targetId, property) {
+        function updateFromInput(inputId, targetId) {
             document.getElementById(targetId).innerText = document.getElementById(inputId).value;
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
+            if (!file) return;
+
+            const imageEl = document.getElementById('mainImage');
+            const videoEl = document.getElementById('mainVideo');
+            const actionText = document.getElementById('actionText');
+            const statusTip = document.getElementById('statusTip');
+
+            if (file.type.startsWith('video/')) {
+                isVideoMode = true;
+                imageEl.classList.add('hidden');
+                videoEl.classList.remove('hidden');
+                videoEl.src = URL.createObjectURL(file);
+                actionText.innerText = "Record Canvas";
+                statusTip.classList.remove('hidden');
+            } else {
+                isVideoMode = false;
+                videoEl.classList.add('hidden');
+                imageEl.classList.remove('hidden');
                 const reader = new FileReader();
-                reader.onload = (e) => { document.getElementById('mainImage').src = e.target.result; };
+                reader.onload = (e) => { imageEl.src = e.target.result; };
                 reader.readAsDataURL(file);
+                actionText.innerText = "Pull PNG";
+                statusTip.classList.add('hidden');
             }
         }
 
-        async function downloadImage() {
+        async function handleExport() {
+            if (isVideoMode) {
+                recordCanvas();
+            } else {
+                downloadPNG();
+            }
+        }
+
+        async function downloadPNG() {
             const card = document.getElementById('captureCard');
             const safeZone = document.getElementById('safeZone');
             const originalBorder = safeZone.style.border;
@@ -341,6 +379,73 @@
                 link.click();
             } catch (err) { console.error(err); } 
             finally { safeZone.style.border = originalBorder; }
+        }
+
+        async function recordCanvas() {
+            const card = document.getElementById('captureCard');
+            const video = document.getElementById('mainVideo');
+            const btn = document.getElementById('actionBtn');
+            const safeZone = document.getElementById('safeZone');
+            
+            // UI Feedback
+            btn.classList.add('btn-recording');
+            btn.innerText = "Recording...";
+            const originalBorder = safeZone.style.border;
+            safeZone.style.border = 'none';
+
+            // 1. Reset video to start
+            video.currentTime = 0;
+            
+            // 2. We use html2canvas in a loop or MediaStream from the element
+            // Note: capturing a div with video inside via CaptureStream is tricky for layouts.
+            // We'll use a hidden Canvas to composite the frame if needed, 
+            // but for simplicity/performance in this environment, we'll capture the specific area.
+            
+            try {
+                // Prepare recording
+                const stream = card.captureStream ? card.captureStream(30) : null;
+                if (!stream) {
+                    alert("Canvas capture not supported in this browser version.");
+                    return;
+                }
+
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+                recordedChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) recordedChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `pxltr-recap-${Date.now()}.webm`;
+                    a.click();
+                    
+                    // Reset UI
+                    btn.classList.remove('btn-recording');
+                    btn.innerText = "Record Canvas";
+                    safeZone.style.border = originalBorder;
+                };
+
+                // Start
+                mediaRecorder.start();
+                video.play();
+
+                // Stop when video ends
+                video.onended = () => {
+                    mediaRecorder.stop();
+                    video.onended = null;
+                };
+
+            } catch (err) {
+                console.error("Recording error:", err);
+                btn.classList.remove('btn-recording');
+                btn.innerText = "Record Canvas";
+                safeZone.style.border = originalBorder;
+            }
         }
 
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
@@ -373,7 +478,13 @@
                     body: JSON.stringify({ instances: [{ prompt: prompt }], parameters: { sampleCount: 1 } })
                 });
                 if (data.predictions?.[0]?.bytesBase64Encoded) {
-                    document.getElementById('mainImage').src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                    isVideoMode = false;
+                    document.getElementById('mainVideo').classList.add('hidden');
+                    const img = document.getElementById('mainImage');
+                    img.classList.remove('hidden');
+                    img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                    document.getElementById('actionText').innerText = "Pull PNG";
+                    document.getElementById('statusTip').classList.add('hidden');
                 }
             } catch (err) { console.error(err); } 
             finally { btn.disabled = false; spinner.style.display = 'none'; text.style.display = 'inline'; }

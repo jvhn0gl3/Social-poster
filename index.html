@@ -5,11 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Social Card Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
         body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
             font-family: 'Outfit', sans-serif;
             background-color: #020617;
             color: white;
@@ -18,6 +25,7 @@
             flex-direction: column;
             align-items: center;
             padding: 10px;
+            overflow: -moz-scrollbars-none; /* Old Firefox */
         }
 
         .app-wrapper {
@@ -39,14 +47,11 @@
             border: 4px solid #1e293b;
             background: #000;
             flex-shrink: 0;
-            /* Explicitly set transform-origin for capture stability */
-            transform-origin: top left;
         }
 
         .canvas-area {
             width: 100%;
             height: 100%;
-            background: #0f172a; /* Solid fallback for capture */
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             display: flex;
             flex-direction: column;
@@ -98,7 +103,7 @@
 
         .main-media-container {
             width: 100%;
-            height: 180px; /* Fixed height inside the safe zone to prevent layout shifts */
+            height: 180px; 
             border-radius: 10px;
             overflow: hidden;
             background: #000;
@@ -127,9 +132,9 @@
 
         .icon-bar-inline {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
-            padding: 4px 8px;
+            padding: 4px 10px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 100px;
         }
@@ -207,10 +212,15 @@
             border: none;
         }
 
-        .btn-download { background: #10b981; }
-        .btn-recording { background: #ef4444; animation: pulse 1.5s infinite; }
-
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .loading-spinner {
+            display: none;
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         [contenteditable="true"]:focus { outline: none; background: rgba(59, 130, 246, 0.2); border-radius: 4px; }
 
@@ -223,12 +233,12 @@
 
     <div class="mb-4 text-center">
         <h1 class="text-2xl font-black italic tracking-tighter">pxltr Studio</h1>
-        <p class="text-slate-400 text-[9px] uppercase tracking-widest">Multimedia Safe-Zone</p>
+        <p class="text-slate-400 text-[9px] uppercase tracking-widest">Multimedia Design Board</p>
     </div>
 
     <div class="app-wrapper">
         <div class="card-container" id="captureCard">
-            <div class="canvas-area" id="canvasArea">
+            <div class="canvas-area">
                 <div class="safe-zone-1to1" id="safeZone">
                     <div class="header-meta-row">
                         <div class="meta-pills">
@@ -236,27 +246,28 @@
                             <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
                         </div>
                         <div class="caption-text-area" id="displayCaption" contenteditable="true">
-                            Capturing the motion of the digital era.
+                            Visions of a digital dreamscape where light and form collide.
                         </div>
                     </div>
                     
-                    <div class="main-media-container" id="mediaContainer">
+                    <div class="main-media-container">
                         <img 
                             src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" 
                             id="mainImage" 
                             class="main-media"
-                            crossorigin="anonymous"
                         >
-                        <video id="mainVideo" class="main-media hidden" muted playsinline></video>
+                        <video id="mainVideo" class="main-media hidden" controls playsinline loop></video>
                     </div>
 
                     <div class="footer-row">
                         <div class="icon-bar-inline">
+                            <i class="fa-brands fa-facebook text-[8px]" style="color:#1877F2"></i>
                             <i class="fa-brands fa-youtube text-[8px]" style="color:#ff0000"></i>
-                            <i class="fa-brands fa-instagram text-[8px]" style="color:#ff4d4d"></i>
                             <i class="fa-brands fa-threads text-[8px]" style="color:#fff"></i>
+                            <i class="fa-brands fa-instagram text-[8px]" style="color:#E4405F"></i>
+                            <i class="fa-brands fa-tiktok text-[8px]" style="color:#00f2ea"></i>
                         </div>
-                        <div class="h-0.5 w-8 bg-white/20 rounded-full"></div>
+                        <div class="h-0.5 w-6 bg-white/20 rounded-full"></div>
                     </div>
                 </div>
             </div>
@@ -264,16 +275,10 @@
 
         <div class="controls-panel">
             <div class="section-title">Visuals</div>
-            <div class="flex flex-col gap-2 mb-3">
-                <div class="flex gap-2">
-                    <button class="btn bg-slate-800 border border-slate-700 flex-1 flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
-                        <i class="fa-solid fa-file-import text-[10px]"></i> Upload
-                    </button>
-                    <button id="actionBtn" class="btn btn-download flex-1 flex items-center justify-center gap-2" onclick="handleExport()">
-                        <i id="actionIcon" class="fa-solid fa-download text-[10px]"></i> 
-                        <span id="actionText">Pull PNG</span>
-                    </button>
-                </div>
+            <div class="mb-3">
+                <button class="btn bg-slate-800 border border-slate-700 w-full flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
+                    <i class="fa-solid fa-file-import text-[10px]"></i> Upload Media
+                </button>
                 <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
             </div>
 
@@ -294,7 +299,7 @@
                 <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
             </div>
 
-            <div class="section-title mt-4">AI Creator</div>
+            <div class="section-title mt-4">AI Image</div>
             <div class="input-group">
                 <div class="flex gap-1">
                     <input type="text" id="aiPrompt" placeholder="Generate art...">
@@ -304,14 +309,18 @@
                     </button>
                 </div>
             </div>
+
+            <div class="mt-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                    <i class="fa-solid fa-eye-slash mr-1 text-blue-400"></i>
+                    <strong>Clean View:</strong> Browser scrollbars have been disabled for a full-screen feel.
+                </p>
+            </div>
         </div>
     </div>
 
     <script>
         const apiKey = "";
-        let isVideoMode = false;
-        let mediaRecorder;
-        let recordedChunks = [];
 
         function updateFromInput(inputId, targetId) {
             document.getElementById(targetId).innerText = document.getElementById(inputId).value;
@@ -323,121 +332,19 @@
 
             const imageEl = document.getElementById('mainImage');
             const videoEl = document.getElementById('mainVideo');
-            const actionText = document.getElementById('actionText');
 
             if (file.type.startsWith('video/')) {
-                isVideoMode = true;
                 imageEl.classList.add('hidden');
                 videoEl.classList.remove('hidden');
                 videoEl.src = URL.createObjectURL(file);
-                actionText.innerText = "Record Canvas";
+                videoEl.play();
             } else {
-                isVideoMode = false;
                 videoEl.classList.add('hidden');
+                videoEl.pause();
                 imageEl.classList.remove('hidden');
                 const reader = new FileReader();
                 reader.onload = (e) => { imageEl.src = e.target.result; };
                 reader.readAsDataURL(file);
-                actionText.innerText = "Pull PNG";
-            }
-        }
-
-        async function handleExport() {
-            if (isVideoMode) {
-                recordCanvas();
-            } else {
-                downloadPNG();
-            }
-        }
-
-        async function downloadPNG() {
-            const card = document.getElementById('captureCard');
-            const safeZone = document.getElementById('safeZone');
-            
-            // Temporary styles to ensure clean capture
-            const originalBorder = safeZone.style.border;
-            safeZone.style.border = 'none';
-            
-            // Scroll to top to prevent offset issues with html2canvas
-            window.scrollTo(0,0);
-
-            try {
-                const canvas = await html2canvas(card, {
-                    scale: 3, // High DPI
-                    useCORS: true,
-                    backgroundColor: "#000000",
-                    logging: false,
-                    width: 320,
-                    height: 568,
-                    x: 0,
-                    y: 0,
-                    scrollX: 0,
-                    scrollY: -window.scrollY // Compensate for scroll
-                });
-                
-                const link = document.createElement('a');
-                link.download = `pxltr-${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
-                link.click();
-            } catch (err) { 
-                console.error("PNG Capture Error:", err); 
-            } finally { 
-                safeZone.style.border = originalBorder; 
-            }
-        }
-
-        async function recordCanvas() {
-            const card = document.getElementById('captureCard');
-            const video = document.getElementById('mainVideo');
-            const btn = document.getElementById('actionBtn');
-            const safeZone = document.getElementById('safeZone');
-            
-            btn.classList.add('btn-recording');
-            btn.innerText = "Recording...";
-            const originalBorder = safeZone.style.border;
-            safeZone.style.border = 'none';
-
-            video.currentTime = 0;
-            
-            try {
-                // Capture at 60fps for smoothness
-                const stream = card.captureStream(60);
-                mediaRecorder = new MediaRecorder(stream, { 
-                    mimeType: 'video/webm; codecs=vp9',
-                    videoBitsPerSecond: 5000000 // 5Mbps for quality
-                });
-                recordedChunks = [];
-
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) recordedChunks.push(e.data);
-                };
-
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `pxltr-video-${Date.now()}.webm`;
-                    a.click();
-                    
-                    btn.classList.remove('btn-recording');
-                    btn.innerText = "Record Canvas";
-                    safeZone.style.border = originalBorder;
-                };
-
-                mediaRecorder.start();
-                video.play();
-
-                video.onended = () => {
-                    mediaRecorder.stop();
-                    video.onended = null;
-                };
-
-            } catch (err) {
-                console.error("Video Recording Error:", err);
-                btn.classList.remove('btn-recording');
-                btn.innerText = "Record Canvas";
-                safeZone.style.border = originalBorder;
             }
         }
 
@@ -456,12 +363,10 @@
                 const data = await response.json();
                 
                 if (data.predictions?.[0]?.bytesBase64Encoded) {
-                    isVideoMode = false;
                     document.getElementById('mainVideo').classList.add('hidden');
                     const img = document.getElementById('mainImage');
                     img.classList.remove('hidden');
                     img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-                    document.getElementById('actionText').innerText = "Pull PNG";
                 }
             } catch (err) { 
                 console.error("AI Generation Error:", err); 
@@ -469,6 +374,14 @@
                 btn.disabled = false; spinner.style.display = 'none'; text.style.display = 'inline'; 
             }
         }
+
+        // Editable Sync
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.addEventListener('input', () => {
+                const inputMap = { 'displayDate': 'dateInput', 'displayHandle': 'handleInput', 'displayCaption': 'captionInput' };
+                if (inputMap[el.id]) document.getElementById(inputMap[el.id]).value = el.innerText;
+            });
+        });
 
         window.onload = () => {
             const now = new Date();

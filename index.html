@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio Pro</title>
+    <title>pxltr Studio 1:1 HD</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
@@ -21,31 +20,49 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
         .app-wrapper {
             display: flex;
             flex-direction: row;
-            gap: 32px;
+            gap: 40px;
             align-items: flex-start;
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
             justify-content: center;
         }
 
-        /* High-res container */
+        /* 1:1 SQUARE PREVIEW WINDOW 
+           The UI displays it at 300px, but it's 800px underneath. */
+        .preview-window {
+            width: 300px;
+            height: 300px;
+            flex-shrink: 0;
+            position: relative;
+            background: #000;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-scaler {
+            transform: scale(0.375); /* Scale 800px down to 300px (300/800 = 0.375) */
+            transform-origin: top left;
+            width: 800px;
+            height: 800px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
         .card-container {
-            width: 240px; 
-            height: 426px;
+            width: 800px; 
+            height: 800px;
             position: relative;
             overflow: hidden;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 64px;
             background: #000;
-            flex-shrink: 0;
+            border: 4px solid rgba(255,255,255,0.1);
         }
 
         .canvas-area {
@@ -54,90 +71,69 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            padding: 15px;
+            justify-content: space-between;
+            padding: 50px;
             position: relative;
         }
 
-        .safe-zone-1to1 {
-            width: 210px; 
-            height: 210px; 
-            margin: 0 auto;
+        /* Safe zone is essentially the whole card in 1:1 */
+        .content-zone {
             display: flex;
             flex-direction: column;
-            position: relative;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 14px;
-            padding: 12px;
-            border: 1px dashed rgba(255, 255, 255, 0.2); 
-            box-sizing: border-box;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            gap: 8px;
+            gap: 24px;
+            flex: 1;
         }
 
         /* --- Mode Logic --- */
-        .caption-only-mode .safe-zone-1to1 {
-            height: auto;
-            background: transparent;
-            border-color: transparent;
-            padding: 0;
-            backdrop-filter: none;
-        }
         .caption-only-mode .main-media-container { display: none; }
-        .caption-only-mode .header-meta-row { flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+        .caption-only-mode .canvas-area { justify-content: center; text-align: center; }
+        .caption-only-mode .header-meta-row { flex-direction: column; align-items: center; gap: 24px; }
         .caption-only-mode .meta-pills { align-items: center; }
-        .caption-only-mode .caption-text-area { font-size: 13px; max-height: none; line-height: 1.4; text-align: center; }
-        .caption-only-mode .footer-row { margin-top: 16px; }
+        .caption-only-mode .caption-text-area { font-size: 48px; max-height: none; line-height: 1.4; }
 
         .media-only-mode .caption-text-area { display: none; }
-        .media-only-mode .main-media-container { height: 165px; } 
-        .media-only-mode .meta-pills { flex-direction: row; align-items: center; }
+        .media-only-mode .main-media-container { height: 500px; } 
+        .media-only-mode .meta-pills { flex-direction: row; align-items: center; gap: 15px; }
 
-        .header-meta-row { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
-        .meta-pills { display: flex; flex-direction: column; gap: 4px; }
+        .header-meta-row { display: flex; align-items: flex-start; gap: 30px; width: 100%; }
+        .meta-pills { display: flex; flex-direction: column; gap: 12px; }
 
         .caption-text-area {
             flex: 1;
-            font-size: 8px;
+            font-size: 28px;
             font-weight: 300;
-            line-height: 1.3;
+            line-height: 1.35;
             color: rgba(255, 255, 255, 0.95);
-            max-height: 32px;
+            max-height: 200px;
             overflow: hidden;
             word-wrap: break-word;
         }
 
         .main-media-container {
             width: 100%;
-            height: 135px; 
-            border-radius: 10px;
+            height: 400px; 
+            border-radius: 40px;
             overflow: hidden;
             background: #000;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
             position: relative;
+            transition: height 0.3s ease;
         }
 
-        .main-media {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            image-rendering: auto;
-        }
+        .main-media { width: 100%; height: 100%; object-fit: cover; }
 
         .footer-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-top: auto;
+            margin-top: 20px;
         }
 
         .icon-bar-inline {
             display: flex;
-            gap: 6px;
-            padding: 4px 10px;
+            gap: 15px;
+            padding: 15px 35px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 100px;
         }
@@ -146,12 +142,14 @@
             background: #3b82f6;
             color: white;
             border-radius: 100px;
-            padding: 2px 8px;
-            font-size: 6.5px;
+            padding: 8px 24px;
+            font-size: 20px;
             font-weight: 800;
             letter-spacing: 0.05em;
             white-space: nowrap;
         }
+
+        .social-icon { font-size: 24px; }
 
         .controls-panel {
             width: 300px;
@@ -183,9 +181,7 @@
             padding: 8px 12px;
             color: white;
             font-size: 12px;
-            transition: border 0.2s;
         }
-        input:focus { border-color: #3b82f6; outline: none; }
 
         .btn {
             background: #3b82f6;
@@ -196,16 +192,13 @@
             cursor: pointer;
             text-align: center;
             font-size: 11px;
-            transition: all 0.2s;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
-        .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
         .btn-secondary { background: #1e293b; border: 1px solid #334155; }
-        .btn-success { background: #10b981; }
 
         .loading-spinner {
             display: none;
@@ -216,54 +209,58 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        [contenteditable="true"]:focus { outline: none; background: rgba(59, 130, 246, 0.2); border-radius: 4px; }
+        [contenteditable="true"]:focus { outline: none; background: rgba(59, 130, 246, 0.2); border-radius: 12px; }
 
         @media (max-width: 650px) {
             .app-wrapper { flex-direction: column; align-items: center; }
+            .preview-window { margin-bottom: 20px; }
         }
     </style>
 </head>
 <body>
 
     <div class="mb-8 text-center">
-        <h1 class="text-2xl font-black italic tracking-tighter">pxltr Studio</h1>
-        <p class="text-slate-500 text-[9px] uppercase tracking-widest font-bold">High-Definition Social Assets</p>
+        <h1 class="text-2xl font-black italic tracking-tighter">pxltr Studio Square</h1>
+        <p class="text-slate-500 text-[9px] uppercase tracking-widest font-bold">1:1 High-Resolution Screenshots</p>
     </div>
 
     <div class="app-wrapper">
-        <!-- The Card -->
-        <div id="exportWrapper" class="card-container">
-            <div class="canvas-area" id="mainCanvas">
-                <div class="safe-zone-1to1" id="safeZone">
-                    <div class="header-meta-row">
-                        <div class="meta-pills">
-                            <div class="date-pill" id="displayDate" contenteditable="true">02.05.2026</div>
-                            <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR_STUDIO</div>
+        <!-- 1:1 Square Card -->
+        <div class="preview-window">
+            <div class="card-scaler">
+                <div class="card-container" id="captureCard">
+                    <div class="canvas-area" id="mainCanvas">
+                        <div class="content-zone">
+                            <div class="header-meta-row">
+                                <div class="meta-pills">
+                                    <div class="date-pill" id="displayDate" contenteditable="true">02.05.2026</div>
+                                    <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR_SQUARE</div>
+                                </div>
+                                <div class="caption-text-area" id="displayCaption" contenteditable="true">
+                                    Native 800x800 square resolution. Perfect for manual high-quality screenshots.
+                                </div>
+                            </div>
+                            
+                            <div class="main-media-container" id="mediaWrapper">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=100&w=800" 
+                                    id="mainImage" 
+                                    class="main-media"
+                                >
+                                <video id="mainVideo" class="main-media hidden" playsinline loop muted></video>
+                            </div>
                         </div>
-                        <div class="caption-text-area" id="displayCaption" contenteditable="true">
-                            Crystal clear resolution. Designed for high-impact social sharing.
-                        </div>
-                    </div>
-                    
-                    <div class="main-media-container" id="mediaWrapper">
-                        <img 
-                            src="https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?auto=format&fit=crop&q=100&w=600" 
-                            id="mainImage" 
-                            class="main-media"
-                            crossorigin="anonymous"
-                        >
-                        <video id="mainVideo" class="main-media hidden" playsinline loop muted></video>
-                    </div>
 
-                    <div class="footer-row">
-                        <div class="icon-bar-inline">
-                            <i class="fa-brands fa-facebook text-[7px]" style="color:#1877F2"></i>
-                            <i class="fa-brands fa-youtube text-[7px]" style="color:#ff0000"></i>
-                            <i class="fa-brands fa-threads text-[7px]" style="color:#fff"></i>
-                            <i class="fa-brands fa-instagram text-[7px]" style="color:#E4405F"></i>
-                            <i class="fa-brands fa-tiktok text-[7px]" style="color:#00f2ea"></i>
+                        <div class="footer-row">
+                            <div class="icon-bar-inline">
+                                <i class="fa-brands fa-facebook social-icon" style="color:#1877F2"></i>
+                                <i class="fa-brands fa-youtube social-icon" style="color:#ff0000"></i>
+                                <i class="fa-brands fa-threads social-icon" style="color:#fff"></i>
+                                <i class="fa-brands fa-instagram social-icon" style="color:#E4405F"></i>
+                                <i class="fa-brands fa-tiktok social-icon" style="color:#00f2ea"></i>
+                            </div>
+                            <div class="h-2 w-16 bg-white/20 rounded-full"></div>
                         </div>
-                        <div class="h-1 w-6 bg-white/20 rounded-full"></div>
                     </div>
                 </div>
             </div>
@@ -271,23 +268,21 @@
 
         <!-- Controls -->
         <div class="controls-panel">
-            <div class="section-title">Layout Mode</div>
+            <div class="section-title">Square Modes</div>
             <div class="grid grid-cols-3 gap-1 mb-4">
                 <button id="modeStandard" class="btn" onclick="setMode('standard')">Standard</button>
-                <button id="modeCaption" class="btn btn-secondary" onclick="setMode('caption')">Text</button>
-                <button id="modeMedia" class="btn btn-secondary" onclick="setMode('media')">Media</button>
+                <button id="modeCaption" class="btn btn-secondary" onclick="setMode('caption')">Text Only</button>
+                <button id="modeMedia" class="btn btn-secondary" onclick="setMode('media')">Media Only</button>
             </div>
 
-            <div class="section-title">Media Content</div>
-            <div class="flex gap-2 mb-4">
-                <button class="btn btn-secondary flex-1" onclick="document.getElementById('fileInput').click()">
-                    <i class="fa-solid fa-upload"></i> Upload
-                </button>
-                <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
-            </div>
+            <div class="section-title">Visuals</div>
+            <button class="btn btn-secondary w-full mb-3" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-upload"></i> Upload Image/Video
+            </button>
+            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
 
             <div class="flex gap-2">
-                <input type="text" id="aiPrompt" placeholder="AI Image Prompt..." class="flex-1">
+                <input type="text" id="aiPrompt" placeholder="AI Image Gen..." class="flex-1">
                 <button class="btn w-12" id="genImageBtn" onclick="generateAIImage()">
                     <div class="loading-spinner" id="genSpinner"></div>
                     <i class="fa-solid fa-wand-magic-sparkles" id="genIcon"></i>
@@ -296,19 +291,16 @@
 
             <div class="section-title">Details</div>
             <div class="grid grid-cols-2 gap-2 mb-2">
-                <input type="text" id="dateInput" placeholder="Date" oninput="updateFromInput('dateInput', 'displayDate')">
-                <input type="text" id="handleInput" placeholder="Handle" oninput="updateFromInput('handleInput', 'displayHandle')">
+                <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate')">
+                <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle')">
             </div>
-            <textarea id="captionInput" placeholder="Write caption..." rows="2" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
+            <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
 
-            <div class="section-title">Finalize</div>
-            <button class="btn btn-success w-full" onclick="exportCard()">
-                <i class="fa-solid fa-download"></i> Export High-Res PNG
-            </button>
-            
-            <p class="text-[10px] text-slate-500 mt-4 text-center italic">
-                Exporting uses 3x supersampling to prevent blur.
-            </p>
+            <div class="mt-6 p-4 bg-blue-900/20 rounded-xl border border-blue-500/30">
+                <p class="text-[10px] text-blue-200 leading-relaxed text-center">
+                    <strong>1:1 Optimization:</strong> This square is rendered at high resolution. Screenshot the preview window for sharp results.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -319,7 +311,6 @@
             const canvas = document.getElementById('mainCanvas');
             const btns = ['modeStandard', 'modeCaption', 'modeMedia'];
             btns.forEach(b => document.getElementById(b).classList.add('btn-secondary'));
-            
             canvas.classList.remove('caption-only-mode', 'media-only-mode');
             
             if (mode === 'caption') {
@@ -342,7 +333,6 @@
             if (!file) return;
             const imageEl = document.getElementById('mainImage');
             const videoEl = document.getElementById('mainVideo');
-            
             if (file.type.startsWith('video/')) {
                 imageEl.classList.add('hidden');
                 videoEl.classList.remove('hidden');
@@ -378,34 +368,6 @@
                 }
             } catch (err) { console.error(err); } 
             finally { btn.disabled = false; spinner.style.display = 'none'; icon.style.display = 'block'; }
-        }
-
-        async function exportCard() {
-            const target = document.getElementById('exportWrapper');
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
-
-            try {
-                // Use html2canvas with high scale for sharpness
-                const canvas = await html2canvas(target, {
-                    scale: 3, // 3x scale for crispness
-                    useCORS: true,
-                    backgroundColor: null,
-                    logging: false
-                });
-                
-                const link = document.createElement('a');
-                link.download = `pxltr-export-${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
-                link.click();
-            } catch (err) {
-                console.error("Export failed", err);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
         }
 
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {

@@ -27,12 +27,11 @@
             flex-direction: row;
             gap: 24px;
             align-items: flex-start;
-            max-width: 800px;
+            max-width: 850px;
             width: 100%;
             justify-content: center;
         }
 
-        /* Scaled down container */
         .card-container {
             width: 240px; 
             height: 426px;
@@ -54,6 +53,7 @@
             justify-content: center;
             padding: 15px;
             position: relative;
+            transition: all 0.3s ease;
         }
 
         .safe-zone-1to1 {
@@ -66,16 +66,39 @@
             z-index: 2;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 14px;
-            padding: 10px;
+            padding: 12px;
             border: 1px dashed rgba(255, 255, 255, 0.15); 
             box-sizing: border-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 8px;
         }
+
+        /* --- Mode Specific Styles --- */
+        
+        /* Text Only Mode */
+        .caption-only-mode .safe-zone-1to1 {
+            height: auto;
+            justify-content: center;
+            background: transparent;
+            border-color: transparent;
+            padding: 0;
+        }
+        .caption-only-mode .main-media-container { display: none; }
+        .caption-only-mode .header-meta-row { flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+        .caption-only-mode .meta-pills { align-items: center; }
+        .caption-only-mode .caption-text-area { font-size: 13px; max-height: none; font-weight: 400; line-height: 1.4; color: #fff; text-align: center; }
+        .caption-only-mode .footer-row { margin-top: 16px; }
+
+        /* Media Only Mode */
+        .media-only-mode .caption-text-area { display: none; }
+        .media-only-mode .main-media-container { height: 165px; } 
+        /* Switch meta row to horizontal in media mode */
+        .media-only-mode .meta-pills { flex-direction: row; align-items: center; }
 
         .header-meta-row {
             display: flex;
             align-items: flex-start;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 10px;
             width: 100%;
             flex-shrink: 0;
         }
@@ -83,16 +106,16 @@
         .meta-pills {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
         }
 
         .caption-text-area {
             flex: 1;
-            font-size: 7.5px;
+            font-size: 8px;
             font-weight: 300;
-            line-height: 1.2;
+            line-height: 1.3;
             color: rgba(255, 255, 255, 0.9);
-            max-height: 24px;
+            max-height: 32px;
             overflow: hidden;
             word-wrap: break-word;
         }
@@ -100,11 +123,12 @@
         .main-media-container {
             width: 100%;
             height: 135px; 
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             background: #000;
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
+            transition: all 0.3s ease;
         }
 
         .main-media {
@@ -121,9 +145,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 6px;
             width: 100%;
             flex-shrink: 0;
+            margin-top: auto;
         }
 
         .icon-bar-inline {
@@ -203,9 +227,14 @@
             text-align: center;
             display: block;
             width: 100%;
-            font-size: 11px;
+            font-size: 10px;
             transition: all 0.2s;
             border: none;
+        }
+
+        .btn-secondary {
+            background: #1e293b;
+            border: 1px solid #334155;
         }
 
         .loading-spinner {
@@ -235,7 +264,7 @@
     <div class="app-wrapper">
         <!-- Compact Card -->
         <div class="card-container" id="captureCard">
-            <div class="canvas-area">
+            <div class="canvas-area" id="mainCanvas">
                 <div class="safe-zone-1to1" id="safeZone">
                     <div class="header-meta-row">
                         <div class="meta-pills">
@@ -243,11 +272,11 @@
                             <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
                         </div>
                         <div class="caption-text-area" id="displayCaption" contenteditable="true">
-                            Minimal scale, maximum impact.
+                            Minimal scale, maximum impact. Keeping designs clean and compact.
                         </div>
                     </div>
                     
-                    <div class="main-media-container">
+                    <div class="main-media-container" id="mediaWrapper">
                         <img 
                             src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400" 
                             id="mainImage" 
@@ -270,47 +299,60 @@
             </div>
         </div>
 
-        <!-- Smaller Controls -->
+        <!-- Controls -->
         <div class="controls-panel">
-            <div class="section-title">Visuals</div>
-            <div class="mb-2">
-                <button class="btn bg-slate-800 border border-slate-700 w-full flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
-                    <i class="fa-solid fa-file-import text-[9px]"></i> Upload Media
-                </button>
-                <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
+            <div class="section-title">Display Mode</div>
+            <div class="grid grid-cols-3 gap-1 mb-4">
+                <button id="modeStandard" class="btn" onclick="setMode('standard')">Standard</button>
+                <button id="modeCaption" class="btn btn-secondary" onclick="setMode('caption')">Text</button>
+                <button id="modeMedia" class="btn btn-secondary" onclick="setMode('media')">Media</button>
             </div>
 
-            <div class="section-title mt-4">Meta</div>
-            <div class="grid grid-cols-2 gap-2 mb-2">
-                <div class="input-group">
-                    <label class="input-label">Date</label>
-                    <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate')">
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Handle</label>
-                    <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle')">
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label class="input-label">Caption</label>
-                <textarea id="captionInput" rows="1" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
-            </div>
-
-            <div class="section-title mt-4">AI Gen</div>
-            <div class="input-group">
-                <div class="flex gap-1">
-                    <input type="text" id="aiPrompt" placeholder="Prompt...">
-                    <button class="btn w-12" id="genImageBtn" onclick="generateAIImage()">
-                        <div class="loading-spinner" id="genSpinner"></div>
-                        <span id="genText">Go</span>
+            <div id="visualsGroup">
+                <div class="section-title">Visuals</div>
+                <div class="mb-2">
+                    <button class="btn bg-slate-800 border border-slate-700 w-full flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
+                        <i class="fa-solid fa-file-import text-[9px]"></i> Upload Media
                     </button>
+                    <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
+                </div>
+            </div>
+
+            <div id="textGroup">
+                <div class="section-title mt-4">Meta</div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div class="input-group">
+                        <label class="input-label">Date</label>
+                        <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate')">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Handle</label>
+                        <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle')">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Caption</label>
+                    <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
+                </div>
+            </div>
+
+            <div id="aiGroup">
+                <div class="section-title mt-4">AI Gen</div>
+                <div class="input-group">
+                    <div class="flex gap-1">
+                        <input type="text" id="aiPrompt" placeholder="Creative prompt...">
+                        <button class="btn w-10" id="genImageBtn" onclick="generateAIImage()">
+                            <div class="loading-spinner" id="genSpinner"></div>
+                            <span id="genText">Go</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div class="mt-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
                 <p class="text-[9px] text-slate-500 italic">
-                    All text on the card is directly editable.
+                    Tap any text on the card to edit directly.
                 </p>
             </div>
         </div>
@@ -318,6 +360,39 @@
 
     <script>
         const apiKey = "";
+        let currentMode = 'standard';
+
+        function setMode(mode) {
+            currentMode = mode;
+            const canvas = document.getElementById('mainCanvas');
+            const visualsGroup = document.getElementById('visualsGroup');
+            const aiGroup = document.getElementById('aiGroup');
+            
+            const btnStandard = document.getElementById('modeStandard');
+            const btnCaption = document.getElementById('modeCaption');
+            const btnMedia = document.getElementById('modeMedia');
+
+            // Reset UI
+            canvas.classList.remove('caption-only-mode', 'media-only-mode');
+            visualsGroup.classList.remove('opacity-30', 'pointer-events-none');
+            aiGroup.classList.remove('opacity-30', 'pointer-events-none');
+            
+            btnStandard.classList.add('btn-secondary');
+            btnCaption.classList.add('btn-secondary');
+            btnMedia.classList.add('btn-secondary');
+
+            if (mode === 'caption') {
+                canvas.classList.add('caption-only-mode');
+                visualsGroup.classList.add('opacity-30', 'pointer-events-none');
+                aiGroup.classList.add('opacity-30', 'pointer-events-none');
+                btnCaption.classList.remove('btn-secondary');
+            } else if (mode === 'media') {
+                canvas.classList.add('media-only-mode');
+                btnMedia.classList.remove('btn-secondary');
+            } else {
+                btnStandard.classList.remove('btn-secondary');
+            }
+        }
 
         function updateFromInput(inputId, targetId) {
             document.getElementById(targetId).innerText = document.getElementById(inputId).value;

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Mini Studio</title>
+    <title>pxltr Studio Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
@@ -20,26 +21,29 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .app-wrapper {
             display: flex;
             flex-direction: row;
-            gap: 24px;
+            gap: 32px;
             align-items: flex-start;
-            max-width: 850px;
+            max-width: 900px;
             width: 100%;
             justify-content: center;
         }
 
+        /* High-res container */
         .card-container {
             width: 240px; 
             height: 426px;
             position: relative;
             overflow: hidden;
-            border-radius: 18px;
-            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.8);
-            border: 3px solid #1e293b;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.1);
             background: #000;
             flex-shrink: 0;
         }
@@ -53,7 +57,6 @@
             justify-content: center;
             padding: 15px;
             position: relative;
-            transition: all 0.3s ease;
         }
 
         .safe-zone-1to1 {
@@ -65,56 +68,42 @@
             position: relative;
             z-index: 2;
             background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             border-radius: 14px;
             padding: 12px;
-            border: 1px dashed rgba(255, 255, 255, 0.15); 
+            border: 1px dashed rgba(255, 255, 255, 0.2); 
             box-sizing: border-box;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             gap: 8px;
         }
 
-        /* --- Mode Specific Styles --- */
-        
-        /* Text Only Mode */
+        /* --- Mode Logic --- */
         .caption-only-mode .safe-zone-1to1 {
             height: auto;
-            justify-content: center;
             background: transparent;
             border-color: transparent;
             padding: 0;
+            backdrop-filter: none;
         }
         .caption-only-mode .main-media-container { display: none; }
         .caption-only-mode .header-meta-row { flex-direction: column; align-items: center; text-align: center; gap: 8px; }
         .caption-only-mode .meta-pills { align-items: center; }
-        .caption-only-mode .caption-text-area { font-size: 13px; max-height: none; font-weight: 400; line-height: 1.4; color: #fff; text-align: center; }
+        .caption-only-mode .caption-text-area { font-size: 13px; max-height: none; line-height: 1.4; text-align: center; }
         .caption-only-mode .footer-row { margin-top: 16px; }
 
-        /* Media Only Mode */
         .media-only-mode .caption-text-area { display: none; }
         .media-only-mode .main-media-container { height: 165px; } 
-        /* Switch meta row to horizontal in media mode */
         .media-only-mode .meta-pills { flex-direction: row; align-items: center; }
 
-        .header-meta-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            width: 100%;
-            flex-shrink: 0;
-        }
-
-        .meta-pills {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+        .header-meta-row { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+        .meta-pills { display: flex; flex-direction: column; gap: 4px; }
 
         .caption-text-area {
             flex: 1;
             font-size: 8px;
             font-weight: 300;
             line-height: 1.3;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             max-height: 32px;
             overflow: hidden;
             word-wrap: break-word;
@@ -128,17 +117,13 @@
             background: #000;
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
-            transition: all 0.3s ease;
         }
 
         .main-media {
             width: 100%;
             height: 100%;
-            display: block;
-            object-fit: contain;
-            position: absolute;
-            top: 0;
-            left: 0;
+            object-fit: cover;
+            image-rendering: auto;
         }
 
         .footer-row {
@@ -146,15 +131,13 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            flex-shrink: 0;
             margin-top: auto;
         }
 
         .icon-bar-inline {
             display: flex;
             gap: 6px;
-            align-items: center;
-            padding: 3px 8px;
+            padding: 4px 10px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 100px;
         }
@@ -163,137 +146,124 @@
             background: #3b82f6;
             color: white;
             border-radius: 100px;
-            padding: 1px 6px;
-            font-size: 6px;
+            padding: 2px 8px;
+            font-size: 6.5px;
             font-weight: 800;
             letter-spacing: 0.05em;
             white-space: nowrap;
         }
 
         .controls-panel {
-            width: 280px;
+            width: 300px;
             background: #0f172a;
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 20px;
+            padding: 20px;
             border: 1px solid #1e293b;
         }
 
         .section-title {
-            font-size: 8px;
+            font-size: 9px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.15em;
             color: #3b82f6;
-            margin-bottom: 8px;
+            margin: 16px 0 8px 0;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
         }
-
-        .section-title::after {
-            content: "";
-            flex-grow: 1;
-            height: 1px;
-            background: #1e293b;
-        }
-
-        .input-group { margin-bottom: 10px; }
-        .input-label {
-            display: block;
-            font-size: 9px;
-            text-transform: uppercase;
-            color: #94a3b8;
-            margin-bottom: 3px;
-            font-weight: 600;
-        }
+        .section-title:first-child { margin-top: 0; }
+        .section-title::after { content: ""; flex-grow: 1; height: 1px; background: #1e293b; }
 
         input, textarea {
             width: 100%;
             background: #1e293b;
             border: 1px solid #334155;
-            border-radius: 6px;
-            padding: 6px 8px;
+            border-radius: 8px;
+            padding: 8px 12px;
             color: white;
-            font-size: 11px;
+            font-size: 12px;
+            transition: border 0.2s;
         }
+        input:focus { border-color: #3b82f6; outline: none; }
 
         .btn {
             background: #3b82f6;
             color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             text-align: center;
-            display: block;
-            width: 100%;
-            font-size: 10px;
+            font-size: 11px;
             transition: all 0.2s;
             border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-
-        .btn-secondary {
-            background: #1e293b;
-            border: 1px solid #334155;
-        }
+        .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        .btn-secondary { background: #1e293b; border: 1px solid #334155; }
+        .btn-success { background: #10b981; }
 
         .loading-spinner {
             display: none;
-            width: 12px; height: 12px;
+            width: 14px; height: 14px;
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%; border-top-color: #fff;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        [contenteditable="true"]:focus { outline: none; background: rgba(59, 130, 246, 0.2); border-radius: 3px; }
+        [contenteditable="true"]:focus { outline: none; background: rgba(59, 130, 246, 0.2); border-radius: 4px; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 650px) {
             .app-wrapper { flex-direction: column; align-items: center; }
         }
     </style>
 </head>
 <body>
 
-    <div class="mb-6 text-center">
-        <h1 class="text-xl font-black italic tracking-tighter">pxltr Studio</h1>
-        <p class="text-slate-400 text-[8px] uppercase tracking-widest">Multimedia Design Board</p>
+    <div class="mb-8 text-center">
+        <h1 class="text-2xl font-black italic tracking-tighter">pxltr Studio</h1>
+        <p class="text-slate-500 text-[9px] uppercase tracking-widest font-bold">High-Definition Social Assets</p>
     </div>
 
     <div class="app-wrapper">
-        <!-- Compact Card -->
-        <div class="card-container" id="captureCard">
+        <!-- The Card -->
+        <div id="exportWrapper" class="card-container">
             <div class="canvas-area" id="mainCanvas">
                 <div class="safe-zone-1to1" id="safeZone">
                     <div class="header-meta-row">
                         <div class="meta-pills">
-                            <div class="date-pill" id="displayDate" contenteditable="true">02.04.2026</div>
-                            <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR30</div>
+                            <div class="date-pill" id="displayDate" contenteditable="true">02.05.2026</div>
+                            <div class="brand-pill uppercase" id="displayHandle" contenteditable="true">@PXTR_STUDIO</div>
                         </div>
                         <div class="caption-text-area" id="displayCaption" contenteditable="true">
-                            Minimal scale, maximum impact. Keeping designs clean and compact.
+                            Crystal clear resolution. Designed for high-impact social sharing.
                         </div>
                     </div>
                     
                     <div class="main-media-container" id="mediaWrapper">
                         <img 
-                            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400" 
+                            src="https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?auto=format&fit=crop&q=100&w=600" 
                             id="mainImage" 
                             class="main-media"
+                            crossorigin="anonymous"
                         >
-                        <video id="mainVideo" class="main-media hidden" controls playsinline loop></video>
+                        <video id="mainVideo" class="main-media hidden" playsinline loop muted></video>
                     </div>
 
                     <div class="footer-row">
                         <div class="icon-bar-inline">
-                            <i class="fa-brands fa-facebook text-[6px]" style="color:#1877F2"></i>
-                            <i class="fa-brands fa-youtube text-[6px]" style="color:#ff0000"></i>
-                            <i class="fa-brands fa-threads text-[6px]" style="color:#fff"></i>
-                            <i class="fa-brands fa-instagram text-[6px]" style="color:#E4405F"></i>
-                            <i class="fa-brands fa-tiktok text-[6px]" style="color:#00f2ea"></i>
+                            <i class="fa-brands fa-facebook text-[7px]" style="color:#1877F2"></i>
+                            <i class="fa-brands fa-youtube text-[7px]" style="color:#ff0000"></i>
+                            <i class="fa-brands fa-threads text-[7px]" style="color:#fff"></i>
+                            <i class="fa-brands fa-instagram text-[7px]" style="color:#E4405F"></i>
+                            <i class="fa-brands fa-tiktok text-[7px]" style="color:#00f2ea"></i>
                         </div>
-                        <div class="h-0.5 w-4 bg-white/20 rounded-full"></div>
+                        <div class="h-1 w-6 bg-white/20 rounded-full"></div>
                     </div>
                 </div>
             </div>
@@ -301,96 +271,65 @@
 
         <!-- Controls -->
         <div class="controls-panel">
-            <div class="section-title">Display Mode</div>
+            <div class="section-title">Layout Mode</div>
             <div class="grid grid-cols-3 gap-1 mb-4">
                 <button id="modeStandard" class="btn" onclick="setMode('standard')">Standard</button>
                 <button id="modeCaption" class="btn btn-secondary" onclick="setMode('caption')">Text</button>
                 <button id="modeMedia" class="btn btn-secondary" onclick="setMode('media')">Media</button>
             </div>
 
-            <div id="visualsGroup">
-                <div class="section-title">Visuals</div>
-                <div class="mb-2">
-                    <button class="btn bg-slate-800 border border-slate-700 w-full flex items-center justify-center gap-2" onclick="document.getElementById('fileInput').click()">
-                        <i class="fa-solid fa-file-import text-[9px]"></i> Upload Media
-                    </button>
-                    <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
-                </div>
+            <div class="section-title">Media Content</div>
+            <div class="flex gap-2 mb-4">
+                <button class="btn btn-secondary flex-1" onclick="document.getElementById('fileInput').click()">
+                    <i class="fa-solid fa-upload"></i> Upload
+                </button>
+                <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
             </div>
 
-            <div id="textGroup">
-                <div class="section-title mt-4">Meta</div>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <div class="input-group">
-                        <label class="input-label">Date</label>
-                        <input type="text" id="dateInput" oninput="updateFromInput('dateInput', 'displayDate')">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Handle</label>
-                        <input type="text" id="handleInput" oninput="updateFromInput('handleInput', 'displayHandle')">
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label class="input-label">Caption</label>
-                    <textarea id="captionInput" rows="2" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
-                </div>
+            <div class="flex gap-2">
+                <input type="text" id="aiPrompt" placeholder="AI Image Prompt..." class="flex-1">
+                <button class="btn w-12" id="genImageBtn" onclick="generateAIImage()">
+                    <div class="loading-spinner" id="genSpinner"></div>
+                    <i class="fa-solid fa-wand-magic-sparkles" id="genIcon"></i>
+                </button>
             </div>
 
-            <div id="aiGroup">
-                <div class="section-title mt-4">AI Gen</div>
-                <div class="input-group">
-                    <div class="flex gap-1">
-                        <input type="text" id="aiPrompt" placeholder="Creative prompt...">
-                        <button class="btn w-10" id="genImageBtn" onclick="generateAIImage()">
-                            <div class="loading-spinner" id="genSpinner"></div>
-                            <span id="genText">Go</span>
-                        </button>
-                    </div>
-                </div>
+            <div class="section-title">Details</div>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="text" id="dateInput" placeholder="Date" oninput="updateFromInput('dateInput', 'displayDate')">
+                <input type="text" id="handleInput" placeholder="Handle" oninput="updateFromInput('handleInput', 'displayHandle')">
             </div>
+            <textarea id="captionInput" placeholder="Write caption..." rows="2" oninput="updateFromInput('captionInput', 'displayCaption')"></textarea>
 
-            <div class="mt-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
-                <p class="text-[9px] text-slate-500 italic">
-                    Tap any text on the card to edit directly.
-                </p>
-            </div>
+            <div class="section-title">Finalize</div>
+            <button class="btn btn-success w-full" onclick="exportCard()">
+                <i class="fa-solid fa-download"></i> Export High-Res PNG
+            </button>
+            
+            <p class="text-[10px] text-slate-500 mt-4 text-center italic">
+                Exporting uses 3x supersampling to prevent blur.
+            </p>
         </div>
     </div>
 
     <script>
         const apiKey = "";
-        let currentMode = 'standard';
 
         function setMode(mode) {
-            currentMode = mode;
             const canvas = document.getElementById('mainCanvas');
-            const visualsGroup = document.getElementById('visualsGroup');
-            const aiGroup = document.getElementById('aiGroup');
+            const btns = ['modeStandard', 'modeCaption', 'modeMedia'];
+            btns.forEach(b => document.getElementById(b).classList.add('btn-secondary'));
             
-            const btnStandard = document.getElementById('modeStandard');
-            const btnCaption = document.getElementById('modeCaption');
-            const btnMedia = document.getElementById('modeMedia');
-
-            // Reset UI
             canvas.classList.remove('caption-only-mode', 'media-only-mode');
-            visualsGroup.classList.remove('opacity-30', 'pointer-events-none');
-            aiGroup.classList.remove('opacity-30', 'pointer-events-none');
             
-            btnStandard.classList.add('btn-secondary');
-            btnCaption.classList.add('btn-secondary');
-            btnMedia.classList.add('btn-secondary');
-
             if (mode === 'caption') {
                 canvas.classList.add('caption-only-mode');
-                visualsGroup.classList.add('opacity-30', 'pointer-events-none');
-                aiGroup.classList.add('opacity-30', 'pointer-events-none');
-                btnCaption.classList.remove('btn-secondary');
+                document.getElementById('modeCaption').classList.remove('btn-secondary');
             } else if (mode === 'media') {
                 canvas.classList.add('media-only-mode');
-                btnMedia.classList.remove('btn-secondary');
+                document.getElementById('modeMedia').classList.remove('btn-secondary');
             } else {
-                btnStandard.classList.remove('btn-secondary');
+                document.getElementById('modeStandard').classList.remove('btn-secondary');
             }
         }
 
@@ -403,6 +342,7 @@
             if (!file) return;
             const imageEl = document.getElementById('mainImage');
             const videoEl = document.getElementById('mainVideo');
+            
             if (file.type.startsWith('video/')) {
                 imageEl.classList.add('hidden');
                 videoEl.classList.remove('hidden');
@@ -410,7 +350,6 @@
                 videoEl.play();
             } else {
                 videoEl.classList.add('hidden');
-                videoEl.pause();
                 imageEl.classList.remove('hidden');
                 const reader = new FileReader();
                 reader.onload = (e) => { imageEl.src = e.target.result; };
@@ -421,8 +360,8 @@
         async function generateAIImage() {
             const prompt = document.getElementById('aiPrompt').value;
             if (!prompt) return;
-            const btn = document.getElementById('genImageBtn'), spinner = document.getElementById('genSpinner'), text = document.getElementById('genText');
-            btn.disabled = true; spinner.style.display = 'block'; text.style.display = 'none';
+            const btn = document.getElementById('genImageBtn'), spinner = document.getElementById('genSpinner'), icon = document.getElementById('genIcon');
+            btn.disabled = true; spinner.style.display = 'block'; icon.style.display = 'none';
 
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
@@ -437,10 +376,35 @@
                     img.classList.remove('hidden');
                     img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
                 }
-            } catch (err) { 
-                console.error("AI Error:", err); 
-            } finally { 
-                btn.disabled = false; spinner.style.display = 'none'; text.style.display = 'inline'; 
+            } catch (err) { console.error(err); } 
+            finally { btn.disabled = false; spinner.style.display = 'none'; icon.style.display = 'block'; }
+        }
+
+        async function exportCard() {
+            const target = document.getElementById('exportWrapper');
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                // Use html2canvas with high scale for sharpness
+                const canvas = await html2canvas(target, {
+                    scale: 3, // 3x scale for crispness
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false
+                });
+                
+                const link = document.createElement('a');
+                link.download = `pxltr-export-${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+            } catch (err) {
+                console.error("Export failed", err);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 

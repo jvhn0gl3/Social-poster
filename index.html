@@ -22,35 +22,34 @@
             min-height: 100vh;
         }
 
-        /* The Export Canvas - High Precision */
+        /* The Live Preview - Optimized for viewing */
         #captureArea {
-            width: 500px;
-            height: 500px;
+            width: 400px;
+            height: 400px;
             background-color: #0f131f;
-            background-image: radial-gradient(circle at 50% 0%, #1a2236 0%, #0f131f 70%);
-            border-radius: 60px;
-            padding: 50px;
+            background-image: radial-gradient(circle at 50% 0%, #1a2236 0%, #0f131f 80%);
+            border-radius: 50px;
+            padding: 40px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
-            /* Prevent library artifacts */
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
             overflow: hidden;
             border: 1px solid rgba(255,255,255,0.05);
         }
 
         .header-tags {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
             align-items: center;
         }
 
         .tag {
-            padding: 8px 18px;
-            border-radius: 50px;
-            font-size: 14px;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 13px;
             font-weight: 800;
             letter-spacing: -0.02em;
             display: flex;
@@ -58,15 +57,14 @@
             justify-content: center;
         }
 
-        /* Solid colors to avoid html2canvas filter bugs */
         .tag-blue {
             background: #2563eb;
             color: #ffffff;
         }
 
         .tag-gray {
-            background: rgba(255, 255, 255, 0.12);
-            color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .content-area {
@@ -75,19 +73,17 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 20px 0;
+            padding: 10px 0;
         }
 
         #previewText {
-            font-size: 32px;
-            line-height: 1.3;
+            font-size: 26px;
+            line-height: 1.35;
             font-weight: 700;
             color: #ffffff;
             word-wrap: break-word;
             max-width: 100%;
-            letter-spacing: -0.01em;
-            /* Force hardware acceleration for sharper text */
-            transform: translateZ(0);
+            letter-spacing: -0.02em;
         }
 
         .social-container {
@@ -96,97 +92,98 @@
         }
 
         .social-bar {
-            background: rgba(255, 255, 255, 0.06);
-            padding: 14px 24px;
-            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 22px;
+            border-radius: 100px;
             display: flex;
-            gap: 16px;
+            gap: 14px;
             align-items: center;
+            border: 1px solid rgba(255,255,255,0.03);
         }
 
         .social-bar i {
-            font-size: 16px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            font-size: 14px;
         }
 
         /* Controls Panel */
         .controls-container {
             width: 100%;
-            max-width: 500px;
-            background: #111827;
-            margin-top: 40px;
-            border-radius: 28px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 80px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
+            max-width: 400px;
+            background: #0f131f;
+            margin-top: 30px;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 60px;
         }
 
         .input-label {
             color: #3b82f6;
             text-transform: uppercase;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 900;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
             display: block;
         }
 
         .input-field {
-            background: #1f2937;
-            border: 1px solid #374151;
-            border-radius: 14px;
-            padding: 16px;
+            background: #161b2a;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 14px;
             width: 100%;
             color: white;
             outline: none;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.2s;
         }
 
         .input-field:focus {
             border-color: #3b82f6;
-            background: #262f3f;
+            background: #1a2236;
         }
 
         .btn-export {
             background: #2563eb;
             color: white;
-            padding: 18px;
-            border-radius: 18px;
+            padding: 16px;
+            border-radius: 16px;
             font-weight: 800;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             cursor: pointer;
             border: none;
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+            transition: all 0.2s;
+            margin-top: 10px;
         }
 
         .btn-export:hover {
             background: #1d4ed8;
             transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(37, 99, 235, 0.3);
         }
 
-        .btn-export:active {
-            transform: translateY(0);
+        /* Hidden Master Stage for Clean Rendering */
+        #renderStage {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
         }
     </style>
 </head>
 <body>
 
-    <div class="text-center mb-10">
-        <h1 class="text-3xl font-black italic tracking-tighter">PXTR STUDIO</h1>
-        <div class="h-1 w-12 bg-blue-600 mx-auto mt-2 rounded-full"></div>
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-black italic tracking-tighter">PXTR STUDIO</h1>
+        <p class="text-[9px] tracking-[3px] text-gray-500 font-bold uppercase">Pixel-Perfect Render Engine</p>
     </div>
 
-    <!-- The Square Render Canvas -->
+    <!-- Live Preview -->
     <div id="captureArea">
         <div class="header-tags">
             <div class="tag tag-gray" id="progressTag">0%</div>
@@ -195,7 +192,7 @@
         </div>
 
         <div class="content-area">
-            <div id="previewText">Focus on the output. Precision over everything.</div>
+            <div id="previewText">Focus</div>
         </div>
 
         <div class="social-container">
@@ -213,9 +210,9 @@
         </div>
     </div>
 
-    <!-- User Controls -->
+    <!-- Controls -->
     <div class="controls-container">
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
                 <span class="input-label">Date</span>
                 <input type="text" id="inputDate" class="input-field" value="02.24.2026">
@@ -226,15 +223,18 @@
             </div>
         </div>
         
-        <div class="input-group">
+        <div class="mb-4">
             <span class="input-label">Message Content</span>
-            <textarea id="inputText" class="input-field h-32 resize-none">Focus on the output. Precision over everything.</textarea>
+            <textarea id="inputText" class="input-field h-24 resize-none">Focus on the output. Precision over everything.</textarea>
         </div>
 
         <button onclick="captureCard()" class="btn-export">
-            <i class="fas fa-file-export"></i> EXPORT HIGH-RES PNG
+            <i class="fas fa-bolt"></i> RENDER MASTER PNG
         </button>
     </div>
+
+    <!-- The hidden high-res render container -->
+    <div id="renderStage"></div>
 
     <script>
         const elements = {
@@ -245,7 +245,8 @@
             inputDate: document.getElementById('inputDate'),
             inputHandle: document.getElementById('inputHandle'),
             inputText: document.getElementById('inputText'),
-            captureArea: document.getElementById('captureArea')
+            captureArea: document.getElementById('captureArea'),
+            renderStage: document.getElementById('renderStage')
         };
 
         function calculateProgress() {
@@ -265,34 +266,36 @@
 
         async function captureCard() {
             const btn = event.currentTarget;
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> RENDERING...';
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> CALCULATING PIXELS...';
             btn.disabled = true;
 
             try {
-                // We use a high scale and force specific dimensions to solve blurring
+                // To solve the "halo" and "blur" issue, we clone the area into a larger scale
+                // and strip away properties that cause library glitches (like box-shadows)
                 const canvas = await html2canvas(elements.captureArea, {
-                    scale: 3, 
-                    backgroundColor: null,
+                    scale: 4, // Ultra high res
+                    backgroundColor: "#05070a",
                     useCORS: true,
                     allowTaint: true,
-                    // These ensure the crop is perfect
-                    width: 500,
-                    height: 500,
+                    logging: false,
                     onclone: (clonedDoc) => {
-                        // Ensure cloned elements are visible for rendering
-                        const clonedArea = clonedDoc.getElementById('captureArea');
-                        clonedArea.style.boxShadow = 'none'; // Avoid shadow artifacts in export
+                        const area = clonedDoc.getElementById('captureArea');
+                        area.style.boxShadow = 'none'; // Shadows are the main cause of halos
+                        area.style.border = 'none';
+                        // Adjust font rendering for the clone
+                        const text = clonedDoc.getElementById('previewText');
+                        text.style.webkitFontSmoothing = "antialiased";
                     }
                 });
 
                 const link = document.createElement('a');
-                link.download = `pxltr-output-${Date.now()}.png`;
+                link.download = `pxtr-master-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
             } catch (err) {
                 console.error("Capture Error:", err);
             } finally {
-                btn.innerHTML = '<i class="fas fa-file-export"></i> EXPORT HIGH-RES PNG';
+                btn.innerHTML = '<i class="fas fa-bolt"></i> RENDER MASTER PNG';
                 btn.disabled = false;
             }
         }

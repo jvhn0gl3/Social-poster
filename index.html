@@ -8,7 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        
+
         body {
             background-color: #05070a;
             color: white;
@@ -21,42 +21,41 @@
             min-height: 100vh;
         }
 
-        /* Version 2.5 - Live Studio Preview */
         #captureArea {
-            width: 450px;
-            height: 450px;
+            width: 350px;
+            height: 350px;
             background-color: #0f131f;
             background-image: radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 95%);
-            border-radius: 72px;
+            border-radius: 56px;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
             overflow: hidden;
             border: none;
         }
 
         .header-tags {
-            padding-top: 54px;
+            padding-top: 0;
             display: flex;
-            gap: 12px;
+            gap: 0;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             width: 100%;
         }
 
         .tag {
-            width: 85px; 
-            height: 44px; 
-            border-radius: 14px; 
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: -0.01em;
+            flex: 1;
+            height: 38px;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
             display: flex;
             align-items: center;
             justify-content: center;
             line-height: 1;
             text-align: center;
+            text-transform: uppercase;
         }
 
         .tag-blue {
@@ -65,8 +64,8 @@
         }
 
         .tag-gray {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .content-area {
@@ -75,12 +74,12 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 0 60px;
+            padding: 0 40px;
         }
 
         #previewText {
-            font-size: 34px;
-            line-height: 1.25;
+            font-size: 26px;
+            line-height: 1.2;
             font-weight: 800;
             color: #ffffff;
             word-wrap: break-word;
@@ -89,34 +88,43 @@
         }
 
         .social-container {
-            padding-bottom: 54px;
+            padding-bottom: 0;
             display: flex;
             justify-content: center;
             width: 100%;
         }
 
         .social-bar {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 16px 32px;
-            border-radius: 20px; 
-            display: flex;
-            gap: 18px;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.02);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.03);
+            display: grid;
+            width: 100%;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(2, 38px);
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         .social-bar i {
-            font-size: 17px;
+            font-size: 13px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            border-right: 1px solid rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .social-bar i:nth-child(5n) {
+            border-right: none;
         }
 
         .controls-container {
             width: 100%;
-            max-width: 450px;
+            max-width: 350px;
             background: #111827;
-            margin-top: 40px;
-            border-radius: 32px;
-            padding: 30px;
+            margin-top: 30px;
+            border-radius: 24px;
+            padding: 24px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             margin-bottom: 80px;
         }
@@ -124,37 +132,37 @@
         .input-label {
             color: #3b82f6;
             text-transform: uppercase;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 900;
             letter-spacing: 2px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: block;
         }
 
         .input-field {
             background: #1f2937;
             border: 1px solid #374151;
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 12px;
+            padding: 12px;
             width: 100%;
             color: white;
             outline: none;
-            font-size: 15px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <div class="text-center mb-10">
-        <h1 class="text-3xl font-black italic tracking-tighter">PXTR STUDIO</h1>
-        <div class="h-1 w-10 bg-blue-600 mx-auto mt-2 rounded-full"></div>
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-black italic tracking-tighter">PXTR STUDIO</h1>
+        <div class="h-1 w-8 bg-blue-600 mx-auto mt-2 rounded-full"></div>
     </div>
 
     <div id="captureArea">
         <div class="header-tags">
             <div class="tag tag-gray" id="progressTag">0%</div>
-            <div class="tag tag-blue" id="dateTag">02.24.2026</div>
-            <div class="tag tag-blue" id="handleTag">@PXTR30</div>
+            <div class="tag tag-blue" id="dateTag">02.26.2026</div>
+            <div class="tag tag-blue" style="background: #1d4ed8;" id="handleTag">@jvhn0gl3</div>
         </div>
 
         <div class="content-area">
@@ -165,6 +173,7 @@
             <div class="social-bar">
                 <i class="fa-brands fa-facebook text-blue-500"></i>
                 <i class="fa-brands fa-threads text-white"></i>
+                <i class="fa-brands fa-x-twitter text-white"></i>
                 <i class="fa-brands fa-tumblr text-blue-400"></i>
                 <i class="fa-brands fa-reddit-alien text-orange-500"></i>
                 <i class="fa-brands fa-discord text-indigo-400"></i>
@@ -177,20 +186,20 @@
     </div>
 
     <div class="controls-container">
-        <div class="grid grid-cols-2 gap-4 mb-5">
+        <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
                 <span class="input-label">Date</span>
-                <input type="text" id="inputDate" class="input-field" value="02.24.2026">
+                <input type="text" id="inputDate" class="input-field" value="02.26.2026">
             </div>
             <div>
                 <span class="input-label">Handle</span>
                 <input type="text" id="inputHandle" class="input-field" value="@jvhn0gl3">
             </div>
         </div>
-        
+
         <div class="">
             <span class="input-label">Content</span>
-            <textarea id="inputText" class="input-field h-24 resize-none">Focus.</textarea>
+            <textarea id="inputText" class="input-field h-20 resize-none">Focus.</textarea>
         </div>
     </div>
 

@@ -7,10 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap');
+
+        :root {
+            --accent: #2563eb;
+            --accent-dark: #1e40af;
+        }
 
         body {
             background-color: #05070a;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.1) 0px, transparent 50%);
             color: white;
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -21,51 +29,87 @@
             min-height: 100vh;
         }
 
+        .stage-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            perspective: 1200px;
+        }
+
+        .middle-row {
+            display: flex;
+            align-items: center; 
+            gap: 14px; 
+            position: relative;
+        }
+
         #captureArea {
-            width: 350px;
-            height: 350px;
+            width: 300px; 
+            height: 300px; 
             background-color: #0f131f;
-            background-image: radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 95%);
-            border-radius: 56px;
+            background-image: 
+                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%),
+                radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 95%);
+            border-radius: 48px;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.05);
             overflow: hidden;
             border: none;
+            aspect-ratio: 1 / 1;
+            animation: breathe 8s ease-in-out infinite;
+            z-index: 10;
         }
 
-        .header-tags {
-            padding-top: 0;
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.015); }
+        }
+
+        #captureArea::after {
+            content: "";
+            position: absolute;
+            top: -100%; left: -100%;
+            width: 300%; height: 300%;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .external-meta-row {
             display: flex;
-            gap: 0;
+            width: 300px;
             justify-content: center;
-            align-items: flex-start;
-            width: 100%;
+            gap: 4px;
+            z-index: 10;
         }
 
         .tag {
-            flex: 1;
-            height: 38px;
-            font-size: 9px;
+            height: 28px; 
+            padding: 0 10px;
+            font-size: 8px; 
             font-weight: 900;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em;
             display: flex;
             align-items: center;
             justify-content: center;
-            line-height: 1;
-            text-align: center;
             text-transform: uppercase;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
         }
 
         .tag-blue {
-            background: #2563eb;
+            background: var(--accent);
             color: #ffffff;
         }
 
         .tag-gray {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .content-area {
@@ -74,113 +118,147 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 0 40px;
+            padding: 32px;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
         }
 
         #previewText {
-            font-size: 26px;
-            line-height: 1.2;
-            font-weight: 800;
+            font-size: 32px; 
+            line-height: 1.1;
+            font-weight: 900;
             color: #ffffff;
             word-wrap: break-word;
             max-width: 100%;
-            letter-spacing: -0.04em;
+            letter-spacing: -0.05em;
+            /* No transitions for font-size to avoid layout jumping during auto-adjust */
         }
 
-        .social-container {
-            padding-bottom: 0;
+        .external-side-bar {
+            width: 36px; 
             display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 0;
+            height: 220px;
+            backdrop-filter: blur(5px);
+        }
+
+        .external-side-bar i {
+            flex: 1;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            width: 100%;
+            font-size: 13px; 
+            color: rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
         }
 
-        .social-bar {
-            background: rgba(255, 255, 255, 0.03);
-            display: grid;
-            width: 100%;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(2, 38px);
+        .footer-premium {
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
             border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .social-bar i {
-            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            width: 100%;
+            padding: 6px 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
-            width: 100%;
-            border-right: 1px solid rgba(255,255,255,0.02);
-            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .social-bar i:nth-child(5n) {
-            border-right: none;
+        .footer-part {
+            font-size: 7.5px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 0.1em;
+            padding: 0 15px;
+            text-transform: uppercase;
         }
 
         .controls-container {
             width: 100%;
-            max-width: 350px;
-            background: #111827;
-            margin-top: 30px;
+            max-width: 400px;
+            background: rgba(17, 24, 39, 0.8);
+            margin-top: 40px;
             border-radius: 24px;
             padding: 24px;
             border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
             margin-bottom: 80px;
         }
 
         .input-label {
-            color: #3b82f6;
+            color: #60a5fa;
             text-transform: uppercase;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 900;
             letter-spacing: 2px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: block;
         }
 
         .input-field {
-            background: #1f2937;
-            border: 1px solid #374151;
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
             padding: 12px;
             width: 100%;
             color: white;
             outline: none;
-            font-size: 14px;
+            font-size: 13px;
+            transition: all 0.3s;
         }
     </style>
 </head>
 <body>
 
-    <div class="text-center mb-8">
-        <h1 class="text-2xl font-black italic tracking-tighter">PXTR STUDIO</h1>
-        <div class="h-1 w-8 bg-blue-600 mx-auto mt-2 rounded-full"></div>
+    <div class="header-main text-center mb-8">
+        <h1 class="text-xl font-black italic tracking-tighter text-blue-500">PXTR STUDIO</h1>
+        <div class="h-[2px] w-4 bg-white/20 mx-auto mt-2"></div>
     </div>
 
-    <div id="captureArea">
-        <div class="header-tags">
+    <div class="stage-wrapper" id="stage">
+        
+        <!-- External Meta Row (Top) -->
+        <div class="external-meta-row">
+            <div class="tag tag-gray" id="dayOfYearTag">DAY 000</div>
             <div class="tag tag-gray" id="progressTag">0%</div>
-            <div class="tag tag-blue" id="dateTag">02.26.2026</div>
-            <div class="tag tag-blue" style="background: #1d4ed8;" id="handleTag">@jvhn0gl3</div>
+            <div class="tag tag-blue" id="dateTag">03.02.2026</div>
+            <div class="tag tag-blue" style="background: var(--accent-dark);" id="handleTag">@jvhn0gl3</div>
         </div>
 
-        <div class="content-area">
-            <div id="previewText">Focus.</div>
-        </div>
-
-        <div class="social-container">
-            <div class="social-bar">
+        <div class="middle-row">
+            <!-- Left Sidebar -->
+            <div class="external-side-bar">
                 <i class="fa-brands fa-facebook text-blue-500"></i>
                 <i class="fa-brands fa-threads text-white"></i>
                 <i class="fa-brands fa-x-twitter text-white"></i>
                 <i class="fa-brands fa-tumblr text-blue-400"></i>
-                <i class="fa-brands fa-reddit-alien text-orange-500"></i>
                 <i class="fa-brands fa-discord text-indigo-400"></i>
+            </div>
+
+            <!-- The Main Card -->
+            <div id="captureArea">
+                <div class="content-area" id="contentArea">
+                    <div id="previewText">Focus.</div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="external-side-bar">
                 <i class="fa-brands fa-snapchat text-yellow-400"></i>
                 <i class="fa-brands fa-tiktok text-cyan-400"></i>
                 <i class="fa-brands fa-youtube text-red-600"></i>
                 <i class="fa-brands fa-instagram text-pink-500"></i>
+            </div>
+        </div>
+
+        <!-- External Footer Row (Clean) -->
+        <div class="external-meta-row mt-1">
+            <div class="footer-premium rounded-xl">
+                <span class="footer-part" id="footerHandle">@jvhn0gl3 // JOHN-OGLETREE</span>
             </div>
         </div>
     </div>
@@ -188,18 +266,18 @@
     <div class="controls-container">
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
-                <span class="input-label">Date</span>
-                <input type="text" id="inputDate" class="input-field" value="02.26.2026">
+                <span class="input-label">Project Date</span>
+                <input type="text" id="inputDate" class="input-field" value="03.02.2026">
             </div>
             <div>
-                <span class="input-label">Handle</span>
+                <span class="input-label">Studio Handle</span>
                 <input type="text" id="inputHandle" class="input-field" value="@jvhn0gl3">
             </div>
         </div>
 
         <div class="">
-            <span class="input-label">Content</span>
-            <textarea id="inputText" class="input-field h-20 resize-none">Focus.</textarea>
+            <span class="input-label">Deep Work Focus</span>
+            <textarea id="inputText" class="input-field h-16 resize-none">Focus.</textarea>
         </div>
     </div>
 
@@ -208,25 +286,65 @@
             dateTag: document.getElementById('dateTag'),
             handleTag: document.getElementById('handleTag'),
             progressTag: document.getElementById('progressTag'),
+            dayOfYearTag: document.getElementById('dayOfYearTag'),
             previewText: document.getElementById('previewText'),
+            contentArea: document.getElementById('contentArea'),
             inputDate: document.getElementById('inputDate'),
             inputHandle: document.getElementById('inputHandle'),
-            inputText: document.getElementById('inputText')
+            inputText: document.getElementById('inputText'),
+            footerHandle: document.getElementById('footerHandle'),
+            card: document.getElementById('captureArea')
         };
 
-        function calculateProgress() {
+        function updateMetrics() {
             const now = new Date();
-            const start = new Date(now.getFullYear(), 0, 1);
-            const end = new Date(now.getFullYear() + 1, 0, 1);
-            const progress = ((now - start) / (end - start)) * 100;
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            
+            const diff = now - startOfYear;
+            const oneDay = 1000 * 60 * 60 * 24;
+            const dayOfYear = Math.floor(diff / oneDay) + 1;
+            elements.dayOfYearTag.innerText = `DAY ${dayOfYear.toString().padStart(3, '0')}`;
+
+            const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+            const progress = ((now - startOfYear) / (endOfYear - startOfYear)) * 100;
             elements.progressTag.innerText = Math.floor(progress) + '%';
         }
 
-        calculateProgress();
+        // Dynamically adjust font size until it fits perfectly
+        function adjustFontSize() {
+            const container = elements.contentArea;
+            const text = elements.previewText;
+            
+            let fontSize = 48; // Start with a large font to "fill" the card
+            text.style.fontSize = fontSize + 'px';
+
+            // Shrink font size pixel by pixel until the text fits within the container limits
+            // Container height is approx 236px (300px - padding)
+            while (
+                (text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && 
+                fontSize > 10
+            ) {
+                fontSize--;
+                text.style.fontSize = fontSize + 'px';
+            }
+        }
+
+        setInterval(updateMetrics, 60000);
+        updateMetrics();
 
         elements.inputDate.addEventListener('input', (e) => elements.dateTag.innerText = e.target.value);
-        elements.inputHandle.addEventListener('input', (e) => elements.handleTag.innerText = e.target.value);
-        elements.inputText.addEventListener('input', (e) => elements.previewText.innerText = e.target.value);
+        elements.inputHandle.addEventListener('input', (e) => {
+            elements.handleTag.innerText = e.target.value;
+            elements.footerHandle.innerText = `${e.target.value.toUpperCase()} // JOHN-OGLETREE`;
+        });
+        
+        elements.inputText.addEventListener('input', (e) => {
+            elements.previewText.innerText = e.target.value;
+            adjustFontSize();
+        });
+
+        // Initialize size on load
+        window.addEventListener('load', adjustFontSize);
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio Square</title>
+    <title>pxltr Studio Square - Platform Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -132,7 +132,6 @@
             word-wrap: break-word;
             max-width: 100%;
             letter-spacing: -0.05em;
-            /* No transitions for font-size to avoid layout jumping during auto-adjust */
         }
 
         .external-side-bar {
@@ -143,16 +142,16 @@
             border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 10px 0;
-            height: 220px;
+            height: 180px; 
             backdrop-filter: blur(5px);
+            justify-content: space-around;
         }
 
         .external-side-bar i {
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px; 
+            font-size: 16px; 
             color: rgba(255, 255, 255, 0.4);
             transition: all 0.3s ease;
         }
@@ -221,7 +220,6 @@
 
     <div class="stage-wrapper" id="stage">
         
-        <!-- External Meta Row (Top) -->
         <div class="external-meta-row">
             <div class="tag tag-gray" id="dayOfYearTag">DAY 000</div>
             <div class="tag tag-gray" id="progressTag">0%</div>
@@ -234,28 +232,22 @@
             <div class="external-side-bar">
                 <i class="fa-brands fa-facebook text-blue-500"></i>
                 <i class="fa-brands fa-threads text-white"></i>
-                <i class="fa-brands fa-x-twitter text-white"></i>
-                <i class="fa-brands fa-tumblr text-blue-400"></i>
-                <i class="fa-brands fa-discord text-indigo-400"></i>
             </div>
 
             <!-- The Main Card -->
             <div id="captureArea">
                 <div class="content-area" id="contentArea">
-                    <div id="previewText">Focus.</div>
+                    <div id="previewText">hi</div>
                 </div>
             </div>
 
             <!-- Right Sidebar -->
             <div class="external-side-bar">
-                <i class="fa-brands fa-snapchat text-yellow-400"></i>
-                <i class="fa-brands fa-tiktok text-cyan-400"></i>
                 <i class="fa-brands fa-youtube text-red-600"></i>
                 <i class="fa-brands fa-instagram text-pink-500"></i>
             </div>
         </div>
 
-        <!-- External Footer Row (Clean) -->
         <div class="external-meta-row mt-1">
             <div class="footer-premium rounded-xl">
                 <span class="footer-part" id="footerHandle">@jvhn0gl3 // JOHN-OGLETREE</span>
@@ -276,8 +268,8 @@
         </div>
 
         <div class="">
-            <span class="input-label">Deep Work Focus</span>
-            <textarea id="inputText" class="input-field h-16 resize-none">Focus.</textarea>
+            <span class="input-label">Announcement Text</span>
+            <textarea id="inputText" class="input-field h-24 resize-none">hi</textarea>
         </div>
     </div>
 
@@ -292,14 +284,12 @@
             inputDate: document.getElementById('inputDate'),
             inputHandle: document.getElementById('inputHandle'),
             inputText: document.getElementById('inputText'),
-            footerHandle: document.getElementById('footerHandle'),
-            card: document.getElementById('captureArea')
+            footerHandle: document.getElementById('footerHandle')
         };
 
         function updateMetrics() {
             const now = new Date();
             const startOfYear = new Date(now.getFullYear(), 0, 1);
-            
             const diff = now - startOfYear;
             const oneDay = 1000 * 60 * 60 * 24;
             const dayOfYear = Math.floor(diff / oneDay) + 1;
@@ -310,19 +300,16 @@
             elements.progressTag.innerText = Math.floor(progress) + '%';
         }
 
-        // Dynamically adjust font size until it fits perfectly
         function adjustFontSize() {
             const container = elements.contentArea;
             const text = elements.previewText;
             
-            let fontSize = 48; // Start with a large font to "fill" the card
+            let fontSize = 120; // Increased base font size for short text like "hi"
             text.style.fontSize = fontSize + 'px';
 
-            // Shrink font size pixel by pixel until the text fits within the container limits
-            // Container height is approx 236px (300px - padding)
             while (
                 (text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && 
-                fontSize > 10
+                fontSize > 12
             ) {
                 fontSize--;
                 text.style.fontSize = fontSize + 'px';
@@ -343,7 +330,6 @@
             adjustFontSize();
         });
 
-        // Initialize size on load
         window.addEventListener('load', adjustFontSize);
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio Square - Platform Update</title>
+    <title>pxltr Studio 1:1 Square Post</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -12,104 +12,121 @@
         :root {
             --accent: #2563eb;
             --accent-dark: #1e40af;
+            --bg-dark: #05070a;
         }
 
         body {
-            background-color: #05070a;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.1) 0px, transparent 50%);
+            background-color: #111;
             color: white;
             font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
         }
 
-        .stage-wrapper {
+        /* The actual 1:1 Exportable Square */
+        #exportSquare {
+            width: 500px;
+            height: 500px;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.15) 0px, transparent 50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+        }
+
+        #exportSquare::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Container for content within the square */
+        .post-inner {
+            z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 12px;
-            perspective: 1200px;
+            width: 100%;
         }
 
-        .middle-row {
+        /* Top Meta Row */
+        .meta-row {
             display: flex;
-            align-items: center; 
-            gap: 14px; 
-            position: relative;
-        }
-
-        #captureArea {
-            width: 300px; 
-            height: 300px; 
-            background-color: #0f131f;
-            background-image: 
-                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%),
-                radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 95%);
-            border-radius: 48px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.05);
-            overflow: hidden;
-            border: none;
-            aspect-ratio: 1 / 1;
-            animation: breathe 8s ease-in-out infinite;
-            z-index: 10;
-        }
-
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.015); }
-        }
-
-        #captureArea::after {
-            content: "";
-            position: absolute;
-            top: -100%; left: -100%;
-            width: 300%; height: 300%;
-            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-            opacity: 0.04;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .external-meta-row {
-            display: flex;
-            width: 300px;
-            justify-content: center;
             gap: 4px;
-            z-index: 10;
         }
 
         .tag {
-            height: 28px; 
-            padding: 0 10px;
-            font-size: 8px; 
+            height: 22px; 
+            padding: 0 8px;
+            font-size: 7px; 
             font-weight: 900;
             letter-spacing: 0.08em;
             display: flex;
             align-items: center;
             justify-content: center;
             text-transform: uppercase;
-            border-radius: 6px;
+            border-radius: 4px;
             backdrop-filter: blur(10px);
         }
 
-        .tag-blue {
-            background: var(--accent);
-            color: #ffffff;
+        .tag-blue { background: var(--accent); color: #ffffff; }
+        .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        /* Social Header */
+        .social-header-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 320px;
         }
 
-        .tag-gray {
+        .social-cell {
             background: rgba(255, 255, 255, 0.03);
-            color: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .social-cell i { font-size: 14px; }
+
+        /* The Card */
+        #captureArea {
+            width: 320px; 
+            height: 320px; 
+            background-color: #0f131f;
+            background-image: 
+                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%),
+                radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 95%);
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden;
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
         }
 
         .content-area {
@@ -118,74 +135,49 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 32px;
-            position: relative;
-            z-index: 2;
+            padding: 30px;
             overflow: hidden;
         }
 
         #previewText {
-            font-size: 32px; 
             line-height: 1.1;
             font-weight: 900;
             color: #ffffff;
             word-wrap: break-word;
             max-width: 100%;
-            letter-spacing: -0.05em;
+            letter-spacing: -0.04em;
         }
 
-        .external-side-bar {
-            width: 36px; 
-            display: flex;
-            flex-direction: column;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 10px 0;
-            height: 180px; 
-            backdrop-filter: blur(5px);
-            justify-content: space-around;
-        }
-
-        .external-side-bar i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px; 
-            color: rgba(255, 255, 255, 0.4);
-            transition: all 0.3s ease;
-        }
-
+        /* Footer */
         .footer-premium {
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
             border-top: 1px solid rgba(255,255,255,0.05);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            width: 100%;
-            padding: 6px 0;
+            width: 320px;
+            padding: 8px 0;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'JetBrains Mono', monospace;
+            border-radius: 10px;
         }
 
         .footer-part {
-            font-size: 7.5px;
+            font-size: 7px;
             color: rgba(255,255,255,0.4);
             letter-spacing: 0.1em;
-            padding: 0 15px;
             text-transform: uppercase;
         }
 
+        /* Controls Section (Outside the Square) */
         .controls-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             background: rgba(17, 24, 39, 0.8);
-            margin-top: 40px;
-            border-radius: 24px;
-            padding: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            margin-bottom: 80px;
+            margin-top: 30px;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .input-label {
@@ -193,68 +185,62 @@
             text-transform: uppercase;
             font-size: 9px;
             font-weight: 900;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
             display: block;
         }
 
         .input-field {
             background: #0f172a;
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 12px;
+            border-radius: 8px;
+            padding: 8px 12px;
             width: 100%;
             color: white;
             outline: none;
             font-size: 13px;
-            transition: all 0.3s;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-main text-center mb-8">
-        <h1 class="text-xl font-black italic tracking-tighter text-blue-500">PXTR STUDIO</h1>
-        <div class="h-[2px] w-4 bg-white/20 mx-auto mt-2"></div>
-    </div>
-
-    <div class="stage-wrapper" id="stage">
-        
-        <div class="external-meta-row">
-            <div class="tag tag-gray" id="dayOfYearTag">DAY 000</div>
-            <div class="tag tag-gray" id="progressTag">0%</div>
-            <div class="tag tag-blue" id="dateTag">03.02.2026</div>
-            <div class="tag tag-blue" style="background: var(--accent-dark);" id="handleTag">@jvhn0gl3</div>
-        </div>
-
-        <div class="middle-row">
-            <!-- Left Sidebar -->
-            <div class="external-side-bar">
-                <i class="fa-brands fa-facebook text-blue-500"></i>
-                <i class="fa-brands fa-threads text-white"></i>
+    <div id="exportSquare">
+        <div class="post-inner">
+            <!-- Meta Row -->
+            <div class="meta-row">
+                <div class="tag tag-gray" id="dayOfYearTag">DAY 000</div>
+                <div class="tag tag-gray" id="progressTag">0%</div>
+                <div class="tag tag-blue" id="dateTag">03.02.2026</div>
+                <div class="tag tag-blue" style="background: var(--accent-dark);" id="handleTag">@jvhn0gl3</div>
             </div>
 
-            <!-- The Main Card -->
+            <!-- Social Bar -->
+            <div class="social-header-row">
+                <div class="social-cell">
+                    <i class="fa-brands fa-facebook text-blue-500"></i>
+                    <i class="fa-brands fa-threads text-white"></i>
+                </div>
+                <div class="social-cell">
+                    <i class="fa-brands fa-youtube text-red-600"></i>
+                    <i class="fa-brands fa-instagram text-pink-500"></i>
+                </div>
+            </div>
+
+            <!-- Card -->
             <div id="captureArea">
                 <div class="content-area" id="contentArea">
                     <div id="previewText">hi</div>
                 </div>
             </div>
 
-            <!-- Right Sidebar -->
-            <div class="external-side-bar">
-                <i class="fa-brands fa-youtube text-red-600"></i>
-                <i class="fa-brands fa-instagram text-pink-500"></i>
-            </div>
-        </div>
-
-        <div class="external-meta-row mt-1">
-            <div class="footer-premium rounded-xl">
+            <!-- Footer -->
+            <div class="footer-premium">
                 <span class="footer-part" id="footerHandle">@jvhn0gl3 // JOHN-OGLETREE</span>
             </div>
         </div>
     </div>
 
+    <!-- Interface Controls -->
     <div class="controls-container">
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
@@ -262,14 +248,13 @@
                 <input type="text" id="inputDate" class="input-field" value="03.02.2026">
             </div>
             <div>
-                <span class="input-label">Studio Handle</span>
+                <span class="input-label">Handle</span>
                 <input type="text" id="inputHandle" class="input-field" value="@jvhn0gl3">
             </div>
         </div>
-
-        <div class="">
-            <span class="input-label">Announcement Text</span>
-            <textarea id="inputText" class="input-field h-24 resize-none">hi</textarea>
+        <div>
+            <span class="input-label">Message Content</span>
+            <textarea id="inputText" class="input-field h-16 resize-none">hi</textarea>
         </div>
     </div>
 
@@ -290,11 +275,9 @@
         function updateMetrics() {
             const now = new Date();
             const startOfYear = new Date(now.getFullYear(), 0, 1);
-            const diff = now - startOfYear;
-            const oneDay = 1000 * 60 * 60 * 24;
-            const dayOfYear = Math.floor(diff / oneDay) + 1;
+            const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
             elements.dayOfYearTag.innerText = `DAY ${dayOfYear.toString().padStart(3, '0')}`;
-
+            
             const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
             const progress = ((now - startOfYear) / (endOfYear - startOfYear)) * 100;
             elements.progressTag.innerText = Math.floor(progress) + '%';
@@ -303,28 +286,26 @@
         function adjustFontSize() {
             const container = elements.contentArea;
             const text = elements.previewText;
-            
-            let fontSize = 120; // Increased base font size for short text like "hi"
+            let fontSize = 140; 
             text.style.fontSize = fontSize + 'px';
 
             while (
                 (text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && 
-                fontSize > 12
+                fontSize > 10
             ) {
                 fontSize--;
                 text.style.fontSize = fontSize + 'px';
             }
         }
 
-        setInterval(updateMetrics, 60000);
         updateMetrics();
+        setInterval(updateMetrics, 60000);
 
         elements.inputDate.addEventListener('input', (e) => elements.dateTag.innerText = e.target.value);
         elements.inputHandle.addEventListener('input', (e) => {
             elements.handleTag.innerText = e.target.value;
             elements.footerHandle.innerText = `${e.target.value.toUpperCase()} // JOHN-OGLETREE`;
         });
-        
         elements.inputText.addEventListener('input', (e) => {
             elements.previewText.innerText = e.target.value;
             adjustFontSize();
@@ -334,4 +315,3 @@
     </script>
 </body>
 </html>
-

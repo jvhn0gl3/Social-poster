@@ -25,6 +25,16 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Fullscreen State */
+        body:fullscreen {
+            background-color: #000;
+        }
+
+        body:fullscreen .controls-container {
+            display: none;
         }
 
         /* The actual 1:1 Exportable Square */
@@ -42,6 +52,7 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+            cursor: pointer;
         }
 
         #exportSquare::after {
@@ -54,7 +65,6 @@
             z-index: 1;
         }
 
-        /* Container for content within the square */
         .post-inner {
             z-index: 2;
             display: flex;
@@ -64,11 +74,7 @@
             width: 100%;
         }
 
-        /* Top Meta Row */
-        .meta-row {
-            display: flex;
-            gap: 4px;
-        }
+        .meta-row { display: flex; gap: 4px; }
 
         .tag {
             height: 22px; 
@@ -87,7 +93,6 @@
         .tag-blue { background: var(--accent); color: #ffffff; }
         .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
 
-        /* Social Header */
         .social-header-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -105,9 +110,6 @@
             align-items: center;
         }
 
-        .social-cell i { font-size: 14px; }
-
-        /* The Card */
         #captureArea {
             width: 320px; 
             height: 320px; 
@@ -148,7 +150,6 @@
             letter-spacing: -0.04em;
         }
 
-        /* Footer */
         .footer-premium {
             background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
             border-top: 1px solid rgba(255,255,255,0.05);
@@ -168,7 +169,6 @@
             text-transform: uppercase;
         }
 
-        /* Controls Section (Outside the Square) */
         .controls-container {
             width: 100%;
             max-width: 500px;
@@ -200,13 +200,31 @@
             outline: none;
             font-size: 13px;
         }
+
+        .btn-fullscreen {
+            background: var(--accent);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            width: 100%;
+            margin-top: 15px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-fullscreen:hover { background: var(--accent-dark); }
     </style>
 </head>
 <body>
 
-    <div id="exportSquare">
+    <div id="exportSquare" title="Click to exit fullscreen">
         <div class="post-inner">
-            <!-- Meta Row -->
             <div class="meta-row">
                 <div class="tag tag-gray" id="dayOfYearTag">DAY 000</div>
                 <div class="tag tag-gray" id="progressTag">0%</div>
@@ -214,33 +232,23 @@
                 <div class="tag tag-blue" style="background: var(--accent-dark);" id="handleTag">@jvhn0gl3</div>
             </div>
 
-            <!-- Social Bar -->
             <div class="social-header-row">
-                <div class="social-cell">
-                    <i class="fa-brands fa-facebook text-blue-500"></i>
-                    <i class="fa-brands fa-threads text-white"></i>
-                </div>
-                <div class="social-cell">
-                    <i class="fa-brands fa-youtube text-red-600"></i>
-                    <i class="fa-brands fa-instagram text-pink-500"></i>
-                </div>
+                <div class="social-cell"><i class="fa-brands fa-facebook text-blue-500"></i><i class="fa-brands fa-threads text-white"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-youtube text-red-600"></i><i class="fa-brands fa-instagram text-pink-500"></i></div>
             </div>
 
-            <!-- Card -->
             <div id="captureArea">
                 <div class="content-area" id="contentArea">
                     <div id="previewText">hi</div>
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="footer-premium">
                 <span class="footer-part" id="footerHandle">@jvhn0gl3 // JOHN-OGLETREE</span>
             </div>
         </div>
     </div>
 
-    <!-- Interface Controls -->
     <div class="controls-container">
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
@@ -256,6 +264,10 @@
             <span class="input-label">Message Content</span>
             <textarea id="inputText" class="input-field h-16 resize-none">hi</textarea>
         </div>
+        
+        <button onclick="toggleFullscreen()" class="btn-fullscreen">
+            <i class="fa-solid fa-expand"></i> Enter Screenshot Mode
+        </button>
     </div>
 
     <script>
@@ -269,7 +281,23 @@
             inputDate: document.getElementById('inputDate'),
             inputHandle: document.getElementById('inputHandle'),
             inputText: document.getElementById('inputText'),
-            footerHandle: document.getElementById('footerHandle')
+            footerHandle: document.getElementById('footerHandle'),
+            exportSquare: document.getElementById('exportSquare')
+        };
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Allow clicking the square to exit fullscreen easily
+        elements.exportSquare.onclick = () => {
+            if (document.fullscreenElement) document.exitFullscreen();
         };
 
         function updateMetrics() {
@@ -289,10 +317,7 @@
             let fontSize = 140; 
             text.style.fontSize = fontSize + 'px';
 
-            while (
-                (text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && 
-                fontSize > 10
-            ) {
+            while ((text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && fontSize > 10) {
                 fontSize--;
                 text.style.fontSize = fontSize + 'px';
             }

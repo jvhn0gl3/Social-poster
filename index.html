@@ -25,10 +25,10 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* INSTAGRAM POST BOX (The "Canvas") */
+        /* INSTAGRAM POST BOX */
         #exportSquare {
             width: 500px;
             height: 500px;
@@ -41,9 +41,8 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
             box-shadow: 0 50px 100px rgba(0,0,0,0.5);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
 
         #exportSquare::after {
@@ -66,12 +65,10 @@
             display: none !important;
         }
 
-        /* Resizes the square to fill the screen for a perfect 1:1 snap */
         :fullscreen #exportSquare {
-            width: 100vh !important; /* Forces 1:1 ratio based on screen height */
+            width: 100vh !important;
             height: 100vh !important;
             box-shadow: none;
-            transform: scale(1);
         }
 
         .post-inner {
@@ -79,48 +76,56 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 15px; /* Increased gap */
             width: 100%;
         }
 
-        .meta-row { display: flex; gap: 4px; }
+        .meta-row { display: flex; gap: 6px; }
 
         .tag {
-            height: 22px; 
-            padding: 0 8px;
-            font-size: 7px; 
+            height: 24px; 
+            padding: 0 10px;
+            font-size: 8px; 
             font-weight: 900;
             letter-spacing: 0.08em;
             display: flex;
             align-items: center;
             justify-content: center;
             text-transform: uppercase;
-            border-radius: 4px;
+            border-radius: 6px;
             backdrop-filter: blur(10px);
         }
 
         .tag-blue { background: var(--accent); color: #ffffff; }
         .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
 
+        /* FIXED SOCIAL BAR */
         .social-header-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            width: 65%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            width: 80%; /* Wider to prevent icon clipping */
         }
 
         .social-cell {
+            flex: 1;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 10px;
+            padding: 12px;
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
+            gap: 20px; /* Space between icons inside the cell */
+        }
+
+        .social-cell i {
+            font-size: 16px;
+            display: block;
         }
 
         #captureArea {
-            width: 65%; 
+            width: 80%; 
             aspect-ratio: 1/1;
             background-color: #0f131f;
             background-image: 
@@ -146,12 +151,11 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 30px;
-            overflow: hidden;
+            padding: 40px;
         }
 
         #previewText {
-            line-height: 1.1;
+            line-height: 1.05;
             font-weight: 900;
             color: #ffffff;
             word-wrap: break-word;
@@ -162,8 +166,8 @@
         .footer-premium {
             background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
             border-top: 1px solid rgba(255,255,255,0.05);
-            width: 65%;
-            padding: 8px 0;
+            width: 80%;
+            padding: 10px 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -172,7 +176,7 @@
         }
 
         .footer-part {
-            font-size: 7px;
+            font-size: 8px;
             color: rgba(255,255,255,0.4);
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -193,11 +197,12 @@
             background: #0f172a;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 10px 12px;
             width: 100%;
             color: white;
             outline: none;
             font-size: 13px;
+            margin-bottom: 10px;
         }
 
         .btn-screenshot {
@@ -209,7 +214,6 @@
             text-transform: uppercase;
             font-size: 12px;
             width: 100%;
-            margin-top: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -223,15 +227,21 @@
     <div id="exportSquare">
         <div class="post-inner">
             <div class="meta-row">
-                <div class="tag tag-gray" id="dayOfYearTag">DAY 000</div>
-                <div class="tag tag-gray" id="progressTag">0%</div>
+                <div class="tag tag-gray" id="dayOfYearTag">DAY 068</div>
+                <div class="tag tag-gray" id="progressTag">18%</div>
                 <div class="tag tag-blue" id="dateTag">03.02.2026</div>
                 <div class="tag tag-blue" style="background: var(--accent-dark);" id="handleTag">@jvhn0gl3</div>
             </div>
 
             <div class="social-header-row">
-                <div class="social-cell"><i class="fa-brands fa-facebook text-blue-500"></i><i class="fa-brands fa-threads text-white"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-youtube text-red-600"></i><i class="fa-brands fa-instagram text-pink-500"></i></div>
+                <div class="social-cell">
+                    <i class="fa-brands fa-facebook text-blue-500"></i>
+                    <i class="fa-brands fa-threads text-white"></i>
+                </div>
+                <div class="social-cell">
+                    <i class="fa-brands fa-youtube text-red-600"></i>
+                    <i class="fa-brands fa-instagram text-pink-500"></i>
+                </div>
             </div>
 
             <div id="captureArea">
@@ -247,7 +257,7 @@
     </div>
 
     <div class="controls-container">
-        <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-2 gap-4">
             <input type="text" id="inputDate" class="input-field" value="03.02.2026">
             <input type="text" id="inputHandle" class="input-field" value="@jvhn0gl3">
         </div>
@@ -278,7 +288,6 @@
             else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
         }
 
-        // Auto-scale font on text change
         function adjustFontSize() {
             const container = elements.contentArea;
             const text = elements.previewText;
@@ -310,7 +319,6 @@
             adjustFontSize();
         });
 
-        // Toggle exit
         elements.exportSquare.onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); };
 
         updateMetrics();

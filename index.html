@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio 1:1 Square Post</title>
+    <title>pxltr Studio // Instagram Ready</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -25,21 +25,10 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            transition: background-color 0.4s ease;
+            overflow-x: hidden;
         }
 
-        /* SCREENSHOT MODE LOGIC */
-        /* Hides everything except the square when in fullscreen */
-        :fullscreen .controls-container {
-            display: none !important;
-        }
-
-        :fullscreen body {
-            background-color: #000 !important;
-            cursor: none !important; /* Hides cursor for clean screenshot */
-        }
-
-        /* The actual 1:1 Exportable Square */
+        /* INSTAGRAM POST BOX (The "Canvas") */
         #exportSquare {
             width: 500px;
             height: 500px;
@@ -54,6 +43,7 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #exportSquare::after {
@@ -66,6 +56,24 @@
             z-index: 1;
         }
 
+        /* SCREENSHOT MODE OVERRIDES */
+        :fullscreen body {
+            background-color: #000 !important;
+            cursor: none !important;
+        }
+
+        :fullscreen .controls-container {
+            display: none !important;
+        }
+
+        /* Resizes the square to fill the screen for a perfect 1:1 snap */
+        :fullscreen #exportSquare {
+            width: 100vh !important; /* Forces 1:1 ratio based on screen height */
+            height: 100vh !important;
+            box-shadow: none;
+            transform: scale(1);
+        }
+
         .post-inner {
             z-index: 2;
             display: flex;
@@ -75,10 +83,7 @@
             width: 100%;
         }
 
-        .meta-row {
-            display: flex;
-            gap: 4px;
-        }
+        .meta-row { display: flex; gap: 4px; }
 
         .tag {
             height: 22px; 
@@ -101,7 +106,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
-            width: 320px;
+            width: 65%;
         }
 
         .social-cell {
@@ -115,8 +120,8 @@
         }
 
         #captureArea {
-            width: 320px; 
-            height: 320px; 
+            width: 65%; 
+            aspect-ratio: 1/1;
             background-color: #0f131f;
             background-image: 
                 linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%),
@@ -132,7 +137,7 @@
 
         @keyframes breathe {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.01); }
+            50% { transform: scale(1.02); }
         }
 
         .content-area {
@@ -157,7 +162,7 @@
         .footer-premium {
             background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
             border-top: 1px solid rgba(255,255,255,0.05);
-            width: 320px;
+            width: 65%;
             padding: 8px 0;
             display: flex;
             justify-content: center;
@@ -182,17 +187,6 @@
             padding: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            z-index: 100;
-        }
-
-        .input-label {
-            color: #60a5fa;
-            text-transform: uppercase;
-            font-size: 9px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-            display: block;
         }
 
         .input-field {
@@ -209,24 +203,18 @@
         .btn-screenshot {
             background: var(--accent);
             color: white;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 12px;
             font-weight: 800;
             text-transform: uppercase;
-            font-size: 11px;
+            font-size: 12px;
             width: 100%;
             margin-top: 15px;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            letter-spacing: 1px;
-        }
-
-        .btn-screenshot:hover {
-            background: var(--accent-dark);
-            transform: translateY(-1px);
+            cursor: pointer;
         }
     </style>
 </head>
@@ -242,19 +230,13 @@
             </div>
 
             <div class="social-header-row">
-                <div class="social-cell">
-                    <i class="fa-brands fa-facebook text-blue-500"></i>
-                    <i class="fa-brands fa-threads text-white"></i>
-                </div>
-                <div class="social-cell">
-                    <i class="fa-brands fa-youtube text-red-600"></i>
-                    <i class="fa-brands fa-instagram text-pink-500"></i>
-                </div>
+                <div class="social-cell"><i class="fa-brands fa-facebook text-blue-500"></i><i class="fa-brands fa-threads text-white"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-youtube text-red-600"></i><i class="fa-brands fa-instagram text-pink-500"></i></div>
             </div>
 
             <div id="captureArea">
                 <div class="content-area" id="contentArea">
-                    <div id="previewText">hi</div>
+                    <div id="previewText">INSTA READY</div>
                 </div>
             </div>
 
@@ -266,22 +248,12 @@
 
     <div class="controls-container">
         <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <span class="input-label">Project Date</span>
-                <input type="text" id="inputDate" class="input-field" value="03.02.2026">
-            </div>
-            <div>
-                <span class="input-label">Handle</span>
-                <input type="text" id="inputHandle" class="input-field" value="@jvhn0gl3">
-            </div>
+            <input type="text" id="inputDate" class="input-field" value="03.02.2026">
+            <input type="text" id="inputHandle" class="input-field" value="@jvhn0gl3">
         </div>
-        <div>
-            <span class="input-label">Message Content</span>
-            <textarea id="inputText" class="input-field h-16 resize-none">hi</textarea>
-        </div>
-
-        <button onclick="toggleScreenshotMode()" class="btn-screenshot">
-            <i class="fa-solid fa-camera"></i> Enter Screenshot Mode
+        <textarea id="inputText" class="input-field h-16 resize-none">INSTA READY</textarea>
+        <button onclick="enterScreenshotMode()" class="btn-screenshot">
+            <i class="fa-solid fa-camera"></i> IG Screenshot Mode
         </button>
     </div>
 
@@ -300,66 +272,48 @@
             exportSquare: document.getElementById('exportSquare')
         };
 
-        function updateMetrics() {
-            const now = new Date();
-            const startOfYear = new Date(now.getFullYear(), 0, 1);
-            const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
-            elements.dayOfYearTag.innerText = `DAY ${dayOfYear.toString().padStart(3, '0')}`;
-            
-            const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
-            const progress = ((now - startOfYear) / (endOfYear - startOfYear)) * 100;
-            elements.progressTag.innerText = Math.floor(progress) + '%';
+        function enterScreenshotMode() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); }
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
         }
 
+        // Auto-scale font on text change
         function adjustFontSize() {
             const container = elements.contentArea;
             const text = elements.previewText;
             let fontSize = 140; 
             text.style.fontSize = fontSize + 'px';
-
-            while (
-                (text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && 
-                fontSize > 10
-            ) {
+            while ((text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && fontSize > 10) {
                 fontSize--;
                 text.style.fontSize = fontSize + 'px';
             }
         }
 
-        // Fullscreen Logic
-        function toggleScreenshotMode() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Error enabling fullscreen: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
+        function updateMetrics() {
+            const now = new Date();
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+            elements.dayOfYearTag.innerText = `DAY ${dayOfYear.toString().padStart(3, '0')}`;
+            const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+            const progress = ((now - startOfYear) / (endOfYear - startOfYear)) * 100;
+            elements.progressTag.innerText = Math.floor(progress) + '%';
         }
 
-        // Exit on click of the square (convenience)
-        elements.exportSquare.addEventListener('click', () => {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            }
-        });
-
-        // Event Listeners
-        updateMetrics();
-        setInterval(updateMetrics, 60000);
-
         elements.inputDate.addEventListener('input', (e) => elements.dateTag.innerText = e.target.value);
-        
         elements.inputHandle.addEventListener('input', (e) => {
             elements.handleTag.innerText = e.target.value;
             elements.footerHandle.innerText = `${e.target.value.toUpperCase()} // JOHN-OGLETREE`;
         });
-
         elements.inputText.addEventListener('input', (e) => {
             elements.previewText.innerText = e.target.value;
             adjustFontSize();
         });
 
+        // Toggle exit
+        elements.exportSquare.onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); };
+
+        updateMetrics();
         window.addEventListener('load', adjustFontSize);
     </script>
 </body>

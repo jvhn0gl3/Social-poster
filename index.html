@@ -25,16 +25,16 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            transition: background-color 0.3s ease;
         }
 
-        /* Fullscreen State */
-        body:fullscreen {
+        /* Fullscreen Logic: Target the specific element */
+        #exportSquare:fullscreen {
             background-color: #000;
-        }
-
-        body:fullscreen .controls-container {
-            display: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
         }
 
         /* The actual 1:1 Exportable Square */
@@ -53,6 +53,7 @@
             overflow: hidden;
             box-shadow: 0 50px 100px rgba(0,0,0,0.5);
             cursor: pointer;
+            flex-shrink: 0; /* Prevents squishing in flex containers */
         }
 
         #exportSquare::after {
@@ -244,7 +245,7 @@
             </div>
 
             <div class="footer-premium">
-                <span class="footer-part" id="footerHandle">@jvhn0gl3 // JOHN-OGLETREE</span>
+                <span class="footer-part" id="footerHandle">@JVHN0GL3 // JOHN-OGLETREE</span>
             </div>
         </div>
     </div>
@@ -287,7 +288,8 @@
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
+                // Request fullscreen on the square specifically, not the document
+                elements.exportSquare.requestFullscreen().catch(err => {
                     alert(`Error attempting to enable full-screen mode: ${err.message}`);
                 });
             } else {
@@ -295,7 +297,6 @@
             }
         }
 
-        // Allow clicking the square to exit fullscreen easily
         elements.exportSquare.onclick = () => {
             if (document.fullscreenElement) document.exitFullscreen();
         };

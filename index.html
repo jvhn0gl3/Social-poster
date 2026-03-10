@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Final Crop Fix</title>
+    <title>pxltr Studio - Bulletproof Crop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,7 +11,6 @@
 
         :root {
             --accent: #2563eb;
-            --accent-dark: #1e40af;
             --bg-dark: #05070a;
         }
 
@@ -27,7 +26,6 @@
             min-height: 100vh;
         }
 
-        /* FULLSCREEN: Ensures the screenshot tool sees the full 1:1 canvas */
         #exportSquare:fullscreen {
             background-color: #000;
             display: flex;
@@ -37,32 +35,20 @@
             height: 100vh;
         }
 
-        /* 1:1 Square with heavy margins to force social media croppers to see everything */
+        /* 1:1 Canvas with Massive Padding */
         #exportSquare {
             width: 1000px; 
             height: 1000px;
             zoom: 0.5; 
             background-color: var(--bg-dark);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.2) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.2) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.25) 0px, transparent 50%);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
-            padding: 120px; /* Heavy safety margin */
-        }
-
-        #exportSquare::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-            opacity: 0.08;
-            pointer-events: none;
-            z-index: 1;
         }
 
         .post-inner {
@@ -70,60 +56,53 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px; /* Tighter gap to keep footer inside crop */
-            width: 100%;
+            gap: 25px; /* Compact spacing */
         }
 
-        .meta-row { display: flex; gap: 8px; margin-bottom: 5px; }
+        .meta-row { display: flex; gap: 8px; }
 
         .tag {
-            height: 36px; 
-            padding: 0 14px;
-            font-size: 12px; 
+            height: 32px; 
+            padding: 0 12px;
+            font-size: 11px; 
             font-weight: 900;
-            letter-spacing: 0.08em;
             display: flex;
             align-items: center;
-            justify-content: center;
             text-transform: uppercase;
-            border-radius: 8px;
+            border-radius: 6px;
             backdrop-filter: blur(10px);
         }
-
         .tag-blue { background: var(--accent); color: #ffffff; }
-        .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); border: 2px solid rgba(255, 255, 255, 0.1); }
+        .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
 
-        .social-header-row {
+        .social-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            width: 600px;
+            width: 550px;
         }
-
         .social-cell {
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            padding: 14px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px;
             display: flex;
             justify-content: space-around;
-            align-items: center;
-            font-size: 22px;
+            font-size: 20px;
         }
 
+        /* The Main Card */
         #captureArea {
-            width: 600px; 
-            height: 600px; 
+            width: 550px; 
+            height: 550px; 
             background-color: #0f131f;
-            background-image: 
-                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%),
-                radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 95%);
-            border-radius: 70px;
+            background-image: radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 100%);
+            border-radius: 60px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
             position: relative;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.05);
-            overflow: hidden;
         }
 
         .content-area {
@@ -132,51 +111,38 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 60px;
+            padding: 50px;
         }
 
         #previewText {
-            line-height: 1.05;
             font-weight: 900;
             color: #ffffff;
-            word-wrap: break-word;
-            max-width: 100%;
             letter-spacing: -0.05em;
+            line-height: 1;
         }
 
-        .footer-premium {
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
-            border-top: 2px solid rgba(255,255,255,0.05);
-            width: 600px;
-            padding: 15px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Footer MOVED INSIDE the Card Area to prevent crop-out */
+        .internal-footer {
+            width: 100%;
+            padding: 25px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
             font-family: 'JetBrains Mono', monospace;
-            border-radius: 15px;
-            margin-top: 5px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.1em;
         }
 
-        .footer-part {
-            font-size: 12px;
-            color: rgba(255,255,255,0.4);
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        /* UI Controls */
         .controls-container {
-            width: 500px;
+            width: 400px;
             background: rgba(17, 24, 39, 0.9);
             margin-top: 20px;
-            border-radius: 20px;
-            padding: 24px;
+            border-radius: 15px;
+            padding: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .input-label { color: #60a5fa; font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .input-field { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; width: 100%; color: white; margin-bottom: 12px; }
-        .btn-fullscreen { background: var(--accent); color: white; padding: 14px; border-radius: 12px; font-weight: 700; width: 100%; text-transform: uppercase; }
+        .input-field { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; width: 100%; color: white; margin-bottom: 10px; font-size: 14px; }
+        .btn-fullscreen { background: var(--accent); color: white; padding: 12px; border-radius: 10px; font-weight: 700; width: 100%; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -184,69 +150,58 @@
     <div id="exportSquare">
         <div class="post-inner">
             <div class="meta-row">
-                <div class="tag tag-gray" id="dayOfYearTag">DAY 068</div>
-                <div class="tag tag-gray" id="progressTag">18%</div>
-                <div class="tag tag-blue" id="dateTag">03.09.2026</div>
-                <div class="tag tag-blue" style="background: var(--accent-dark);" id="handleTag">@jvhn0gl3</div>
+                <div class="tag tag-gray">DAY 068</div>
+                <div class="tag tag-gray">18%</div>
+                <div class="tag tag-blue">03.09.2026</div>
+                <div class="tag tag-blue" style="opacity: 0.8;">@jvhn0gl3</div>
             </div>
 
-            <div class="social-header-row">
+            <div class="social-row">
                 <div class="social-cell"><i class="fa-brands fa-facebook text-blue-500"></i><i class="fa-brands fa-threads text-white"></i></div>
                 <div class="social-cell"><i class="fa-brands fa-youtube text-red-600"></i><i class="fa-brands fa-instagram text-pink-500"></i></div>
             </div>
 
             <div id="captureArea">
-                <div class="content-area" id="contentArea">
-                    <div id="previewText">FINAL TEST</div>
+                <div class="content-area">
+                    <div id="previewText">CROP SAFE</div>
                 </div>
-            </div>
-
-            <div class="footer-premium">
-                <span class="footer-part" id="footerHandle">@JVHN0GL3 // JOHN-OGLETREE</span>
+                <div class="internal-footer">
+                    @JVHN0GL3 // JOHN-OGLETREE
+                </div>
             </div>
         </div>
     </div>
 
     <div class="controls-container">
-        <span class="input-label">Message</span>
-        <textarea id="inputText" class="input-field h-16">FINAL TEST</textarea>
+        <textarea id="inputText" class="input-field h-16">CROP SAFE</textarea>
         <button onclick="toggleFullscreen()" class="btn-fullscreen">Enter Screenshot Mode</button>
     </div>
 
     <script>
-        const elements = {
-            previewText: document.getElementById('previewText'),
-            contentArea: document.getElementById('contentArea'),
-            inputText: document.getElementById('inputText'),
-            exportSquare: document.getElementById('exportSquare')
-        };
+        const previewText = document.getElementById('previewText');
+        const inputText = document.getElementById('inputText');
+        const exportSquare = document.getElementById('exportSquare');
 
         function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                elements.exportSquare.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
+            if (!document.fullscreenElement) exportSquare.requestFullscreen();
+            else document.exitFullscreen();
         }
 
         function adjustFontSize() {
-            const container = elements.contentArea;
-            const text = elements.previewText;
-            let fontSize = 180; 
-            text.style.fontSize = fontSize + 'px';
-            while ((text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && fontSize > 20) {
+            let fontSize = 160; 
+            previewText.style.fontSize = fontSize + 'px';
+            while ((previewText.scrollHeight > 400 || previewText.scrollWidth > 450) && fontSize > 20) {
                 fontSize -= 2;
-                text.style.fontSize = fontSize + 'px';
+                previewText.style.fontSize = fontSize + 'px';
             }
         }
 
-        elements.inputText.addEventListener('input', (e) => {
-            elements.previewText.innerText = e.target.value;
+        inputText.addEventListener('input', (e) => {
+            previewText.innerText = e.target.value;
             adjustFontSize();
         });
 
         window.addEventListener('load', adjustFontSize);
-        document.addEventListener('fullscreenchange', adjustFontSize);
     </script>
 </body>
 </html>

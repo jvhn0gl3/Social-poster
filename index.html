@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Universal Suite</title>
+    <title>pxltr Studio - Production Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -49,22 +49,20 @@
             transition: background 0.8s ease;
         }
 
-        /* Reactive Themes */
+        /* Themes */
         .theme-default { background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.3) 0px, transparent 50%); }
         .theme-art { background-image: radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.3) 0px, transparent 50%); }
         .theme-success { background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.3) 0px, transparent 50%); }
         .theme-alert { background-image: radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.3) 0px, transparent 50%); }
         .theme-minimal { background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.1) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.05) 0px, transparent 50%); }
 
-        .post-inner {
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
-        }
+        .post-inner { z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 25px; }
 
-        .meta-row { display: flex; gap: 8px; }
+        /* Editable State Styling */
+        [contenteditable="true"] { outline: none; cursor: text; transition: all 0.2s; }
+        .is-editing [contenteditable="true"]:hover { background: rgba(255,255,255,0.08); border-radius: 4px; box-shadow: 0 0 0 4px rgba(255,255,255,0.08); }
+        .is-locked [contenteditable="true"] { cursor: default !important; }
+
         .tag {
             height: 32px; padding: 0 12px; font-size: 11px; font-weight: 900;
             display: flex; align-items: center; text-transform: uppercase;
@@ -85,7 +83,6 @@
             width: 550px; height: 550px;
             background: var(--card-bg);
             backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
             border-radius: 60px;
             display: flex;
             flex-direction: column;
@@ -93,12 +90,8 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .content-area {
-            flex-grow: 1; display: flex; align-items: center;
-            justify-content: center; text-align: center; padding: 50px;
-        }
-
-        #previewText { font-weight: 900; color: #ffffff; letter-spacing: -0.05em; line-height: 1; }
+        .content-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 50px; }
+        #previewText { font-weight: 900; color: #ffffff; letter-spacing: -0.05em; line-height: 1; width: 100%; }
 
         .internal-footer {
             width: 100%; padding: 25px 0; border-top: 1px solid rgba(255,255,255,0.1);
@@ -107,16 +100,16 @@
             text-transform: uppercase;
         }
 
-        /* Advanced Controls */
+        /* UI Controls */
         .controls-container {
-            width: 500px; background: rgba(17, 24, 39, 0.95); margin-top: 20px;
-            border-radius: 20px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 420px; background: rgba(17, 24, 39, 0.95); margin-top: 20px;
+            border-radius: 20px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .control-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        .input-field { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; width: 100%; color: white; font-size: 13px; outline: none; transition: border 0.3s; }
-        .input-field:focus { border-color: var(--accent); }
-        .label { font-size: 10px; font-weight: 800; color: #60a5fa; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .btn-blue { background: var(--accent); color: white; padding: 15px; border-radius: 12px; font-weight: 700; width: 100%; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-group { display: grid; grid-template-columns: 100px 1fr; gap: 10px; }
+        .btn { padding: 14px; border-radius: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn-lock { background: #374151; color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-lock.active { background: #991b1b; color: white; border-color: #ef4444; }
+        .btn-blue { background: var(--accent); color: white; }
         
         #copyToast {
             position: fixed; bottom: 20px; background: #10b981; color: white;
@@ -126,17 +119,17 @@
         }
     </style>
 </head>
-<body class="theme-default">
+<body class="is-editing">
 
     <div id="copyToast">TEXT COPIED!</div>
 
     <div id="exportSquare" class="theme-default">
         <div class="post-inner">
             <div class="meta-row">
-                <div class="tag tag-gray" id="tagDay">DAY 068</div>
-                <div class="tag tag-gray" id="tagProgress">18%</div>
-                <div class="tag tag-blue" id="tagDate">03.09.2026</div>
-                <div class="tag tag-blue" id="tagHandle" style="opacity: 0.8;">@USER</div>
+                <div class="tag tag-gray" contenteditable="true">DAY 068</div>
+                <div class="tag tag-gray" contenteditable="true">18%</div>
+                <div class="tag tag-blue" contenteditable="true">03.09.2026</div>
+                <div class="tag tag-blue" contenteditable="true" style="opacity: 0.8;">@jvhn0gl3</div>
             </div>
 
             <div class="social-row">
@@ -146,62 +139,31 @@
 
             <div id="captureArea">
                 <div class="content-area">
-                    <div id="previewText">UNIVERSAL MODE</div>
+                    <div id="previewText" contenteditable="true">READY FOR PRODUCTION</div>
                 </div>
-                <div class="internal-footer" id="footerText">@USER // FULL NAME</div>
+                <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
             </div>
         </div>
     </div>
 
     <div class="controls-container">
-        <div class="control-row">
-            <div>
-                <span class="label">Handle</span>
-                <input type="text" id="inHandle" class="input-field" value="@jvhn0gl3">
-            </div>
-            <div>
-                <span class="label">Full Name</span>
-                <input type="text" id="inName" class="input-field" value="John-Ogletree">
-            </div>
+        <div class="btn-group">
+            <button id="lockBtn" onclick="toggleLock()" class="btn btn-lock">
+                <i id="lockIcon" class="fa-solid fa-unlock"></i>
+            </button>
+            <button onclick="prepAndFullscreen()" class="btn btn-blue">
+                <i class="fa-solid fa-camera"></i> Prepare Shot
+            </button>
         </div>
-        <div class="control-row">
-            <div>
-                <span class="label">Date</span>
-                <input type="text" id="inDate" class="input-field" value="03.09.2026">
-            </div>
-            <div>
-                <span class="label">Day # / Progress</span>
-                <div class="flex gap-2">
-                    <input type="text" id="inDayNum" class="input-field w-1/2" value="068">
-                    <input type="text" id="inProg" class="input-field w-1/2" value="18%">
-                </div>
-            </div>
-        </div>
-        <span class="label">Main Message</span>
-        <textarea id="inText" class="input-field h-16" placeholder="Vibe check...">UNIVERSAL MODE</textarea>
-        
-        <button onclick="prepAndFullscreen()" class="btn-blue">
-            <i class="fa-solid fa-camera"></i> Prepare Screenshot
-        </button>
     </div>
 
     <script>
-        const els = {
-            pText: document.getElementById('previewText'),
-            iText: document.getElementById('inText'),
-            iHandle: document.getElementById('inHandle'),
-            iName: document.getElementById('inName'),
-            iDate: document.getElementById('inDate'),
-            iDay: document.getElementById('inDayNum'),
-            iProg: document.getElementById('inProg'),
-            tDay: document.getElementById('tagDay'),
-            tProg: document.getElementById('tagProgress'),
-            tDate: document.getElementById('tagDate'),
-            tHandle: document.getElementById('tagHandle'),
-            fText: document.getElementById('footerText'),
-            sq: document.getElementById('exportSquare'),
-            toast: document.getElementById('copyToast')
-        };
+        const pText = document.getElementById('previewText');
+        const sq = document.getElementById('exportSquare');
+        const toast = document.getElementById('copyToast');
+        const lockBtn = document.getElementById('lockBtn');
+        const lockIcon = document.getElementById('lockIcon');
+        let isLocked = false;
 
         const themes = {
             art: ['design', 'art', 'style', 'love', 'creative', 'heart'],
@@ -210,45 +172,57 @@
             minimal: ['minimal', 'black', 'white', 'simple', 'clean']
         };
 
-        function updateAll() {
-            // Update UI Elements
-            els.pText.innerText = els.iText.value;
-            els.tDay.innerText = `DAY ${els.iDay.value}`;
-            els.tProg.innerText = els.iProg.value;
-            els.tDate.innerText = els.iDate.value;
-            els.tHandle.innerText = els.iHandle.value;
-            els.fText.innerText = `${els.iHandle.value} // ${els.iName.value}`;
+        function toggleLock() {
+            isLocked = !isLocked;
+            document.body.className = isLocked ? 'is-locked' : 'is-editing';
+            lockBtn.classList.toggle('active', isLocked);
+            lockIcon.className = isLocked ? 'fa-solid fa-lock' : 'fa-solid fa-unlock';
+            
+            document.querySelectorAll('[contenteditable]').forEach(el => {
+                el.contentEditable = !isLocked;
+            });
+        }
 
-            // Handle Font Scaling
+        function adjustFontSize() {
             let fontSize = 160; 
-            els.pText.style.fontSize = fontSize + 'px';
-            while ((els.pText.scrollHeight > 400 || els.pText.scrollWidth > 450) && fontSize > 20) {
+            pText.style.fontSize = fontSize + 'px';
+            while ((pText.scrollHeight > 400 || pText.scrollWidth > 450) && fontSize > 20) {
                 fontSize -= 2;
-                els.pText.style.fontSize = fontSize + 'px';
+                pText.style.fontSize = fontSize + 'px';
             }
+        }
 
-            // Handle Background Logic
-            const lowerText = els.iText.value.toLowerCase();
+        function updateBackground() {
+            const lowerText = pText.innerText.toLowerCase();
             let theme = 'theme-default';
             if (themes.art.some(w => lowerText.includes(w))) theme = 'theme-art';
             else if (themes.success.some(w => lowerText.includes(w))) theme = 'theme-success';
             else if (themes.alert.some(w => lowerText.includes(w))) theme = 'theme-alert';
             else if (themes.minimal.some(w => lowerText.includes(w))) theme = 'theme-minimal';
-            els.sq.className = theme;
+            sq.className = theme;
         }
 
         async function prepAndFullscreen() {
-            await navigator.clipboard.writeText(els.iText.value);
-            els.toast.style.transform = 'translateY(0)';
-            setTimeout(() => els.toast.style.transform = 'translateY(100px)', 2000);
-            if (!document.fullscreenElement) els.sq.requestFullscreen();
+            await navigator.clipboard.writeText(pText.innerText);
+            toast.style.transform = 'translateY(0)';
+            setTimeout(() => toast.style.transform = 'translateY(100px)', 2000);
+            if (!document.fullscreenElement) sq.requestFullscreen();
         }
 
-        [els.iText, els.iHandle, els.iName, els.iDate, els.iDay, els.iProg].forEach(input => {
-            input.addEventListener('input', updateAll);
+        pText.addEventListener('input', () => {
+            updateBackground();
+            adjustFontSize();
         });
 
-        window.addEventListener('load', updateAll);
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
+            });
+        });
+
+        window.addEventListener('load', adjustFontSize);
     </script>
 </body>
 </html>

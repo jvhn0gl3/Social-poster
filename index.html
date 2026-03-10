@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Reactive Edition</title>
+    <title>pxltr Studio - Universal Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -36,7 +36,6 @@
             height: 100vh;
         }
 
-        /* 1:1 Canvas */
         #exportSquare {
             width: 1000px; 
             height: 1000px;
@@ -105,15 +104,17 @@
             width: 100%; padding: 25px 0; border-top: 1px solid rgba(255,255,255,0.1);
             text-align: center; font-family: 'JetBrains Mono', monospace;
             font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
 
         .controls-container {
-            width: 400px; background: rgba(17, 24, 39, 0.95); margin-top: 20px;
+            width: 450px; background: rgba(17, 24, 39, 0.95); margin-top: 20px;
             border-radius: 20px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .input-field { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; width: 100%; color: white; margin-bottom: 15px; font-size: 14px; outline: none; }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .input-field { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; width: 100%; color: white; font-size: 13px; outline: none; }
         .btn-blue { background: var(--accent); color: white; padding: 12px; border-radius: 10px; font-weight: 700; width: 100%; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
+        
         #copyToast {
             position: fixed; bottom: 20px; background: #10b981; color: white;
             padding: 10px 20px; border-radius: 30px; font-weight: 700;
@@ -129,10 +130,10 @@
     <div id="exportSquare" class="theme-default">
         <div class="post-inner">
             <div class="meta-row">
-                <div class="tag tag-gray">DAY 068</div>
-                <div class="tag tag-gray">18%</div>
-                <div class="tag tag-blue">03.09.2026</div>
-                <div class="tag tag-blue" style="opacity: 0.8;">@jvhn0gl3</div>
+                <div class="tag tag-gray" id="dayTag">DAY 068</div>
+                <div class="tag tag-gray" id="progressTag">18%</div>
+                <div class="tag tag-blue" id="dateTag">03.09.2026</div>
+                <div class="tag tag-blue" id="displayHandle" style="opacity: 0.8;">@jvhn0gl3</div>
             </div>
 
             <div class="social-row">
@@ -144,13 +145,17 @@
                 <div class="content-area">
                     <div id="previewText">REACTIVE MODE</div>
                 </div>
-                <div class="internal-footer">@JVHN0GL3 // JOHN-OGLETREE</div>
+                <div class="internal-footer" id="displayFooter">@JVHN0GL3 // JOHN-OGLETREE</div>
             </div>
         </div>
     </div>
 
     <div class="controls-container">
-        <textarea id="inputText" class="input-field h-16" placeholder="Try typing 'Success' or 'Alert'...">REACTIVE MODE</textarea>
+        <div class="input-group">
+            <input type="text" id="inputHandle" class="input-field" placeholder="Handle (@user)" value="@jvhn0gl3">
+            <input type="text" id="inputName" class="input-field" placeholder="Full Name" value="John-Ogletree">
+        </div>
+        <textarea id="inputText" class="input-field h-16 mb-4" placeholder="Message...">REACTIVE MODE</textarea>
         <button onclick="prepAndFullscreen()" class="btn-blue">
             <i class="fa-solid fa-camera"></i> Screenshot
         </button>
@@ -159,6 +164,10 @@
     <script>
         const previewText = document.getElementById('previewText');
         const inputText = document.getElementById('inputText');
+        const inputHandle = document.getElementById('inputHandle');
+        const inputName = document.getElementById('inputName');
+        const displayHandle = document.getElementById('displayHandle');
+        const displayFooter = document.getElementById('displayFooter');
         const exportSquare = document.getElementById('exportSquare');
         const toast = document.getElementById('copyToast');
 
@@ -169,15 +178,20 @@
             minimal: ['minimal', 'black', 'white', 'simple', 'clean']
         };
 
+        function updateUI() {
+            const handle = inputHandle.value || '@user';
+            const name = inputName.value || 'Name';
+            displayHandle.innerText = handle;
+            displayFooter.innerText = `${handle} // ${name}`;
+        }
+
         function updateBackground(text) {
             const lowerText = text.toLowerCase();
             let selectedTheme = 'theme-default';
-
             if (themes.art.some(word => lowerText.includes(word))) selectedTheme = 'theme-art';
             else if (themes.success.some(word => lowerText.includes(word))) selectedTheme = 'theme-success';
             else if (themes.alert.some(word => lowerText.includes(word))) selectedTheme = 'theme-alert';
             else if (themes.minimal.some(word => lowerText.includes(word))) selectedTheme = 'theme-minimal';
-
             exportSquare.className = selectedTheme;
         }
 
@@ -197,10 +211,13 @@
             }
         }
 
-        inputText.addEventListener('input', (e) => {
-            previewText.innerText = e.target.value;
-            updateBackground(e.target.value);
-            adjustFontSize();
+        [inputText, inputHandle, inputName].forEach(el => {
+            el.addEventListener('input', () => {
+                previewText.innerText = inputText.value;
+                updateUI();
+                updateBackground(inputText.value);
+                adjustFontSize();
+            });
         });
 
         window.addEventListener('load', adjustFontSize);

@@ -16,7 +16,7 @@ A high end, reactive social media post generator designed for consistent, premiu
 
 ## Usage
 
-1. Open the tool at: https://jvhn0gl3.github.io/Social poster/
+1. Open the tool at: https://jvhn0gl3.github.io/Social-poster/
 2. Click on the text elements to customize your information.
 3. Type your message in the central card to see the background react.
 4. Click "Prepare Screenshot" to copy your text and enter fullscreen mode.

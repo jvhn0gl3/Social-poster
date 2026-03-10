@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Production Suite</title>
+    <title>pxltr Studio - Live Edit Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -58,10 +58,15 @@
 
         .post-inner { z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 25px; }
 
-        /* Editable State Styling */
-        [contenteditable="true"] { outline: none; cursor: text; transition: all 0.2s; }
-        .is-editing [contenteditable="true"]:hover { background: rgba(255,255,255,0.08); border-radius: 4px; box-shadow: 0 0 0 4px rgba(255,255,255,0.08); }
-        .is-locked [contenteditable="true"] { cursor: default !important; }
+        .meta-row { display: flex; gap: 8px; }
+        
+        /* Clickable Text Styling */
+        [contenteditable="true"] {
+            outline: none;
+            cursor: text;
+            transition: opacity 0.2s;
+        }
+        [contenteditable="true"]:hover { opacity: 0.8; background: rgba(255,255,255,0.05); border-radius: 4px; }
 
         .tag {
             height: 32px; padding: 0 12px; font-size: 11px; font-weight: 900;
@@ -90,7 +95,11 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .content-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 50px; }
+        .content-area {
+            flex-grow: 1; display: flex; align-items: center;
+            justify-content: center; text-align: center; padding: 50px;
+        }
+
         #previewText { font-weight: 900; color: #ffffff; letter-spacing: -0.05em; line-height: 1; width: 100%; }
 
         .internal-footer {
@@ -100,16 +109,12 @@
             text-transform: uppercase;
         }
 
-        /* UI Controls */
         .controls-container {
-            width: 420px; background: rgba(17, 24, 39, 0.95); margin-top: 20px;
+            width: 400px; background: rgba(17, 24, 39, 0.95); margin-top: 20px;
             border-radius: 20px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
         }
-        .btn-group { display: grid; grid-template-columns: 100px 1fr; gap: 10px; }
-        .btn { padding: 14px; border-radius: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
-        .btn-lock { background: #374151; color: white; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-lock.active { background: #991b1b; color: white; border-color: #ef4444; }
-        .btn-blue { background: var(--accent); color: white; }
+        .btn-blue { background: var(--accent); color: white; padding: 15px; border-radius: 12px; font-weight: 700; width: 100%; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
         #copyToast {
             position: fixed; bottom: 20px; background: #10b981; color: white;
@@ -119,7 +124,7 @@
         }
     </style>
 </head>
-<body class="is-editing">
+<body class="theme-default">
 
     <div id="copyToast">TEXT COPIED!</div>
 
@@ -139,7 +144,7 @@
 
             <div id="captureArea">
                 <div class="content-area">
-                    <div id="previewText" contenteditable="true">READY FOR PRODUCTION</div>
+                    <div id="previewText" contenteditable="true">CLICK ANY TEXT TO EDIT</div>
                 </div>
                 <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
             </div>
@@ -147,23 +152,16 @@
     </div>
 
     <div class="controls-container">
-        <div class="btn-group">
-            <button id="lockBtn" onclick="toggleLock()" class="btn btn-lock">
-                <i id="lockIcon" class="fa-solid fa-unlock"></i>
-            </button>
-            <button onclick="prepAndFullscreen()" class="btn btn-blue">
-                <i class="fa-solid fa-camera"></i> Prepare Shot
-            </button>
-        </div>
+        <p class="text-gray-400 text-xs mb-4">Click any text above to change it. Background reacts to the main message.</p>
+        <button onclick="prepAndFullscreen()" class="btn-blue">
+            <i class="fa-solid fa-camera"></i> Prepare Screenshot
+        </button>
     </div>
 
     <script>
         const pText = document.getElementById('previewText');
         const sq = document.getElementById('exportSquare');
         const toast = document.getElementById('copyToast');
-        const lockBtn = document.getElementById('lockBtn');
-        const lockIcon = document.getElementById('lockIcon');
-        let isLocked = false;
 
         const themes = {
             art: ['design', 'art', 'style', 'love', 'creative', 'heart'],
@@ -171,17 +169,6 @@
             alert: ['alert', 'warning', 'fire', 'stop', 'hot', 'error'],
             minimal: ['minimal', 'black', 'white', 'simple', 'clean']
         };
-
-        function toggleLock() {
-            isLocked = !isLocked;
-            document.body.className = isLocked ? 'is-locked' : 'is-editing';
-            lockBtn.classList.toggle('active', isLocked);
-            lockIcon.className = isLocked ? 'fa-solid fa-lock' : 'fa-solid fa-unlock';
-            
-            document.querySelectorAll('[contenteditable]').forEach(el => {
-                el.contentEditable = !isLocked;
-            });
-        }
 
         function adjustFontSize() {
             let fontSize = 160; 
@@ -203,9 +190,11 @@
         }
 
         async function prepAndFullscreen() {
+            // Copy main text
             await navigator.clipboard.writeText(pText.innerText);
             toast.style.transform = 'translateY(0)';
             setTimeout(() => toast.style.transform = 'translateY(100px)', 2000);
+            
             if (!document.fullscreenElement) sq.requestFullscreen();
         }
 
@@ -214,6 +203,7 @@
             adjustFontSize();
         });
 
+        // Ensure formatting doesn't break when pasting text
         document.querySelectorAll('[contenteditable]').forEach(el => {
             el.addEventListener('paste', (e) => {
                 e.preventDefault();

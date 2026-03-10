@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Safe Crop Edition</title>
+    <title>pxltr Studio - Final Crop Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -27,7 +27,7 @@
             min-height: 100vh;
         }
 
-        /* FULLSCREEN: Essential for capturing the safe margins */
+        /* FULLSCREEN: Ensures the screenshot tool sees the full 1:1 canvas */
         #exportSquare:fullscreen {
             background-color: #000;
             display: flex;
@@ -37,11 +37,11 @@
             height: 100vh;
         }
 
-        /* The 1:1 Square with forced internal margins for cropping */
+        /* 1:1 Square with heavy margins to force social media croppers to see everything */
         #exportSquare {
             width: 1000px; 
             height: 1000px;
-            zoom: 0.5; /* Scale for desktop view */
+            zoom: 0.5; 
             background-color: var(--bg-dark);
             background-image: 
                 radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.2) 0px, transparent 50%),
@@ -52,7 +52,7 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
-            padding: 100px; /* THIS IS THE SAFE ZONE MARGIN */
+            padding: 120px; /* Heavy safety margin */
         }
 
         #exportSquare::after {
@@ -70,16 +70,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 32px; 
+            gap: 20px; /* Tighter gap to keep footer inside crop */
             width: 100%;
         }
 
-        .meta-row { display: flex; gap: 10px; }
+        .meta-row { display: flex; gap: 8px; margin-bottom: 5px; }
 
         .tag {
-            height: 40px; 
-            padding: 0 16px;
-            font-size: 14px; 
+            height: 36px; 
+            padding: 0 14px;
+            font-size: 12px; 
             font-weight: 900;
             letter-spacing: 0.08em;
             display: flex;
@@ -96,33 +96,33 @@
         .social-header-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            width: 650px;
+            gap: 12px;
+            width: 600px;
         }
 
         .social-cell {
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 20px;
+            border-radius: 18px;
             border: 2px solid rgba(255, 255, 255, 0.08);
-            padding: 16px;
+            padding: 14px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            font-size: 24px;
+            font-size: 22px;
         }
 
         #captureArea {
-            width: 650px; 
-            height: 650px; 
+            width: 600px; 
+            height: 600px; 
             background-color: #0f131f;
             background-image: 
                 linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%),
                 radial-gradient(circle at 50% 0%, #1e2638 0%, #0f131f 95%);
-            border-radius: 80px;
+            border-radius: 70px;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.05);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.05);
             overflow: hidden;
         }
 
@@ -132,7 +132,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 70px;
+            padding: 60px;
         }
 
         #previewText {
@@ -147,23 +147,24 @@
         .footer-premium {
             background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
             border-top: 2px solid rgba(255,255,255,0.05);
-            width: 650px;
-            padding: 18px 0;
+            width: 600px;
+            padding: 15px 0;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'JetBrains Mono', monospace;
-            border-radius: 18px;
+            border-radius: 15px;
+            margin-top: 5px;
         }
 
         .footer-part {
-            font-size: 14px;
+            font-size: 12px;
             color: rgba(255,255,255,0.4);
             letter-spacing: 0.12em;
             text-transform: uppercase;
         }
 
-        /* Controls Panel */
+        /* UI Controls */
         .controls-container {
             width: 500px;
             background: rgba(17, 24, 39, 0.9);
@@ -171,7 +172,6 @@
             border-radius: 20px;
             padding: 24px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
         }
 
         .input-label { color: #60a5fa; font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block; }
@@ -197,7 +197,7 @@
 
             <div id="captureArea">
                 <div class="content-area" id="contentArea">
-                    <div id="previewText">SAFE CROP</div>
+                    <div id="previewText">FINAL TEST</div>
                 </div>
             </div>
 
@@ -209,7 +209,7 @@
 
     <div class="controls-container">
         <span class="input-label">Message</span>
-        <textarea id="inputText" class="input-field h-16">SAFE CROP</textarea>
+        <textarea id="inputText" class="input-field h-16">FINAL TEST</textarea>
         <button onclick="toggleFullscreen()" class="btn-fullscreen">Enter Screenshot Mode</button>
     </div>
 
@@ -232,7 +232,7 @@
         function adjustFontSize() {
             const container = elements.contentArea;
             const text = elements.previewText;
-            let fontSize = 200; 
+            let fontSize = 180; 
             text.style.fontSize = fontSize + 'px';
             while ((text.scrollHeight > container.offsetHeight || text.scrollWidth > container.offsetWidth) && fontSize > 20) {
                 fontSize -= 2;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Live Edit Edition</title>
+    <title>pxltr Studio - 3 Platforms</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -60,7 +60,6 @@
 
         .meta-row { display: flex; gap: 8px; }
         
-        /* Clickable Text Styling */
         [contenteditable="true"] {
             outline: none;
             cursor: text;
@@ -77,11 +76,16 @@
         .tag-blue { background: var(--accent); color: #ffffff; }
         .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
 
-        .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 550px; }
+        .social-row { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+            width: 550px; 
+        }
         .social-cell {
             background: rgba(255, 255, 255, 0.03); border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px;
-            display: flex; justify-content: space-around; font-size: 20px;
+            display: flex; justify-content: center; font-size: 24px;
         }
 
         #captureArea {
@@ -137,14 +141,22 @@
                 <div class="tag tag-blue" contenteditable="true" style="opacity: 0.8;">@jvhn0gl3</div>
             </div>
 
+            <!-- Social Row: FB, Threads, Instagram -->
             <div class="social-row">
-                <div class="social-cell"><i class="fa-brands fa-facebook text-blue-500"></i><i class="fa-brands fa-threads text-white"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-youtube text-red-600"></i><i class="fa-brands fa-instagram text-pink-500"></i></div>
+                <div class="social-cell">
+                    <i class="fa-brands fa-facebook text-blue-500"></i>
+                </div>
+                <div class="social-cell">
+                    <i class="fa-brands fa-threads text-white"></i>
+                </div>
+                <div class="social-cell">
+                    <i class="fa-brands fa-instagram text-pink-500"></i>
+                </div>
             </div>
 
             <div id="captureArea">
                 <div class="content-area">
-                    <div id="previewText" contenteditable="true">CLICK ANY TEXT TO EDIT</div>
+                    <div id="previewText" contenteditable="true">THREE PLATFORMS. ZERO NOISE.</div>
                 </div>
                 <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
             </div>
@@ -152,7 +164,7 @@
     </div>
 
     <div class="controls-container">
-        <p class="text-gray-400 text-xs mb-4">Click any text above to change it. Background reacts to the main message.</p>
+        <p class="text-gray-400 text-xs mb-4">Click any text above to change it. Background reacts to keywords.</p>
         <button onclick="prepAndFullscreen()" class="btn-blue">
             <i class="fa-solid fa-camera"></i> Prepare Screenshot
         </button>
@@ -165,8 +177,8 @@
 
         const themes = {
             art: ['design', 'art', 'style', 'love', 'creative', 'heart'],
-            success: ['success', 'win', 'green', 'done', 'go', 'finished'],
-            alert: ['alert', 'warning', 'fire', 'stop', 'hot', 'error'],
+            success: ['success', 'win', 'green', 'done', 'go', 'finished', 'focus'],
+            alert: ['alert', 'warning', 'fire', 'stop', 'hot', 'error', 'youtube', 'quit', 'delete', 'remove'],
             minimal: ['minimal', 'black', 'white', 'simple', 'clean']
         };
 
@@ -190,10 +202,13 @@
         }
 
         async function prepAndFullscreen() {
-            // Copy main text
-            await navigator.clipboard.writeText(pText.innerText);
-            toast.style.transform = 'translateY(0)';
-            setTimeout(() => toast.style.transform = 'translateY(100px)', 2000);
+            try {
+                await navigator.clipboard.writeText(pText.innerText);
+                toast.style.transform = 'translateY(0)';
+                setTimeout(() => toast.style.transform = 'translateY(100px)', 2000);
+            } catch (e) {
+                console.log("Clipboard skip");
+            }
             
             if (!document.fullscreenElement) sq.requestFullscreen();
         }
@@ -203,7 +218,6 @@
             adjustFontSize();
         });
 
-        // Ensure formatting doesn't break when pasting text
         document.querySelectorAll('[contenteditable]').forEach(el => {
             el.addEventListener('paste', (e) => {
                 e.preventDefault();
@@ -212,7 +226,10 @@
             });
         });
 
-        window.addEventListener('load', adjustFontSize);
+        window.addEventListener('load', () => {
+            adjustFontSize();
+            updateBackground();
+        });
     </script>
 </body>
 </html>

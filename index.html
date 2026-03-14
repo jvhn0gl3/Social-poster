@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - 10 Platforms</title>
+    <title>pxltr Studio - 9 Platforms</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -77,12 +77,12 @@
         .tag-blue { background: var(--accent); color: #ffffff; }
         .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
 
-        /* Social Grid - Updated for 10 Icons */
+        /* Social Grid - Updated for 9 Icons (3x3) */
         .social-row { 
             display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
+            grid-template-columns: repeat(3, 1fr); 
             gap: 12px; 
-            width: 550px; 
+            width: 400px; 
         }
         .social-cell {
             background: rgba(255, 255, 255, 0.03); 
@@ -149,25 +149,23 @@
                 <div class="tag tag-blue" contenteditable="true" style="opacity: 0.8;">@jvhn0gl3</div>
             </div>
 
-            <!-- Social Row: 10 Brand Icons -->
             <div class="social-row">
-                <!-- Facebook, YouTube, TikTok, Snapchat, Instagram -->
                 <div class="social-cell"><i class="fa-brands fa-facebook text-[#1877F2]"></i></div>
                 <div class="social-cell"><i class="fa-brands fa-youtube text-[#FF0000]"></i></div>
                 <div class="social-cell"><i class="fa-brands fa-tiktok text-white"></i></div>
+                
                 <div class="social-cell"><i class="fa-brands fa-snapchat text-[#FFFC00]"></i></div>
                 <div class="social-cell"><i class="fa-brands fa-instagram text-[#E4405F]"></i></div>
-                <!-- Threads, Discord, Reddit, Tumblr, Twitter (X) -->
                 <div class="social-cell"><i class="fa-brands fa-threads text-white"></i></div>
+                
                 <div class="social-cell"><i class="fa-brands fa-discord text-[#5865F2]"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-reddit text-[#FF4500]"></i></div>
                 <div class="social-cell"><i class="fa-brands fa-tumblr text-[#36465D]"></i></div>
                 <div class="social-cell"><i class="fa-brands fa-x-twitter text-white"></i></div>
             </div>
 
             <div id="captureArea">
                 <div class="content-area">
-                    <div id="previewText" contenteditable="true">TEN PLATFORMS. ONE VISION.</div>
+                    <div id="previewText" contenteditable="true">NINE PLATFORMS. ONE VISION.</div>
                 </div>
                 <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
             </div>
@@ -196,7 +194,6 @@
         function adjustFontSize() {
             let fontSize = 160; 
             pText.style.fontSize = fontSize + 'px';
-            // Constraint check for the container
             while ((pText.scrollHeight > 400 || pText.scrollWidth > 450) && fontSize > 20) {
                 fontSize -= 2;
                 pText.style.fontSize = fontSize + 'px';
@@ -215,7 +212,6 @@
 
         async function prepAndFullscreen() {
             try {
-                // Using standard command for broader compatibility in iframes
                 const textToCopy = pText.innerText;
                 const hiddenInput = document.createElement('textarea');
                 hiddenInput.value = textToCopy;
@@ -257,5 +253,3 @@
     </script>
 </body>
 </html>
-
-

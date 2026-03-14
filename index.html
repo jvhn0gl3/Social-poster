@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - 3 Platforms</title>
+    <title>pxltr Studio - 10 Platforms</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -25,6 +25,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         #exportSquare:fullscreen {
@@ -56,7 +57,7 @@
         .theme-alert { background-image: radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.3) 0px, transparent 50%); }
         .theme-minimal { background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.1) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.05) 0px, transparent 50%); }
 
-        .post-inner { z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 25px; }
+        .post-inner { z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 30px; }
 
         .meta-row { display: flex; gap: 8px; }
         
@@ -76,16 +77,23 @@
         .tag-blue { background: var(--accent); color: #ffffff; }
         .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
 
+        /* Social Grid - Updated for 10 Icons */
         .social-row { 
             display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
+            grid-template-columns: repeat(5, 1fr); 
             gap: 12px; 
             width: 550px; 
         }
         .social-cell {
-            background: rgba(255, 255, 255, 0.03); border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px;
-            display: flex; justify-content: center; font-size: 24px;
+            background: rgba(255, 255, 255, 0.03); 
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            padding: 14px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            font-size: 22px;
+            transition: all 0.3s ease;
         }
 
         #captureArea {
@@ -141,22 +149,25 @@
                 <div class="tag tag-blue" contenteditable="true" style="opacity: 0.8;">@jvhn0gl3</div>
             </div>
 
-            <!-- Social Row: FB, Threads, Instagram -->
+            <!-- Social Row: 10 Brand Icons -->
             <div class="social-row">
-                <div class="social-cell">
-                    <i class="fa-brands fa-facebook text-blue-500"></i>
-                </div>
-                <div class="social-cell">
-                    <i class="fa-brands fa-threads text-white"></i>
-                </div>
-                <div class="social-cell">
-                    <i class="fa-brands fa-instagram text-pink-500"></i>
-                </div>
+                <!-- Facebook, YouTube, TikTok, Snapchat, Instagram -->
+                <div class="social-cell"><i class="fa-brands fa-facebook text-[#1877F2]"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-youtube text-[#FF0000]"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-tiktok text-white"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-snapchat text-[#FFFC00]"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-instagram text-[#E4405F]"></i></div>
+                <!-- Threads, Discord, Reddit, Tumblr, Twitter (X) -->
+                <div class="social-cell"><i class="fa-brands fa-threads text-white"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-discord text-[#5865F2]"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-reddit text-[#FF4500]"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-tumblr text-[#36465D]"></i></div>
+                <div class="social-cell"><i class="fa-brands fa-x-twitter text-white"></i></div>
             </div>
 
             <div id="captureArea">
                 <div class="content-area">
-                    <div id="previewText" contenteditable="true">THREE PLATFORMS. ZERO NOISE.</div>
+                    <div id="previewText" contenteditable="true">TEN PLATFORMS. ONE VISION.</div>
                 </div>
                 <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
             </div>
@@ -185,6 +196,7 @@
         function adjustFontSize() {
             let fontSize = 160; 
             pText.style.fontSize = fontSize + 'px';
+            // Constraint check for the container
             while ((pText.scrollHeight > 400 || pText.scrollWidth > 450) && fontSize > 20) {
                 fontSize -= 2;
                 pText.style.fontSize = fontSize + 'px';
@@ -203,14 +215,26 @@
 
         async function prepAndFullscreen() {
             try {
-                await navigator.clipboard.writeText(pText.innerText);
+                // Using standard command for broader compatibility in iframes
+                const textToCopy = pText.innerText;
+                const hiddenInput = document.createElement('textarea');
+                hiddenInput.value = textToCopy;
+                document.body.appendChild(hiddenInput);
+                hiddenInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(hiddenInput);
+
                 toast.style.transform = 'translateY(0)';
                 setTimeout(() => toast.style.transform = 'translateY(100px)', 2000);
             } catch (e) {
-                console.log("Clipboard skip");
+                console.log("Clipboard fallback active");
             }
             
-            if (!document.fullscreenElement) sq.requestFullscreen();
+            if (!document.fullscreenElement) {
+                sq.requestFullscreen().catch(err => {
+                    console.log(`Fullscreen failed: ${err.message}`);
+                });
+            }
         }
 
         pText.addEventListener('input', () => {
@@ -233,3 +257,5 @@
     </script>
 </body>
 </html>
+
+

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Perfectly Centered</title>
+    <title>pxltr Studio - Bold Header 1:1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -28,16 +28,6 @@
             overflow: hidden;
         }
 
-        #exportSquare:fullscreen {
-            background-color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        /* 1:1 Aspect Ratio Box */
         #exportSquare {
             width: 1000px; 
             height: 1000px;
@@ -48,73 +38,93 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
             transition: background 0.8s ease;
         }
 
-        /* Themes */
         .theme-default { background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.15) 0px, transparent 50%); }
         .theme-art { background-image: radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.2) 0px, transparent 50%); }
         .theme-success { background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.2) 0px, transparent 50%); }
         .theme-alert { background-image: radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.2) 0px, transparent 50%); }
 
-        .post-inner { 
-            z-index: 2; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 25px; 
-            width: 100%;
+        .post-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 860px; /* Adjusted for larger header impact */
+            position: relative;
         }
 
-        .meta-row { display: flex; gap: 8px; margin-bottom: 5px; }
+        /* Enlarged Unified Meta Row */
+        .unified-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 28px;
+            padding: 16px 36px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .meta-tags-group { 
+            display: flex; 
+            gap: 12px; 
+            align-items: center;
+        }
+
+        .divider {
+            width: 2px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 8px;
+        }
+
+        .social-group {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+        }
         
         [contenteditable="true"] { outline: none; }
 
         .tag {
-            height: 28px; padding: 0 10px; font-size: 10px; font-weight: 900;
-            display: flex; align-items: center; text-transform: uppercase;
-            border-radius: 4px; backdrop-filter: blur(10px);
+            height: 40px; /* Taller tags */
+            padding: 0 16px; 
+            font-size: 13px; /* Bigger font */
+            font-weight: 900;
+            display: flex; 
+            align-items: center; 
+            text-transform: uppercase;
+            border-radius: 8px; 
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .tag-blue { background: var(--accent); color: #ffffff; }
-        .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
+        .tag-gray { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); }
 
-        /* Social Sidebar - Bold and Vertical */
-        .social-sidebar { 
-            display: flex;
-            flex-direction: column; 
-            gap: 10px; 
-            padding: 30px 24px;
-            border-right: 1px solid rgba(255,255,255,0.06);
-            background: rgba(0,0,0,0.3);
-            height: 100%;
-            justify-content: center;
+        .social-icon-small {
+            font-size: 22px; /* Bigger icons */
+            opacity: 0.85;
+            transition: transform 0.2s, opacity 0.2s;
         }
-        
-        .social-cell {
-            width: 56px;
-            height: 56px;
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            font-size: 26px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.06);
+        .social-icon-small:hover { 
+            opacity: 1; 
+            transform: scale(1.15);
         }
 
-        /* Rounded Main Card */
         #captureArea {
-            width: 880px; 
-            height: 720px;
-            background: var(--card-bg);
-            border-radius: 70px;
+            width: 100%; 
+            height: 640px; /* Slightly reduced to keep everything in safe zone */
+            position: relative;
             display: flex;
-            flex-direction: row; 
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: 64px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
             overflow: hidden;
-            box-shadow: 0 60px 120px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .main-content {
@@ -132,14 +142,13 @@
             justify-content: center; 
             text-align: center; 
             padding: 40px 80px;
-            overflow: hidden;
         }
 
         #previewText { 
             font-weight: 900; 
             color: #ffffff; 
             letter-spacing: -0.04em; 
-            line-height: 1.1; 
+            line-height: 1.15; 
             width: 100%; 
             word-wrap: break-word;
             display: flex;
@@ -147,18 +156,6 @@
             justify-content: center;
             align-items: center;
             white-space: pre-wrap;
-        }
-
-        .internal-footer {
-            width: 100%; 
-            padding: 24px 0; 
-            border-top: 1px solid rgba(255,255,255,0.05);
-            text-align: center; 
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; 
-            color: rgba(255,255,255,0.2); 
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
         }
 
         .controls-container {
@@ -171,7 +168,7 @@
             position: fixed; bottom: 20px; background: #10b981; color: white;
             padding: 10px 25px; border-radius: 30px; font-weight: 700;
             transform: translateY(100px); transition: transform 0.3s;
-            z-index: 100; font-size: 12px;
+            z-index: 200; font-size: 12px;
         }
     </style>
 </head>
@@ -180,37 +177,39 @@
     <div id="copyToast">TEXT COPIED!</div>
 
     <div id="exportSquare" class="theme-default">
-        <div class="post-inner">
-            <!-- Meta Tags centered above -->
-            <div class="meta-row">
-                <div class="tag tag-gray" contenteditable="true">DAY 068</div>
-                <div class="tag tag-gray" contenteditable="true">18%</div>
-                <div class="tag tag-blue" contenteditable="true">03.09.2026</div>
-                <div class="tag tag-blue" contenteditable="true">@jvhn0gl3</div>
+        <div class="post-wrapper">
+            
+            <!-- Bigger Unified Meta Row -->
+            <div class="unified-meta-row">
+                <div class="meta-tags-group">
+                    <div class="tag tag-gray" contenteditable="true">DAY 068</div>
+                    <div class="tag tag-gray" contenteditable="true">18%</div>
+                    <div class="tag tag-blue" contenteditable="true">03.09.2026</div>
+                    <div class="tag tag-blue" contenteditable="true">@jvhn0gl3</div>
+                </div>
+                
+                <div class="divider"></div>
+
+                <div class="social-group">
+                    <i class="fa-brands fa-facebook social-icon-small text-[#1877F2]"></i>
+                    <i class="fa-brands fa-youtube social-icon-small text-[#FF0000]"></i>
+                    <i class="fa-brands fa-tiktok social-icon-small text-white"></i>
+                    <i class="fa-brands fa-snapchat social-icon-small text-[#FFFC00]"></i>
+                    <i class="fa-brands fa-instagram social-icon-small text-[#E4405F]"></i>
+                    <i class="fa-brands fa-threads social-icon-small text-white"></i>
+                    <i class="fa-brands fa-discord social-icon-small text-[#5865F2]"></i>
+                    <i class="fa-brands fa-tumblr social-icon-small text-[#36465D]"></i>
+                    <i class="fa-brands fa-x-twitter social-icon-small text-white"></i>
+                </div>
             </div>
 
             <div id="captureArea">
-                <!-- Vertical Social Sidebar -->
-                <div class="social-sidebar">
-                    <div class="social-cell"><i class="fa-brands fa-facebook text-[#1877F2]"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-youtube text-[#FF0000]"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-tiktok text-white"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-snapchat text-[#FFFC00]"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-instagram text-[#E4405F]"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-threads text-white"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-discord text-[#5865F2]"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-tumblr text-[#36465D]"></i></div>
-                    <div class="social-cell"><i class="fa-brands fa-x-twitter text-white"></i></div>
-                </div>
-
                 <div class="main-content">
                     <div class="content-area">
-                        <!-- Content Text Strictly Centered -->
                         <div id="previewText" contenteditable="true">"Where'd your depth go?"
 
 It didn't go anywhere. Life just got loud.</div>
                     </div>
-                    <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
                 </div>
             </div>
         </div>
@@ -234,12 +233,11 @@ It didn't go anywhere. Life just got loud.</div>
         };
 
         function adjustFontSize() {
-            let fontSize = 90; 
+            let fontSize = 80; 
             pText.style.fontSize = fontSize + 'px';
             const container = pText.parentElement;
             
-            // Constrain font size so text stays centered and within safe margins
-            while ((pText.scrollHeight > container.offsetHeight - 80 || pText.scrollWidth > container.offsetWidth - 80) && fontSize > 20) {
+            while ((pText.scrollHeight > container.offsetHeight - 40 || pText.scrollWidth > container.offsetWidth - 40) && fontSize > 20) {
                 fontSize -= 1;
                 pText.style.fontSize = fontSize + 'px';
             }
@@ -277,7 +275,6 @@ It didn't go anywhere. Life just got loud.</div>
             adjustFontSize();
         });
 
-        // Ensure formatting is stripped on paste
         document.querySelectorAll('[contenteditable]').forEach(el => {
             el.addEventListener('paste', (e) => {
                 e.preventDefault();

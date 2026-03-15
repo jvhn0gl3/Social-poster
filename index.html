@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - Vertical Sidebar</title>
+    <title>pxltr Studio - Centered Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -12,11 +12,11 @@
         :root {
             --accent: #2563eb;
             --bg-dark: #05070a;
-            --card-bg: rgba(15, 19, 31, 0.95);
+            --card-bg: rgba(15, 19, 31, 0.98);
         }
 
         body {
-            background-color: #0b0e14;
+            background-color: #000;
             color: white;
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -25,7 +25,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         #exportSquare:fullscreen {
@@ -37,6 +37,7 @@
             height: 100vh;
         }
 
+        /* 1:1 Aspect Ratio Box */
         #exportSquare {
             width: 1000px; 
             height: 1000px;
@@ -52,11 +53,10 @@
         }
 
         /* Themes */
-        .theme-default { background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.2) 0px, transparent 50%); }
+        .theme-default { background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.15) 0px, transparent 50%); }
         .theme-art { background-image: radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.2) 0px, transparent 50%); }
         .theme-success { background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.2) 0px, transparent 50%); }
         .theme-alert { background-image: radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.2) 0px, transparent 50%); }
-        .theme-minimal { background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.02) 0px, transparent 50%); }
 
         .post-inner { 
             z-index: 2; 
@@ -64,106 +64,106 @@
             flex-direction: column; 
             align-items: center; 
             gap: 25px; 
+            width: 100%;
         }
 
-        .meta-row { display: flex; gap: 8px; }
+        .meta-row { display: flex; gap: 8px; margin-bottom: 5px; }
         
-        [contenteditable="true"] {
-            outline: none;
-            cursor: text;
-            transition: opacity 0.2s;
-        }
-        [contenteditable="true"]:hover { opacity: 0.8; background: rgba(255,255,255,0.05); border-radius: 4px; }
+        [contenteditable="true"] { outline: none; }
 
         .tag {
-            height: 32px; padding: 0 12px; font-size: 11px; font-weight: 900;
+            height: 28px; padding: 0 10px; font-size: 10px; font-weight: 900;
             display: flex; align-items: center; text-transform: uppercase;
-            border-radius: 6px; backdrop-filter: blur(10px);
+            border-radius: 4px; backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .tag-blue { background: var(--accent); color: #ffffff; }
         .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
 
-        /* Sidebar Social List - Vertical Only */
+        /* Vertical Sidebar (Left Side of Card) */
         .social-sidebar { 
             display: flex;
             flex-direction: column; 
-            gap: 8px; 
-            padding: 20px 15px;
-            border-right: 1px solid rgba(255,255,255,0.08);
+            gap: 10px; 
+            padding: 25px 22px;
+            border-right: 1px solid rgba(255,255,255,0.06);
             background: rgba(0,0,0,0.3);
             height: 100%;
             justify-content: center;
         }
         
         .social-cell {
-            background: rgba(255, 255, 255, 0.03); 
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            width: 44px;
-            height: 44px;
+            width: 52px;
+            height: 52px;
             display: flex; 
             justify-content: center; 
             align-items: center;
-            font-size: 18px;
-            transition: all 0.3s ease;
+            font-size: 24px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
+        /* Rounded Main Card */
         #captureArea {
-            width: 750px; 
-            height: 550px;
+            width: 850px; 
+            height: 680px;
             background: var(--card-bg);
-            backdrop-filter: blur(40px);
-            border-radius: 50px;
+            border-radius: 70px;
             display: flex;
             flex-direction: row; 
             overflow: hidden;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.7);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 60px 120px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .main-content {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
+            justify-content: center; /* Centers the whole column vertically */
+            align-items: center; /* Centers the whole column horizontally */
         }
 
         .content-area {
             flex-grow: 1; 
             display: flex; 
-            align-items: center;
-            justify-content: center; 
+            align-items: center; /* Vertical center for text block */
+            justify-content: center; /* Horizontal center for text block */
             text-align: center; 
             padding: 40px 60px;
+            width: 100%;
         }
 
         #previewText { 
             font-weight: 900; 
             color: #ffffff; 
-            letter-spacing: -0.05em; 
-            line-height: 1.1; 
+            letter-spacing: -0.04em; 
+            line-height: 1.05; 
             width: 100%; 
             word-wrap: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .internal-footer {
             width: 100%; 
-            padding: 20px 0; 
-            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 24px 0; 
+            border-top: 1px solid rgba(255,255,255,0.05);
             text-align: center; 
             font-family: 'JetBrains Mono', monospace;
-            font-size: 10px; 
-            color: rgba(255,255,255,0.3); 
-            letter-spacing: 0.15em;
+            font-size: 11px; 
+            color: rgba(255,255,255,0.2); 
+            letter-spacing: 0.2em;
             text-transform: uppercase;
         }
 
         .controls-container {
-            width: 400px; background: rgba(17, 24, 39, 0.95); margin-top: 20px;
-            border-radius: 20px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 300px; margin-top: 20px;
             text-align: center;
         }
-        .btn-blue { background: var(--accent); color: white; padding: 15px; border-radius: 12px; font-weight: 700; width: 100%; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-blue { background: var(--accent); color: white; padding: 12px; border-radius: 10px; font-weight: 700; width: 100%; text-transform: uppercase; cursor: pointer; font-size: 12px; }
         
         #copyToast {
             position: fixed; bottom: 20px; background: #10b981; color: white;
@@ -179,15 +179,16 @@
 
     <div id="exportSquare" class="theme-default">
         <div class="post-inner">
+            <!-- Meta Tags centered above -->
             <div class="meta-row">
                 <div class="tag tag-gray" contenteditable="true">DAY 068</div>
                 <div class="tag tag-gray" contenteditable="true">18%</div>
                 <div class="tag tag-blue" contenteditable="true">03.09.2026</div>
-                <div class="tag tag-blue" contenteditable="true" style="opacity: 0.8;">@jvhn0gl3</div>
+                <div class="tag tag-blue" contenteditable="true">@jvhn0gl3</div>
             </div>
 
             <div id="captureArea">
-                <!-- Social Sidebar (Vertical Column Only) -->
+                <!-- Vertical Social Sidebar -->
                 <div class="social-sidebar">
                     <div class="social-cell"><i class="fa-brands fa-facebook text-[#1877F2]"></i></div>
                     <div class="social-cell"><i class="fa-brands fa-youtube text-[#FF0000]"></i></div>
@@ -200,9 +201,9 @@
                     <div class="social-cell"><i class="fa-brands fa-x-twitter text-white"></i></div>
                 </div>
 
-                <!-- Main Text Content -->
                 <div class="main-content">
                     <div class="content-area">
+                        <!-- Content Text is now strictly centered -->
                         <div id="previewText" contenteditable="true">The 7-hour human patience test is now up on the jvhn0gl3 YouTube channel. 🌳💀🍿</div>
                     </div>
                     <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
@@ -212,9 +213,8 @@
     </div>
 
     <div class="controls-container">
-        <p class="text-gray-400 text-xs mb-4">Vertical-only sidebar layout. Content is editable.</p>
         <button onclick="prepAndFullscreen()" class="btn-blue">
-            <i class="fa-solid fa-camera"></i> Prepare Screenshot
+            Prepare Square Screenshot
         </button>
     </div>
 
@@ -224,18 +224,18 @@
         const toast = document.getElementById('copyToast');
 
         const themes = {
-            art: ['design', 'art', 'style', 'love', 'creative', 'heart'],
-            success: ['success', 'win', 'green', 'done', 'go', 'finished', 'focus'],
-            alert: ['alert', 'warning', 'fire', 'stop', 'hot', 'error', 'youtube', 'quit', 'delete', 'remove'],
-            minimal: ['minimal', 'black', 'white', 'simple', 'clean']
+            art: ['design', 'art', 'style', 'love', 'creative'],
+            success: ['success', 'win', 'green', 'done'],
+            alert: ['alert', 'warning', 'fire', 'stop', 'hot', 'error', 'quit', 'delete']
         };
 
         function adjustFontSize() {
-            let fontSize = 90; 
+            let fontSize = 95; 
             pText.style.fontSize = fontSize + 'px';
             const container = pText.parentElement;
             
-            while ((pText.scrollHeight > container.offsetHeight - 40 || pText.scrollWidth > container.offsetWidth - 40) && fontSize > 20) {
+            // Tighten constraints for centering and fit
+            while ((pText.scrollHeight > container.offsetHeight - 80 || pText.scrollWidth > container.offsetWidth - 80) && fontSize > 20) {
                 fontSize -= 1;
                 pText.style.fontSize = fontSize + 'px';
             }
@@ -247,7 +247,6 @@
             if (themes.art.some(w => lowerText.includes(w))) theme = 'theme-art';
             else if (themes.success.some(w => lowerText.includes(w))) theme = 'theme-success';
             else if (themes.alert.some(w => lowerText.includes(w))) theme = 'theme-alert';
-            else if (themes.minimal.some(w => lowerText.includes(w))) theme = 'theme-minimal';
             sq.className = theme;
         }
 
@@ -260,17 +259,12 @@
                 hiddenInput.select();
                 document.execCommand('copy');
                 document.body.removeChild(hiddenInput);
-
                 toast.style.transform = 'translateY(0)';
                 setTimeout(() => toast.style.transform = 'translateY(100px)', 2000);
-            } catch (e) {
-                console.log("Clipboard fallback active");
-            }
+            } catch (e) {}
             
             if (!document.fullscreenElement) {
-                sq.requestFullscreen().catch(err => {
-                    console.log(`Fullscreen failed: ${err.message}`);
-                });
+                sq.requestFullscreen().catch(() => {});
             }
         }
 

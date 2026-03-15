@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pxltr Studio - 9 Platforms</title>
+    <title>pxltr Studio - Vertical Sidebar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -12,7 +12,7 @@
         :root {
             --accent: #2563eb;
             --bg-dark: #05070a;
-            --card-bg: rgba(15, 19, 31, 0.85);
+            --card-bg: rgba(15, 19, 31, 0.95);
         }
 
         body {
@@ -43,6 +43,7 @@
             zoom: 0.5; 
             background-color: var(--bg-dark);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
@@ -51,13 +52,19 @@
         }
 
         /* Themes */
-        .theme-default { background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.3) 0px, transparent 50%); }
-        .theme-art { background-image: radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.3) 0px, transparent 50%); }
-        .theme-success { background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.3) 0px, transparent 50%); }
-        .theme-alert { background-image: radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.3) 0px, transparent 50%); }
-        .theme-minimal { background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.1) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.05) 0px, transparent 50%); }
+        .theme-default { background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.2) 0px, transparent 50%); }
+        .theme-art { background-image: radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.2) 0px, transparent 50%); }
+        .theme-success { background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.2) 0px, transparent 50%); }
+        .theme-alert { background-image: radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.2) 0px, transparent 50%); }
+        .theme-minimal { background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.02) 0px, transparent 50%); }
 
-        .post-inner { z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 30px; }
+        .post-inner { 
+            z-index: 2; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 25px; 
+        }
 
         .meta-row { display: flex; gap: 8px; }
         
@@ -77,47 +84,77 @@
         .tag-blue { background: var(--accent); color: #ffffff; }
         .tag-gray { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
 
-        /* Social Grid - Updated for 9 Icons (3x3) */
-        .social-row { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 12px; 
-            width: 400px; 
+        /* Sidebar Social List - Vertical Only */
+        .social-sidebar { 
+            display: flex;
+            flex-direction: column; 
+            gap: 8px; 
+            padding: 20px 15px;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.3);
+            height: 100%;
+            justify-content: center;
         }
+        
         .social-cell {
             background: rgba(255, 255, 255, 0.03); 
-            border-radius: 15px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.08); 
-            padding: 14px;
+            width: 44px;
+            height: 44px;
             display: flex; 
             justify-content: center; 
             align-items: center;
-            font-size: 22px;
+            font-size: 18px;
             transition: all 0.3s ease;
         }
 
         #captureArea {
-            width: 550px; height: 550px;
+            width: 750px; 
+            height: 550px;
             background: var(--card-bg);
-            backdrop-filter: blur(30px);
-            border-radius: 60px;
+            backdrop-filter: blur(40px);
+            border-radius: 50px;
             display: flex;
-            flex-direction: column;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            flex-direction: row; 
+            overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.7);
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .content-area {
-            flex-grow: 1; display: flex; align-items: center;
-            justify-content: center; text-align: center; padding: 50px;
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        #previewText { font-weight: 900; color: #ffffff; letter-spacing: -0.05em; line-height: 1; width: 100%; }
+        .content-area {
+            flex-grow: 1; 
+            display: flex; 
+            align-items: center;
+            justify-content: center; 
+            text-align: center; 
+            padding: 40px 60px;
+        }
+
+        #previewText { 
+            font-weight: 900; 
+            color: #ffffff; 
+            letter-spacing: -0.05em; 
+            line-height: 1.1; 
+            width: 100%; 
+            word-wrap: break-word;
+        }
 
         .internal-footer {
-            width: 100%; padding: 25px 0; border-top: 1px solid rgba(255,255,255,0.1);
-            text-align: center; font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.1em;
+            width: 100%; 
+            padding: 20px 0; 
+            border-top: 1px solid rgba(255,255,255,0.08);
+            text-align: center; 
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; 
+            color: rgba(255,255,255,0.3); 
+            letter-spacing: 0.15em;
             text-transform: uppercase;
         }
 
@@ -149,31 +186,33 @@
                 <div class="tag tag-blue" contenteditable="true" style="opacity: 0.8;">@jvhn0gl3</div>
             </div>
 
-            <div class="social-row">
-                <div class="social-cell"><i class="fa-brands fa-facebook text-[#1877F2]"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-youtube text-[#FF0000]"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-tiktok text-white"></i></div>
-                
-                <div class="social-cell"><i class="fa-brands fa-snapchat text-[#FFFC00]"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-instagram text-[#E4405F]"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-threads text-white"></i></div>
-                
-                <div class="social-cell"><i class="fa-brands fa-discord text-[#5865F2]"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-tumblr text-[#36465D]"></i></div>
-                <div class="social-cell"><i class="fa-brands fa-x-twitter text-white"></i></div>
-            </div>
-
             <div id="captureArea">
-                <div class="content-area">
-                    <div id="previewText" contenteditable="true">NINE PLATFORMS. ONE VISION.</div>
+                <!-- Social Sidebar (Vertical Column Only) -->
+                <div class="social-sidebar">
+                    <div class="social-cell"><i class="fa-brands fa-facebook text-[#1877F2]"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-youtube text-[#FF0000]"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-tiktok text-white"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-snapchat text-[#FFFC00]"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-instagram text-[#E4405F]"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-threads text-white"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-discord text-[#5865F2]"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-tumblr text-[#36465D]"></i></div>
+                    <div class="social-cell"><i class="fa-brands fa-x-twitter text-white"></i></div>
                 </div>
-                <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
+
+                <!-- Main Text Content -->
+                <div class="main-content">
+                    <div class="content-area">
+                        <div id="previewText" contenteditable="true">The 7-hour human patience test is now up on the jvhn0gl3 YouTube channel. 🌳💀🍿</div>
+                    </div>
+                    <div class="internal-footer" contenteditable="true">@JVHN0GL3 // JOHN-OGLETREE</div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="controls-container">
-        <p class="text-gray-400 text-xs mb-4">Click any text above to change it. Background reacts to keywords.</p>
+        <p class="text-gray-400 text-xs mb-4">Vertical-only sidebar layout. Content is editable.</p>
         <button onclick="prepAndFullscreen()" class="btn-blue">
             <i class="fa-solid fa-camera"></i> Prepare Screenshot
         </button>
@@ -192,10 +231,12 @@
         };
 
         function adjustFontSize() {
-            let fontSize = 160; 
+            let fontSize = 90; 
             pText.style.fontSize = fontSize + 'px';
-            while ((pText.scrollHeight > 400 || pText.scrollWidth > 450) && fontSize > 20) {
-                fontSize -= 2;
+            const container = pText.parentElement;
+            
+            while ((pText.scrollHeight > container.offsetHeight - 40 || pText.scrollWidth > container.offsetWidth - 40) && fontSize > 20) {
+                fontSize -= 1;
                 pText.style.fontSize = fontSize + 'px';
             }
         }
@@ -253,3 +294,4 @@
     </script>
 </body>
 </html>
+
